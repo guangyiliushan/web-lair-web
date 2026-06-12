@@ -1,2 +1,14 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<script lang="ts">
+	import Hero from '$lib/components/home/Hero.svelte';
+	import ActivityFeed from '$lib/components/home/ActivityFeed.svelte';
+	import Timeline from '$lib/components/home/Timeline.svelte';
+	import CategoryNav from '$lib/components/home/CategoryNav.svelte';
+</script>
+
+<Hero />
+
+<div class="flex flex-col gap-24 py-16">
+	<ActivityFeed />
+	<Timeline />
+	<CategoryNav />
+</div>

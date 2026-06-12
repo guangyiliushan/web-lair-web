@@ -42,6 +42,10 @@ export default defineConfig(
 	{
 		// Override or add rule settings here, such as:
 		// 'svelte/button-has-type': 'error'
-		rules: {}
+		rules: {
+			// SvelteKit's documented standard is plain <a href="/path"> without resolve().
+			// resolve() is only needed when config.kit.paths.base is set.
+			'svelte/no-navigation-without-resolve': 'off'
+		}
 	}
 );

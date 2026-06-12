@@ -1,19 +1,26 @@
 <script lang="ts">
-	import type { Pathname } from '$app/types';
-	import { resolve } from '$app/paths';
-	import { page } from '$app/state';
-	import { locales, localizeHref } from '$lib/paraglide/runtime';
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
+	import Header from '$lib/components/layout/Header.svelte';
+	import MobileNav from '$lib/components/layout/MobileNav.svelte';
+	import { ModeWatcher } from 'mode-watcher';
 
 	let { children } = $props();
+	let mobileOpen = $state(false);
 </script>
 
-<svelte:head><link rel="icon" href={favicon} /></svelte:head>
-{@render children()}
+<svelte:head>
+	<link rel="icon" href={favicon} />
+</svelte:head>
 
-<div style="display:none">
-	{#each locales as locale (locale)}
-		<a href={resolve(localizeHref(page.url.pathname, { locale }) as Pathname)}>{locale}</a>
-	{/each}
+<ModeWatcher />
+
+<div class="flex min-h-screen flex-col selection:bg-primary/30">
+	<Header onMenuToggle={() => mobileOpen = !mobileOpen} />
+	<div class="flex flex-1 pt-24">
+		<main class="flex-1 min-w-0">
+			{@render children()}
+		</main>
+	</div>
+	<MobileNav open={mobileOpen} onOpenChange={(v) => mobileOpen = v} />
 </div>
