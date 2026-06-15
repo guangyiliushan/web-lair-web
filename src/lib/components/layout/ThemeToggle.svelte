@@ -1,31 +1,62 @@
 <script lang="ts">
-	import { setMode, resetMode } from 'mode-watcher';
+	import { Button } from '$lib/components/ui/button';
+	import * as Tooltip from '$lib/components/ui/tooltip';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import * as Button from '$lib/components/ui/button';
-	import { IconSun, IconMoon, IconDeviceDesktop } from '@tabler/icons-svelte';
 	import { m } from '$lib/paraglide/messages';
+	import { themeStore } from '$lib/stores/theme.svelte';
+	import { IconSunHigh, IconMoonStars, IconDeviceDesktop } from '@tabler/icons-svelte';
+
+	const themes = [
+		{ value: 'light' as const, label: m.theme_light, icon: IconSunHigh },
+		{ value: 'dark' as const, label: m.theme_dark, icon: IconMoonStars },
+		{ value: 'system' as const, label: m.theme_system, icon: IconDeviceDesktop }
+	] as const;
+
+	let current = $derived(themeStore.value);
+
+	function setTheme(v: string) {
+		if (v === 'light' || v === 'dark' || v === 'system') {
+			themeStore.value = v;
+		}
+	}
 </script>
 
-<DropdownMenu.Root>
-	<DropdownMenu.Trigger>
-		<Button.Root variant="ghost" size="icon" aria-label={m.toggle_theme()}>
-			<IconSun class="size-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-			<IconMoon class="absolute size-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-		</Button.Root>
-	</DropdownMenu.Trigger>
-	<DropdownMenu.Content align="end">
-		<DropdownMenu.Item onclick={() => setMode('light')}>
-			<IconSun class="size-4" />
-			<span class="ml-2">{m.theme_light()}</span>
-		</DropdownMenu.Item>
-		<DropdownMenu.Item onclick={() => setMode('dark')}>
-			<IconMoon class="size-4" />
-			<span class="ml-2">{m.theme_dark()}</span>
-		</DropdownMenu.Item>
-		<DropdownMenu.Separator />
-		<DropdownMenu.Item onclick={() => resetMode()}>
-			<IconDeviceDesktop class="size-4" />
-			<span class="ml-2">{m.theme_system()}</span>
-		</DropdownMenu.Item>
-	</DropdownMenu.Content>
-</DropdownMenu.Root>
+<Tooltip.Root>
+	<Tooltip.Trigger>
+		<DropdownMenu.Root>
+			<DropdownMenu.Trigger>
+				<Button
+					variant="ghost"
+					size="icon"
+					class="size-9 rounded-full"
+					aria-label={m.toggle_theme()}
+				>
+					<IconSunHigh
+						data-icon="inline-start"
+						class="rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
+					/>
+					<IconMoonStars
+						data-icon="inline-start"
+						class="absolute rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
+					/>
+				</Button>
+			</DropdownMenu.Trigger>
+			<DropdownMenu.Content align="end" sideOffset={8}>
+				<DropdownMenu.Label>{m.toggle_theme()}</DropdownMenu.Label>
+				<DropdownMenu.Separator />
+				<DropdownMenu.RadioGroup value={current} onValueChange={setTheme}>
+					{#each themes as { value, label, icon } (value)}
+						{@const Icon = icon}
+						<DropdownMenu.RadioItem {value}>
+							<Icon />
+							{label()}
+						</DropdownMenu.RadioItem>
+					{/each}
+				</DropdownMenu.RadioGroup>
+			</DropdownMenu.Content>
+		</DropdownMenu.Root>
+	</Tooltip.Trigger>
+	<Tooltip.Content>
+		{m.toggle_theme()}
+	</Tooltip.Content>
+</Tooltip.Root>
