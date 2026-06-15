@@ -2,14 +2,17 @@
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import Header from '$lib/components/layout/Header.svelte';
+	import Footer from '$lib/components/layout/Footer.svelte';
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import { themeStore } from '$lib/stores/theme.svelte';
+	import { localeStore } from '$lib/stores/locale.svelte';
 	import { onMount } from 'svelte';
 
 	let { children } = $props();
 
 	onMount(() => {
 		themeStore.init();
+		localeStore.init();
 	});
 </script>
 
@@ -25,5 +28,6 @@
 				{@render children()}
 			</main>
 		</div>
+		<Footer />
 	</div>
 </Tooltip.Provider>

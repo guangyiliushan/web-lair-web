@@ -4,6 +4,7 @@
 	import { page } from '$app/state';
 	import { IconCodeCircle2 } from '@tabler/icons-svelte';
 	import ThemeToggle from '$lib/components/layout/ThemeToggle.svelte';
+	import LangSwitcher from '$lib/components/layout/LangSwitcher.svelte';
 
 	const navItems = [
 		{ key: 'nav_home', href: '/' },
@@ -48,6 +49,7 @@
 		</div>
 
 		<div class="flex items-center gap-2">
+			<LangSwitcher />
 			<ThemeToggle />
 		</div>
 	</div>
