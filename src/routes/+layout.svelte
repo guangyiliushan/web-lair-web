@@ -7,8 +7,9 @@
 	import { themeStore } from '$lib/stores/theme.svelte';
 	import { localeStore } from '$lib/stores/locale.svelte';
 	import { onMount } from 'svelte';
+	import type { LayoutProps } from './$types';
 
-	let { children } = $props();
+	let { children, data }: LayoutProps = $props();
 
 	onMount(() => {
 		themeStore.init();
@@ -22,7 +23,7 @@
 
 <Tooltip.Provider>
 	<div class="flex min-h-screen flex-col selection:bg-primary/30">
-		<Header />
+		<Header auth={data.auth} />
 		<div class="flex flex-1 pt-24">
 			<main class="min-w-0 flex-1">
 				{@render children()}

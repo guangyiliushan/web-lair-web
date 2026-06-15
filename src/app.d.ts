@@ -13,6 +13,21 @@ declare global {
 				status: 'active' | 'suspended' | 'deleted';
 			};
 		}
+		interface PageData {
+			auth?: {
+				user: {
+					id: string;
+					name: string;
+					email: string;
+					emailVerified: boolean;
+					image: string | null;
+				} | null;
+				profile: {
+					displayName: string;
+					avatarUrl: string | null;
+				} | null;
+			} | null;
+		}
 	}
 }
 

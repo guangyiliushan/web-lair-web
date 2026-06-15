@@ -12,6 +12,12 @@
 	import IconAlertCircle from '@tabler/icons-svelte/icons/alert-circle';
 
 	let { form }: { form: ActionData } = $props();
+
+	const redirectParam = $derived(
+		$page.url.searchParams.get('redirectTo')
+			? `?redirectTo=${encodeURIComponent($page.url.searchParams.get('redirectTo')!)}`
+			: ''
+	);
 </script>
 
 <div class="flex min-h-svh flex-col items-center justify-center px-4 py-12">
@@ -96,7 +102,7 @@
 		<Card.Footer class="justify-center">
 			<p class="text-sm text-muted-foreground">
 				Don't have an account?
-				<a href="/register" class="font-medium underline-offset-2 hover:underline"> Sign up </a>
+				<a href="/register{redirectParam}" class="font-medium underline-offset-2 hover:underline"> Sign up </a>
 			</p>
 		</Card.Footer>
 	</Card.Root>

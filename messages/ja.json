@@ -61,5 +61,10 @@
 	"footer_sitemap": "サイトマップ",
 	"footer_subscribe": "購読",
 	"footer_aria_label": "フッター",
-	"footer_bottom_aria": "フッター下部"
+	"footer_bottom_aria": "フッター下部",
+	"nav_sign_in": "ログイン",
+	"nav_sign_out": "ログアウト",
+	"nav_dashboard": "ダッシュボード",
+	"nav_account": "アカウント",
+	"nav_open_user_menu": "ユーザーメニューを開く"
 }

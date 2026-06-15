@@ -5,6 +5,23 @@
 	import { IconCodeCircle2 } from '@tabler/icons-svelte';
 	import ThemeToggle from '$lib/components/layout/ThemeToggle.svelte';
 	import LangSwitcher from '$lib/components/layout/LangSwitcher.svelte';
+	import UserNav from '$lib/components/layout/UserNav.svelte';
+
+	type AuthData = {
+		user: {
+			id: string;
+			name: string;
+			email: string;
+			emailVerified: boolean;
+			image: string | null;
+		} | null;
+		profile: {
+			displayName: string;
+			avatarUrl: string | null;
+		} | null;
+	} | null;
+
+	let { auth }: { auth?: AuthData } = $props();
 
 	const navItems = [
 		{ key: 'nav_home', href: '/' },
@@ -53,6 +70,7 @@
 		<div class="flex items-center gap-2">
 			<LangSwitcher />
 			<ThemeToggle />
+			<UserNav {auth} />
 		</div>
 	</div>
 </header>

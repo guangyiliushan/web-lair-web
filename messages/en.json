@@ -61,5 +61,10 @@
 	"footer_sitemap": "Sitemap",
 	"footer_subscribe": "Subscribe",
 	"footer_aria_label": "Site footer",
-	"footer_bottom_aria": "Footer bottom"
+	"footer_bottom_aria": "Footer bottom",
+	"nav_sign_in": "Sign in",
+	"nav_sign_out": "Sign out",
+	"nav_dashboard": "Dashboard",
+	"nav_account": "Account",
+	"nav_open_user_menu": "Open user menu"
 }
