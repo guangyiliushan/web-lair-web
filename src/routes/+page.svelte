@@ -4,7 +4,7 @@
 
 <Hero />
 
-<div id="content" class="flex flex-col gap-24 py-16">
+<div id="content" class="mx-auto max-w-4xl flex flex-col gap-24 py-16 px-4 sm:px-6 lg:px-8">
 	<div class="flex flex-col gap-4">
 		<h2 class="text-2xl font-bold">What is SvelteKit?</h2>
 		<p class="text-lg">

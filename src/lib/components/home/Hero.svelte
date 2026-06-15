@@ -2,6 +2,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as Avatar from '$lib/components/ui/avatar';
 	import * as Tooltip from '$lib/components/ui/tooltip';
+	import { mergeProps } from 'bits-ui';
 	import { m } from '$lib/paraglide/messages';
 	import { motion } from '@humanspeak/svelte-motion';
 	import {
@@ -74,17 +75,20 @@
 					{@const Icon = iconOf[link.platform]}
 					<Tooltip.Root>
 						<Tooltip.Trigger>
-							<Button
-								variant="ghost"
-								size="icon"
-								class="size-10 rounded-full"
-								href={link.href}
-								target="_blank"
-								rel="noopener noreferrer"
-								aria-label={link.ariaLabel}
-							>
-								<Icon data-icon="inline-start" />
-							</Button>
+							{#snippet child({ props })}
+								{@const merged = mergeProps(props, { class: 'size-10 rounded-full' })}
+								<Button
+									variant="ghost"
+									size="icon"
+									href={link.href}
+									target="_blank"
+									rel="noopener noreferrer"
+									aria-label={link.ariaLabel}
+									{...merged}
+								>
+									<Icon data-icon="inline-start" />
+								</Button>
+							{/snippet}
 						</Tooltip.Trigger>
 						<Tooltip.Content>
 							{link.ariaLabel}

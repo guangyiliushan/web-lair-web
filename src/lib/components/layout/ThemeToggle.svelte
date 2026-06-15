@@ -2,6 +2,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+	import { mergeProps } from 'bits-ui';
 	import { m } from '$lib/paraglide/messages';
 	import { themeStore } from '$lib/stores/theme.svelte';
 	import { IconSunHigh, IconMoonStars, IconDeviceDesktop } from '@tabler/icons-svelte';
@@ -23,25 +24,29 @@
 
 <Tooltip.Root>
 	<Tooltip.Trigger>
-		<DropdownMenu.Root>
-			<DropdownMenu.Trigger>
-				<Button
-					variant="ghost"
-					size="icon"
-					class="size-9 rounded-full"
-					aria-label={m.toggle_theme()}
-				>
-					<IconSunHigh
-						data-icon="inline-start"
-						class="rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
-					/>
-					<IconMoonStars
-						data-icon="inline-start"
-						class="absolute rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
-					/>
-				</Button>
-			</DropdownMenu.Trigger>
-			<DropdownMenu.Content align="end" sideOffset={8}>
+		{#snippet child({ props: tooltipProps })}
+			<DropdownMenu.Root>
+				<DropdownMenu.Trigger>
+					{#snippet child({ props: dropdownProps })}
+						{@const merged = mergeProps(tooltipProps, dropdownProps, { class: 'size-9 rounded-full' })}
+						<Button
+							variant="ghost"
+							size="icon"
+							aria-label={m.toggle_theme()}
+							{...merged}
+						>
+							<IconSunHigh
+								data-icon="inline-start"
+								class="rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
+							/>
+							<IconMoonStars
+								data-icon="inline-start"
+								class="absolute rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
+							/>
+						</Button>
+					{/snippet}
+				</DropdownMenu.Trigger>
+				<DropdownMenu.Content align="end" sideOffset={8}>
 				<DropdownMenu.Label>{m.toggle_theme()}</DropdownMenu.Label>
 				<DropdownMenu.Separator />
 				<DropdownMenu.RadioGroup value={current} onValueChange={setTheme}>
@@ -55,7 +60,8 @@
 				</DropdownMenu.RadioGroup>
 			</DropdownMenu.Content>
 		</DropdownMenu.Root>
-	</Tooltip.Trigger>
+	{/snippet}
+</Tooltip.Trigger>
 	<Tooltip.Content>
 		{m.toggle_theme()}
 	</Tooltip.Content>
