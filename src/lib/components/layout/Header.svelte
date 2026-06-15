@@ -23,8 +23,10 @@
 	}
 </script>
 
-<header class="fixed top-6 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
-	<div class="pointer-events-auto flex items-center justify-between w-full max-w-5xl rounded-full border bg-background/70 backdrop-blur-md px-4 py-2 shadow-sm">
+<header class="pointer-events-none fixed top-6 right-0 left-0 z-50 flex justify-center px-4">
+	<div
+		class="pointer-events-auto flex w-full max-w-5xl items-center justify-between rounded-full border bg-background/70 px-4 py-2 shadow-sm backdrop-blur-md"
+	>
 		<div class="flex items-center gap-2">
 			<a href="/" class="flex items-center gap-2 font-bold">
 				<IconCodeCircle2 class="size-6 text-primary" />
@@ -33,13 +35,13 @@
 		</div>
 
 		<div class="flex items-center gap-1">
-			<nav class="hidden lg:flex items-center gap-1">
+			<nav class="hidden items-center gap-1 lg:flex">
 				{#each navItems as { key, href } (key)}
 					<a
 						{href}
 						class={cn(
-							'px-4 py-1.5 rounded-full text-sm font-medium transition-colors hover:text-primary',
-							isActive(href) ? 'text-primary bg-primary/10' : 'text-muted-foreground'
+							'rounded-full px-4 py-1.5 text-sm font-medium transition-colors hover:text-primary',
+							isActive(href) ? 'bg-primary/10 text-primary' : 'text-muted-foreground'
 						)}
 					>
 						{m[key]()}

@@ -4,11 +4,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import LangSwitcher from '$lib/components/layout/LangSwitcher.svelte';
 	import ThemeToggle from '$lib/components/layout/ThemeToggle.svelte';
-	import {
-		IconCodeCircle2,
-		IconRss,
-		IconExternalLink
-	} from '@tabler/icons-svelte';
+	import { IconCodeCircle2, IconRss, IconExternalLink } from '@tabler/icons-svelte';
 
 	/** Footer link item descriptor */
 	interface FooterLink {
@@ -35,12 +31,7 @@
 		class?: string;
 	}
 
-	let {
-		sections: sectionProp,
-		icpNumber,
-		onlineCount,
-		class: className
-	}: FooterProps = $props();
+	let { sections: sectionProp, icpNumber, onlineCount, class: className }: FooterProps = $props();
 
 	/** Resolved sections — user-supplied or auto-generated localized defaults */
 	let sections = $derived(sectionProp ?? buildDefaultSections());
@@ -101,7 +92,7 @@
 					<span class="text-lg font-bold">Lair</span>
 				</div>
 
-				<p class="text-sm italic text-muted-foreground">
+				<p class="text-sm text-muted-foreground italic">
 					{m.footer_tagline()}
 				</p>
 
@@ -138,13 +129,11 @@
 									class={cn(
 										'group inline-flex items-center gap-1 text-sm text-muted-foreground',
 										'transition-colors hover:text-primary',
-										'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+										'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none',
 										'rounded-sm'
 									)}
 									target={link.external || isExternal(link.href) ? '_blank' : undefined}
-									rel={link.external || isExternal(link.href)
-										? 'noopener noreferrer'
-										: undefined}
+									rel={link.external || isExternal(link.href) ? 'noopener noreferrer' : undefined}
 								>
 									{link.label}
 									{#if link.external || isExternal(link.href)}
@@ -174,7 +163,7 @@
 			>
 				<a
 					href="/rss.xml"
-					class="inline-flex items-center gap-1 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+					class="inline-flex items-center gap-1 rounded-sm transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
 				>
 					<IconRss class="size-3" aria-hidden="true" />
 					<span>{m.footer_rss()}</span>
@@ -182,14 +171,14 @@
 				<span aria-hidden="true">·</span>
 				<a
 					href="/sitemap.xml"
-					class="transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+					class="rounded-sm transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
 				>
 					{m.footer_sitemap()}
 				</a>
 				<span aria-hidden="true">·</span>
 				<a
 					href="/subscribe"
-					class="transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+					class="rounded-sm transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
 				>
 					{m.footer_subscribe()}
 				</a>

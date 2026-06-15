@@ -24,7 +24,7 @@
 	<div class="flex min-h-screen flex-col selection:bg-primary/30">
 		<Header />
 		<div class="flex flex-1 pt-24">
-			<main class="flex-1 min-w-0">
+			<main class="min-w-0 flex-1">
 				{@render children()}
 			</main>
 		</div>

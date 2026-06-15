@@ -20,7 +20,7 @@ const config = {
 			})
 		},
 		alias: {
-			"@/*": "./path/to/lib/*"
+			'@/*': './path/to/lib/*'
 		}
 	},
 	preprocess: [mdsvex({ extensions: ['.svx', '.md'] })],

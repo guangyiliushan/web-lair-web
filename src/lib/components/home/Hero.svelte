@@ -49,24 +49,29 @@
 	};
 </script>
 
-<section class="relative min-h-[calc(100vh-6rem)] flex flex-col items-center justify-center overflow-hidden px-4">
-	<div class="container w-full max-w-5xl flex flex-col-reverse md:flex-row items-center justify-between gap-12 z-10">
+<section
+	class="relative flex min-h-[calc(100vh-6rem)] flex-col items-center justify-center overflow-hidden px-4"
+>
+	<div
+		class="z-10 container flex w-full max-w-5xl flex-col-reverse items-center justify-between gap-12 md:flex-row"
+	>
 		<!-- 文字区域：左滑入场 -->
 		<motion.div
-			class="flex-1 flex flex-col items-start"
+			class="flex flex-1 flex-col items-start"
 			initial={{ opacity: 0, x: -30 }}
 			animate={{ opacity: 1, x: 0 }}
 			transition={{ duration: 0.6 }}
 		>
-			<h1 class="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight mb-4">
+			<h1 class="mb-4 text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
 				{m.hero_title()}
 			</h1>
 
-			<h2 class="text-2xl sm:text-3xl md:text-4xl font-semibold mb-6">
-				{m.hero_subtitle_prefix()} <span class="font-mono text-primary">{m.hero_subtitle_highlight()}</span>
+			<h2 class="mb-6 text-2xl font-semibold sm:text-3xl md:text-4xl">
+				{m.hero_subtitle_prefix()}
+				<span class="font-mono text-primary">{m.hero_subtitle_highlight()}</span>
 			</h2>
 
-			<p class="text-muted-foreground text-lg mb-10 max-w-lg">
+			<p class="mb-10 max-w-lg text-lg text-muted-foreground">
 				{m.hero_description()}
 			</p>
 
@@ -100,12 +105,14 @@
 
 		<!-- 头像区域：弹性缩放入场 -->
 		<motion.div
-			class="relative shrink-0 size-64 sm:size-80 md:size-96"
+			class="relative size-64 shrink-0 sm:size-80 md:size-96"
 			initial={{ opacity: 0, scale: 0.6 }}
 			animate={{ opacity: 1, scale: 1 }}
 			transition={{ type: 'spring', stiffness: 260, damping: 20, delay: 0.3 }}
 		>
-			<Avatar.Root class="relative size-full rounded-full overflow-hidden border-4 border-background shadow-2xl">
+			<Avatar.Root
+				class="relative size-full overflow-hidden rounded-full border-4 border-background shadow-2xl"
+			>
 				<Avatar.Image src={avatarConfig.src} alt={avatarConfig.alt} loading="lazy" />
 				<Avatar.Fallback class="text-4xl">{avatarConfig.fallback}</Avatar.Fallback>
 			</Avatar.Root>
@@ -113,13 +120,13 @@
 	</div>
 
 	<!-- 底部欢迎语 + 可点击滚动指示器 -->
-	<div class="flex flex-col items-center gap-2 pt-8 z-10">
-		<p class="text-xs sm:text-sm text-center max-w-xs text-muted-foreground">
+	<div class="z-10 flex flex-col items-center gap-2 pt-8">
+		<p class="max-w-xs text-center text-xs text-muted-foreground sm:text-sm">
 			{m.hero_welcome()}
 		</p>
 		<a
 			href="#content"
-			class="animate-bounce text-muted-foreground hover:text-foreground transition-colors"
+			class="animate-bounce text-muted-foreground transition-colors hover:text-foreground"
 		>
 			<IconChevronDown class="size-5" />
 			<span class="sr-only">{m.hero_scroll_down()}</span>

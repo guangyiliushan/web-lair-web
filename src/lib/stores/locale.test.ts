@@ -25,7 +25,12 @@ beforeAll(() => {
 	vi.stubGlobal('window', { localStorage: lsMock });
 });
 
-let localeStore: { current: string; available: readonly string[]; switchTo(l: string): void; init(): void };
+let localeStore: {
+	current: string;
+	available: readonly string[];
+	switchTo(l: string): void;
+	init(): void;
+};
 
 beforeAll(async () => {
 	const mod = await import('./locale.svelte');
