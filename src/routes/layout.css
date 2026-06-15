@@ -239,6 +239,7 @@
 		font-family: var(--font-mono);
 		scrollbar-width: thin;
 		scrollbar-color: var(--scrollbar-thumb) transparent;
+		scrollbar-gutter: stable;
 	}
 
 	::-webkit-scrollbar {

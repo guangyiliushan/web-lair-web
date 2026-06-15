@@ -45,6 +45,9 @@
 					</a>
 				{/each}
 			</nav>
+		</div>
+
+		<div class="flex items-center gap-2">
 			<ThemeToggle />
 		</div>
 	</div>

@@ -101,7 +101,6 @@
 			animate={{ opacity: 1, scale: 1 }}
 			transition={{ type: 'spring', stiffness: 260, damping: 20, delay: 0.3 }}
 		>
-			<div class="absolute inset-0 rounded-full bg-gradient-to-tr from-primary/20 to-secondary/20 blur-3xl animate-pulse"></div>
 			<Avatar.Root class="relative size-full rounded-full overflow-hidden border-4 border-background shadow-2xl">
 				<Avatar.Image src={avatarConfig.src} alt={avatarConfig.alt} loading="lazy" />
 				<Avatar.Fallback class="text-4xl">{avatarConfig.fallback}</Avatar.Fallback>
