@@ -6,8 +6,6 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Button } from '$lib/components/ui/button';
 	import IconMail from '@tabler/icons-svelte/icons/mail';
-	import IconUser from '@tabler/icons-svelte/icons/user';
-	import IconLock from '@tabler/icons-svelte/icons/lock';
 	import IconAlertCircle from '@tabler/icons-svelte/icons/alert-circle';
 
 	let { form }: { form: ActionData } = $props();

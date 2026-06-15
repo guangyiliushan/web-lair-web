@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, jsonb, boolean } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, boolean } from 'drizzle-orm/pg-core';
 import { user } from './auth.schema';
 
 export const appUserProfile = pgTable('app_user_profile', {

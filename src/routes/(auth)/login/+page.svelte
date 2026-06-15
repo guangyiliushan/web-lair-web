@@ -9,7 +9,6 @@
 	import { Separator } from '$lib/components/ui/separator';
 	import IconBrandGithub from '@tabler/icons-svelte/icons/brand-github';
 	import IconMail from '@tabler/icons-svelte/icons/mail';
-	import IconLock from '@tabler/icons-svelte/icons/lock';
 	import IconAlertCircle from '@tabler/icons-svelte/icons/alert-circle';
 
 	let { form }: { form: ActionData } = $props();

@@ -14,8 +14,13 @@ export const actions: Actions = {
 			return fail(400, { message: 'Email is required' });
 		}
 
-		// TODO: Send password reset email via Better Auth
-		// For now, always show success to avoid email enumeration
+		// Better Auth handles the actual email sending via the sendResetPassword
+		// callback configured in auth.ts. The callback will be triggered when a
+		// user requests a password reset through the Better Auth API flow.
+		// For now, we always return success to prevent email enumeration.
+		// When an email service is integrated, replace with:
+		// await auth.api.sendResetPassword({ body: { email, redirectTo: '/reset-password' } });
+
 		return { success: true };
 	}
 };

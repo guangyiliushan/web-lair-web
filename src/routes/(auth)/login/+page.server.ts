@@ -1,6 +1,7 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { auth } from '$lib/server/auth';
+import { safeRedirect } from '$lib/server/safe-redirect';
 import { APIError } from 'better-auth/api';
 
 export const load: PageServerLoad = (event) => {
@@ -15,7 +16,7 @@ export const actions: Actions = {
 		const formData = await event.request.formData();
 		const email = formData.get('email')?.toString() ?? '';
 		const password = formData.get('password')?.toString() ?? '';
-		const redirectTo = event.url.searchParams.get('redirectTo') ?? '/dashboard';
+		const redirectTo = safeRedirect(event.url.searchParams.get('redirectTo'));
 
 		if (!email || !password) {
 			return fail(400, { message: 'Email and password are required' });
@@ -42,12 +43,13 @@ export const actions: Actions = {
 	signInSocial: async ({ request }) => {
 		const formData = await request.formData();
 		const provider = formData.get('provider')?.toString() ?? 'github';
-		const redirectTo = formData.get('redirectTo')?.toString() ?? '/dashboard';
+		const rawUrl = formData.get('redirectTo')?.toString();
+		const callbackURL = safeRedirect(rawUrl);
 
 		const result = await auth.api.signInSocial({
 			body: {
 				provider: provider as 'github',
-				callbackURL: redirectTo
+				callbackURL
 			}
 		});
 

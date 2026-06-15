@@ -18,6 +18,12 @@ function generateSlug(name: string): string {
 	);
 }
 
+function devLogMail(label: string, url: string) {
+	if (import.meta.env.DEV) {
+		console.log(`[better-auth] ${label}: ${url}`);
+	}
+}
+
 export const auth = betterAuth({
 	baseURL: env.ORIGIN,
 	secret: env.BETTER_AUTH_SECRET,
@@ -25,7 +31,16 @@ export const auth = betterAuth({
 
 	emailAndPassword: {
 		enabled: true,
-		requireEmailVerification: true
+		requireEmailVerification: true,
+		sendResetPassword: async ({ url }) => {
+			devLogMail('Password reset link', url);
+		}
+	},
+
+	emailVerification: {
+		sendVerificationEmail: async ({ user, url }) => {
+			devLogMail('Verify email link', url);
+		}
 	},
 
 	socialProviders: {
