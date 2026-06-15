@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Button } from '$lib/components/ui/button';
 	import { m } from '$lib/paraglide/messages';
 	import { IconBrandGithub, IconBrandTwitter, IconMail, IconRss, IconBrandTelegram, IconBrandX, IconChevronDown } from '@tabler/icons-svelte';
 </script>
@@ -20,24 +21,24 @@
 			</p>
 
 			<div class="flex flex-wrap items-center gap-3">
-				<button type="button" class="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-colors" aria-label="GitHub">
-					<IconBrandGithub class="size-5" />
-				</button>
-				<button type="button" class="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-colors" aria-label="Twitter">
-					<IconBrandTwitter class="size-5" />
-				</button>
-				<button type="button" class="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-colors" aria-label="Email">
-					<IconMail class="size-5" />
-				</button>
-				<a href="/rss.xml" class="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-colors" aria-label="RSS Feed">
-					<IconRss class="size-5" />
-				</a>
-				<button type="button" class="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-colors" aria-label="Telegram">
-					<IconBrandTelegram class="size-5" />
-				</button>
-				<button type="button" class="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-colors" aria-label="X">
-					<IconBrandX class="size-5" />
-				</button>
+				<Button variant="ghost" size="icon" class="size-10 rounded-full" aria-label="GitHub">
+					<IconBrandGithub />
+				</Button>
+				<Button variant="ghost" size="icon" class="size-10 rounded-full" aria-label="Twitter">
+					<IconBrandTwitter />
+				</Button>
+				<Button variant="ghost" size="icon" class="size-10 rounded-full" aria-label="Email">
+					<IconMail />
+				</Button>
+				<Button variant="ghost" size="icon" class="size-10 rounded-full" href="/rss.xml" aria-label="RSS Feed">
+					<IconRss />
+				</Button>
+				<Button variant="ghost" size="icon" class="size-10 rounded-full" aria-label="Telegram">
+					<IconBrandTelegram />
+				</Button>
+				<Button variant="ghost" size="icon" class="size-10 rounded-full" aria-label="X">
+					<IconBrandX />
+				</Button>
 			</div>
 		</div>
 

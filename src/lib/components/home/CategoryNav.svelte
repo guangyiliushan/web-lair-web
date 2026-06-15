@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Badge } from '$lib/components/ui/badge';
 	import { m } from '$lib/paraglide/messages';
 
 	const categories = [
@@ -23,7 +24,7 @@
 				class="group flex flex-col items-center gap-3 rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 text-center transition-all hover:border-primary hover:shadow-md hover:-translate-y-0.5"
 			>
 				<span class="text-sm font-medium group-hover:text-primary transition-colors">{cat.label}</span>
-				<span class="text-xs text-muted-foreground">{cat.count} articles</span>
+				<Badge variant="secondary">{cat.count} articles</Badge>
 			</a>
 		{/each}
 	</div>

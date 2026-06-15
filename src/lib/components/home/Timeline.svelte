@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { m } from '$lib/paraglide/messages';
+	import { Badge } from '$lib/components/ui/badge';
+	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
-	import * as Button from '$lib/components/ui/button';
 	import * as Select from '$lib/components/ui/select';
+	import { m } from '$lib/paraglide/messages';
 
 	interface Item {
 		slug: string;
@@ -67,10 +68,12 @@
 					{displayedYear}
 				</Select.Trigger>
 				<Select.Content>
-					<Select.Item value="all">{m.type_all()}</Select.Item>
-					{#each yearOptions as y (y)}
-						<Select.Item value={String(y)}>{y}</Select.Item>
-					{/each}
+					<Select.Group>
+						<Select.Item value="all">{m.type_all()}</Select.Item>
+						{#each yearOptions as y (y)}
+							<Select.Item value={String(y)}>{y}</Select.Item>
+						{/each}
+					</Select.Group>
 				</Select.Content>
 			</Select.Root>
 
@@ -79,43 +82,43 @@
 					{displayedType}
 				</Select.Trigger>
 				<Select.Content>
-					<Select.Item value="all">{m.type_all()}</Select.Item>
-					<Select.Item value="post">{m.type_post()}</Select.Item>
-					<Select.Item value="note">{m.type_note()}</Select.Item>
+					<Select.Group>
+						<Select.Item value="all">{m.type_all()}</Select.Item>
+						<Select.Item value="post">{m.type_post()}</Select.Item>
+						<Select.Item value="note">{m.type_note()}</Select.Item>
+					</Select.Group>
 				</Select.Content>
 			</Select.Root>
 		</div>
 	</div>
 
-	<div class="flex flex-col gap-6">
+		<div class="flex flex-col gap-6">
 		{#each filtered as item, i (item.slug + i)}
 			<Card.Root class="transition-shadow hover:shadow-md border-border/50 bg-card/50 backdrop-blur-sm">
-				<Card.Content class="p-6">
-					<div class="flex flex-col gap-3">
-						<div class="flex items-center gap-3 text-sm text-muted-foreground">
-							<span class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium">
-								{item.type === 'post' ? m.type_post() : m.type_note()}
-							</span>
-							<time datetime={item.date}>{item.date}</time>
-							<span>&middot;</span>
-							<span>{item.readTime} {m.minutes_read()}</span>
-						</div>
+				<Card.Header>
+					<div class="flex items-center gap-3 text-sm text-muted-foreground">
+						<Badge variant="outline">
+							{item.type === 'post' ? m.type_post() : m.type_note()}
+						</Badge>
+						<time datetime={item.date}>{item.date}</time>
+						<span>&middot;</span>
+						<span>{item.readTime} {m.minutes_read()}</span>
+					</div>
 
-						<h3 class="text-xl font-semibold">
-							<a href={item.slug} class="hover:text-primary hover:underline underline-offset-4 transition-colors">
-								{item.title}
-							</a>
-						</h3>
+					<Card.Title>
+						<a href={item.slug} class="hover:text-primary hover:underline underline-offset-4 transition-colors">
+							{item.title}
+						</a>
+					</Card.Title>
 
-						<p class="text-muted-foreground text-sm leading-relaxed">{item.description}</p>
+					<Card.Description>{item.description}</Card.Description>
+				</Card.Header>
 
-						<div class="flex flex-wrap items-center gap-2">
-							{#each item.tags as tag (tag)}
-								<span class="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
-									{tag}
-								</span>
-							{/each}
-						</div>
+				<Card.Content>
+					<div class="flex flex-wrap items-center gap-2">
+						{#each item.tags as tag (tag)}
+							<Badge variant="secondary">{tag}</Badge>
+						{/each}
 					</div>
 				</Card.Content>
 			</Card.Root>
@@ -128,9 +131,9 @@
 
 	{#if filtered.length > 0}
 		<div class="mt-10 flex justify-center">
-			<Button.Root variant="outline" size="lg" class="rounded-full">
+			<Button variant="outline" size="lg" class="rounded-full">
 				{m.view_all()}
-			</Button.Root>
+			</Button>
 		</div>
 	{/if}
 </section>

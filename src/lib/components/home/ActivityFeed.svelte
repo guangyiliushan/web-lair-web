@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { m } from '$lib/paraglide/messages';
+	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
+	import { m } from '$lib/paraglide/messages';
 	import { IconPencil, IconMessageCircle, IconBulb } from '@tabler/icons-svelte';
 
 	interface Item {
@@ -39,7 +40,7 @@
 	<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 		{#each items as item (item.id)}
 			<Card.Root class="transition-shadow hover:shadow-md border-border/50 bg-card/50 backdrop-blur-sm">
-				<Card.Content class="p-5">
+				<Card.Header>
 					<div class="flex items-start gap-3">
 						<span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
 							{#if item.type === 'post'}
@@ -51,13 +52,15 @@
 							{/if}
 						</span>
 						<div class="min-w-0 flex-1">
-							<span class="text-xs font-medium text-primary">{label(item.type)}</span>
-							<p class="mt-1 text-sm font-medium truncate">{item.title}</p>
-							<p class="mt-0.5 text-xs text-muted-foreground truncate">{item.description}</p>
-							<time class="mt-2 block text-xs text-muted-foreground/70">{item.time}</time>
+							<Badge variant="outline">{label(item.type)}</Badge>
+							<Card.Title class="mt-1">{item.title}</Card.Title>
+							<Card.Description>{item.description}</Card.Description>
 						</div>
 					</div>
-				</Card.Content>
+				</Card.Header>
+				<Card.Footer>
+					<time class="text-xs text-muted-foreground">{item.time}</time>
+				</Card.Footer>
 			</Card.Root>
 		{/each}
 	</div>
