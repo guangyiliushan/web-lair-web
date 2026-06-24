@@ -1,199 +1,333 @@
 import type { Component } from 'svelte';
 import {
-	IconHome,
-	IconBulb,
-	IconCategory,
-	IconUser,
-	IconRss,
-	IconMail,
-	IconBrandGithub,
-	IconBrandTwitter,
-	IconHeart
+    IconHome,
+    IconBulb,
+    IconCategory,
+    IconRss,
+    IconMail,
+    IconBrandGithub,
+    IconBrandTwitter,
+    IconUsers,
+    IconFlask,
+    IconQuote,
+    IconWorld,
+    IconPencil,
+    IconBook,
+    IconHeart
 } from '@tabler/icons-svelte-runes';
+import { m } from '$lib/paraglide/messages';
 
-// ── 类型定义 ──
+// ── i18n resolver ──
+
+const t = {
+    nav_home: m.nav_home,
+    nav_posts: m.nav_posts,
+    nav_notes: m.nav_notes,
+    nav_timeline: m.nav_timeline,
+    nav_thinking: m.nav_thinking,
+    nav_more: m.nav_more,
+    nav_categories: m.nav_categories,
+    nav_about: m.nav_about,
+    nav_home_quick_links: m.nav_home_quick_links,
+    nav_home_rss: m.nav_home_rss,
+    nav_home_rss_desc: m.nav_home_rss_desc,
+    nav_home_github: m.nav_home_github,
+    nav_home_github_desc: m.nav_home_github_desc,
+    nav_home_twitter: m.nav_home_twitter,
+    nav_home_twitter_desc: m.nav_home_twitter_desc,
+    nav_home_email: m.nav_home_email,
+    nav_home_email_desc: m.nav_home_email_desc,
+    nav_thinking_all: m.nav_thinking_all,
+    nav_thinking_categories: m.nav_thinking_categories,
+    nav_thinking_tech: m.nav_thinking_tech,
+    nav_thinking_life: m.nav_thinking_life,
+    nav_thinking_design: m.nav_thinking_design,
+    nav_thinking_reading: m.nav_thinking_reading,
+    nav_thinking_view_all: m.nav_thinking_view_all,
+    nav_thinking_write: m.nav_thinking_write,
+    nav_categories_all: m.nav_categories_all,
+    nav_categories_tech: m.nav_categories_tech,
+    nav_categories_tech_desc: m.nav_categories_tech_desc,
+    nav_categories_life: m.nav_categories_life,
+    nav_categories_life_desc: m.nav_categories_life_desc,
+    nav_categories_design: m.nav_categories_design,
+    nav_categories_design_desc: m.nav_categories_design_desc,
+    nav_categories_reading: m.nav_categories_reading,
+    nav_categories_reading_desc: m.nav_categories_reading_desc,
+    nav_categories_browse_all: m.nav_categories_browse_all,
+    nav_about_me: m.nav_about_me,
+    nav_about_me_desc: m.nav_about_me_desc,
+    nav_about_site: m.nav_about_site,
+    nav_about_site_desc: m.nav_about_site_desc,
+    nav_about_archive: m.nav_about_archive,
+    nav_about_archive_desc: m.nav_about_archive_desc,
+    nav_more_friends: m.nav_more_friends,
+    nav_more_friends_desc: m.nav_more_friends_desc,
+    nav_more_projects: m.nav_more_projects,
+    nav_more_projects_desc: m.nav_more_projects_desc,
+    nav_more_quotes: m.nav_more_quotes,
+    nav_more_quotes_desc: m.nav_more_quotes_desc,
+    nav_more_warp: m.nav_more_warp,
+    nav_more_warp_desc: m.nav_more_warp_desc,
+    nav_posts_categories: m.nav_posts_categories,
+    nav_posts_recent: m.nav_posts_recent,
+    nav_posts_view_all: m.nav_posts_view_all,
+    nav_notes_series: m.nav_notes_series,
+    nav_notes_recent: m.nav_notes_recent,
+    nav_notes_view_all: m.nav_notes_view_all,
+    nav_notes_all_series: m.nav_notes_all_series,
+    nav_timeline_notes: m.nav_timeline_notes,
+    nav_timeline_posts: m.nav_timeline_posts,
+    nav_timeline_memories: m.nav_timeline_memories,
+    nav_timeline_recent: m.nav_timeline_recent,
+    nav_timeline_view_all: m.nav_timeline_view_all
+} as const;
+
+type I18nKey = keyof typeof t;
+
+/** Resolve i18n key → translated string */
+export function tLabel(key: I18nKey): string {
+    return t[key]();
+}
+
+// ── Types ──
 
 export interface NavChild {
-	label: string;
-	href: string;
-	description?: string;
-	icon?: Component;
-	badge?: string;
+    labelKey?: I18nKey;
+    label?: string; // Literal override for dynamic server data
+    href: string;
+    descKey?: I18nKey;
+    desc?: string; // Literal fallback for descriptions/dates
+    icon?: Component;
+    imageUrl?: string; // Thumbnail image (e.g., series icons)
+    badge?: string | number;
 }
 
 export interface NavColumn {
-	title?: string;
-	items: NavChild[];
+    titleKey?: I18nKey;
+    items: NavChild[];
 }
 
 export interface NavFooter {
-	label: string;
-	href: string;
-	secondary?: NavFooter;
+    labelKey: I18nKey;
+    href: string;
+    secondary?: NavFooter;
 }
 
+export type MegaMenuType = 'home' | 'two-column' | 'simple' | 'timeline';
+
 export interface MegaMenu {
-	columns: NavColumn[];
-	footer?: NavFooter;
-	/** 面板宽度 (Tailwind class) */
-	width?: string;
+    type?: MegaMenuType; // defaults to 'simple'
+    width?: string;
+    columns: NavColumn[];
+    rightColumn?: NavColumn; // For two-column layout (e.g., Recent Notes)
+    footer?: NavFooter;
 }
 
 export interface NavItem {
-	key: string;
-	label: string;
-	href: string;
-	icon?: Component;
-	/** Desktop: mega menu hover 面板 */
-	megaMenu?: MegaMenu;
-	/** Mobile: accordion 子项 */
-	children?: NavChild[];
+    key: string;
+    labelKey: I18nKey;
+    href: string;
+    icon?: Component;
+    megaMenu?: MegaMenu;
+    children?: NavChild[];
 }
 
-// ── 单一数据�?──
+// ── Dynamic server data for mega menus ──
+
+/** Runtime data passed to NavMegaMenu to fill two-column/timeline layouts */
+export interface MegaMenuDynamicData {
+    leftItems: NavChild[];
+    rightItems: NavChild[];
+    footerSecondaryText?: string;
+    footerSecondaryHref?: string;
+    /** Timeline activity items (for type='timeline') */
+    timelineItems?: TimelineActivityItem[];
+}
+
+export interface TimelineActivityItem {
+    title: string;
+    href: string;
+    type: 'posts' | 'notes' | 'memories';
+    date: string;
+}
+
+export interface MegaMenuCategory {
+    labelKey: I18nKey;
+    href: string;
+    count: number;
+}
+
+export interface MegaMenuRecentPost {
+    title: string;
+    href: string;
+    date: string;
+}
+
+export interface PostsMegaData {
+    categories: MegaMenuCategory[];
+    recentPosts: MegaMenuRecentPost[];
+    totalCount: number;
+}
+
+export interface MegaMenuSeriesItem {
+    label: string;
+    href: string;
+    imageUrl?: string;
+}
+
+export interface NotesMegaData {
+    series: MegaMenuSeriesItem[];
+    recentNotes: MegaMenuRecentPost[];
+    totalCount: number;
+}
+
+export interface TimelineMegaData {
+    activities: TimelineActivityItem[];
+}
+
+// ── Single data source ──
 
 export const navigationConfig: NavItem[] = [
-	{
-		key: 'nav_home',
-		label: 'Home',
-		href: '/',
-		icon: IconHome,
-		megaMenu: {
-			width: 'w-[380px]',
-			columns: [
-				{
-					title: 'Quick Links',
-					items: [
-						{
-							label: 'RSS Feed',
-							href: '/rss.xml',
-							description: 'Subscribe to updates',
-							icon: IconRss
-						},
-						{
-							label: 'GitHub',
-							href: 'https://github.com/guangyiliushan',
-							description: 'Open source projects',
-							icon: IconBrandGithub
-						},
-						{
-							label: 'Twitter',
-							href: 'https://twitter.com/guangyiliushan',
-							description: 'Follow for updates',
-							icon: IconBrandTwitter
-						},
-						{
-							label: 'Email',
-							href: 'mailto:guangyiliushan@example.com',
-							description: 'Get in touch',
-							icon: IconMail
-						}
-					]
-				}
-			]
-		},
-		children: [
-			{ label: 'RSS Feed', href: '/rss.xml', icon: IconRss },
-			{ label: 'GitHub', href: 'https://github.com/guangyiliushan', icon: IconBrandGithub },
-			{ label: 'Twitter', href: 'https://twitter.com/guangyiliushan', icon: IconBrandTwitter },
-			{ label: 'Email', href: 'mailto:guangyiliushan@example.com', icon: IconMail }
-		]
-	},
-	{
-		key: 'nav_thinking',
-		label: 'Thoughts',
-		href: '/thinking',
-		icon: IconBulb,
-		megaMenu: {
-			width: 'w-[380px]',
-			columns: [
-				{
-					title: 'Categories',
-					items: [
-						{ label: 'Tech', href: '/thinking?category=tech', badge: '12' },
-						{ label: 'Life', href: '/thinking?category=life', badge: '8' },
-						{ label: 'Design', href: '/thinking?category=design', badge: '5' },
-						{ label: 'Reading', href: '/thinking?category=reading', badge: '3' }
-					]
-				}
-			],
-			footer: {
-				label: 'View all thoughts',
-				href: '/thinking',
-				secondary: { label: 'Write a thought', href: '/thinking/new' }
-			}
-		},
-		children: [
-			{ label: 'All Thoughts', href: '/thinking' },
-			{ label: 'Tech', href: '/thinking?category=tech', badge: '12' },
-			{ label: 'Life', href: '/thinking?category=life', badge: '8' },
-			{ label: 'Design', href: '/thinking?category=design', badge: '5' },
-			{ label: 'Reading', href: '/thinking?category=reading', badge: '3' }
-		]
-	},
-	{
-		key: 'nav_categories',
-		label: 'Categories',
-		href: '/categories',
-		icon: IconCategory,
-		megaMenu: {
-			width: 'w-[320px]',
-			columns: [
-				{
-					items: [
-						{ label: 'Tech', href: '/categories/tech', description: 'Programming & tools' },
-						{ label: 'Life', href: '/categories/life', description: 'Daily thoughts' },
-						{ label: 'Design', href: '/categories/design', description: 'UI & visual' },
-						{ label: 'Reading', href: '/categories/reading', description: 'Books & articles' }
-					]
-				}
-			],
-			footer: { label: 'Browse all categories', href: '/categories' }
-		},
-		children: [
-			{ label: 'All Categories', href: '/categories' },
-			{ label: 'Tech', href: '/categories/tech' },
-			{ label: 'Life', href: '/categories/life' },
-			{ label: 'Design', href: '/categories/design' },
-			{ label: 'Reading', href: '/categories/reading' }
-		]
-	},
-	{
-		key: 'nav_about',
-		label: 'About',
-		href: '/about',
-		icon: IconUser,
-		megaMenu: {
-			width: 'w-[320px]',
-			columns: [
-				{
-					items: [
-						{
-							label: 'About Me',
-							href: '/about',
-							description: 'Who I am',
-							icon: IconUser
-						},
-						{
-							label: 'About This Site',
-							href: '/about-site',
-							description: 'Tech stack & history',
-							icon: IconHeart
-						},
-						{
-							label: 'Archive',
-							href: '/archive',
-							description: 'All posts by date',
-							icon: IconRss
-						}
-					]
-				}
-			]
-		},
-		children: [
-			{ label: 'About Me', href: '/about' },
-			{ label: 'About This Site', href: '/about-site' },
-			{ label: 'Archive', href: '/archive' }
-		]
-	}
+    {
+        key: 'nav_home',
+        labelKey: 'nav_home',
+        href: '/',
+        icon: IconHome,
+        megaMenu: {
+            type: 'home',
+            width: 'w-[480px]',
+            columns: [
+                {
+                    titleKey: 'nav_home_quick_links',
+                    items: [
+                        { labelKey: 'nav_home_rss', href: '/rss.xml', descKey: 'nav_home_rss_desc', icon: IconRss },
+                        { labelKey: 'nav_home_github', href: 'https://github.com/guangyiliushan', descKey: 'nav_home_github_desc', icon: IconBrandGithub },
+                        { labelKey: 'nav_home_twitter', href: 'https://twitter.com/guangyiliushan', descKey: 'nav_home_twitter_desc', icon: IconBrandTwitter },
+                        { labelKey: 'nav_home_email', href: 'mailto:guangyiliushan@example.com', descKey: 'nav_home_email_desc', icon: IconMail }
+                    ]
+                }
+            ]
+        },
+        children: [
+            { labelKey: 'nav_home_rss', href: '/rss.xml', icon: IconRss },
+            { labelKey: 'nav_home_github', href: 'https://github.com/guangyiliushan', icon: IconBrandGithub },
+            { labelKey: 'nav_home_twitter', href: 'https://twitter.com/guangyiliushan', icon: IconBrandTwitter },
+            { labelKey: 'nav_home_email', href: 'mailto:guangyiliushan@example.com', icon: IconMail }
+        ]
+    },
+    {
+        key: 'nav_posts',
+        labelKey: 'nav_posts',
+        href: '/posts',
+        icon: IconHome,
+        megaMenu: {
+            type: 'two-column',
+            width: 'w-[480px]',
+            columns: [
+                {
+                    titleKey: 'nav_posts_categories',
+                    items: [] // filled by server data
+                }
+            ],
+            rightColumn: {
+                titleKey: 'nav_posts_recent',
+                items: [] // filled by server data
+            },
+            footer: {
+                labelKey: 'nav_posts_view_all',
+                href: '/posts'
+            }
+        },
+        children: [
+            { labelKey: 'nav_posts_view_all', href: '/posts' }
+        ]
+    },
+    {
+        key: 'nav_notes',
+        labelKey: 'nav_notes',
+        href: '/notes',
+        icon: IconHome,
+        megaMenu: {
+            type: 'two-column',
+            width: 'w-[380px]',
+            columns: [
+                {
+                    titleKey: 'nav_notes_series',
+                    items: [] // filled by server data
+                }
+            ],
+            rightColumn: {
+                titleKey: 'nav_notes_recent',
+                items: [] // filled by server data
+            },
+            footer: {
+                labelKey: 'nav_notes_view_all',
+                href: '/notes',
+                secondary: { labelKey: 'nav_notes_all_series', href: '/notes/series' }
+            }
+        },
+        children: [
+            { labelKey: 'nav_notes_view_all', href: '/notes' },
+            { labelKey: 'nav_notes_all_series', href: '/notes/series' }
+        ]
+    },
+    {
+        key: 'nav_timeline',
+        labelKey: 'nav_timeline',
+        href: '/timeline',
+        icon: IconHome,
+        megaMenu: {
+            type: 'timeline',
+            width: 'w-[320px]',
+            columns: [
+                {
+                    items: [
+                        { labelKey: 'nav_timeline_notes', href: '/timeline?type=note', icon: IconPencil },
+                        { labelKey: 'nav_timeline_posts', href: '/timeline?type=post', icon: IconBook },
+                        { labelKey: 'nav_timeline_memories', href: '/timeline?memory=1', icon: IconHeart }
+                    ]
+                }
+            ],
+            footer: {
+                labelKey: 'nav_timeline_view_all',
+                href: '/timeline'
+            }
+        },
+        children: [
+            { labelKey: 'nav_timeline_view_all', href: '/timeline' }
+        ]
+    },
+    {
+        key: 'nav_thinking',
+        labelKey: 'nav_thinking',
+        href: '/thinking',
+        icon: IconBulb,
+    },
+    {
+        key: 'nav_more',
+        labelKey: 'nav_more',
+        href: '#',
+        icon: IconCategory,
+        megaMenu: {
+            type: 'simple',
+            width: 'w-[280px]',
+            columns: [
+                {
+                    items: [
+                        { labelKey: 'nav_more_friends', href: '/friends', descKey: 'nav_more_friends_desc', icon: IconUsers },
+                        { labelKey: 'nav_more_projects', href: '/projects', descKey: 'nav_more_projects_desc', icon: IconFlask },
+                        { labelKey: 'nav_more_quotes', href: '/says', descKey: 'nav_more_quotes_desc', icon: IconQuote },
+                        { labelKey: 'nav_more_warp', href: 'https://travel.moe/go.html', descKey: 'nav_more_warp_desc', icon: IconWorld }
+                    ]
+                }
+            ]
+        },
+        children: [
+            { labelKey: 'nav_more_friends', href: '/friends' },
+            { labelKey: 'nav_more_projects', href: '/projects' },
+            { labelKey: 'nav_more_quotes', href: '/says' },
+            { labelKey: 'nav_more_warp', href: 'https://travel.moe/go.html' }
+        ]
+    }
 ];

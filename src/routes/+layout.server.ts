@@ -1,8 +1,16 @@
-export const load = ({ locals }: Parameters<import('./$types').LayoutServerLoad>[0]) => {
+import { loadPostsMegaData, loadNotesMegaData, loadTimelineMegaData } from '$lib/server/nav-data';
+
+export const load = async ({ locals }: Parameters<import('./$types').LayoutServerLoad>[0]) => {
 	const { user, profile } = locals;
 
+	const [postsData, notesData, timelineData] = await Promise.all([
+		loadPostsMegaData(),
+		loadNotesMegaData(),
+		loadTimelineMegaData()
+	]);
+
 	if (!user) {
-		return { auth: null };
+		return { auth: null, postsData, notesData, timelineData };
 	}
 
 	return {
@@ -20,6 +28,9 @@ export const load = ({ locals }: Parameters<import('./$types').LayoutServerLoad>
 						avatarUrl: profile.avatarUrl ?? null
 					}
 				: null
-		}
+		},
+		postsData,
+		notesData,
+		timelineData
 	};
 };

@@ -8,16 +8,22 @@
 	import UserNav from '$lib/components/layout/UserNav.svelte';
 	import { Separator } from '$lib/components/ui/separator';
 	import NavMegaMenu from '$lib/components/layout/NavMegaMenu.svelte';
-	import { navigationConfig } from '$lib/config/navigation.config';
+	import { navigationConfig, tLabel, type MegaMenuDynamicData } from '$lib/config/navigation.config';
 
 	// ── Types ──
 	type AuthData = {
-		user: { id: string; name: string; email: string; emailVerified: boolean; image: string | null } | null;
+		user: {
+			id: string;
+			name: string;
+			email: string;
+			emailVerified: boolean;
+			image: string | null;
+		} | null;
 		profile: { displayName: string; avatarUrl: string | null } | null;
 	} | null;
 
 	// ── Props ──
-	let { auth }: { auth?: AuthData } = $props();
+	let { auth, postsData, notesData, timelineData }: { auth?: AuthData; postsData?: MegaMenuDynamicData | null; notesData?: MegaMenuDynamicData | null; timelineData?: MegaMenuDynamicData | null } = $props();
 
 	// ── Derived ──
 	const currentPath = $derived(page.url.pathname);
@@ -31,9 +37,16 @@
 	let menuOpen = $state(false);
 	let expandedKey = $state<string | null>(null);
 
-	function toggleMenu() { menuOpen = !menuOpen; }
-	function closeMenu() { menuOpen = false; expandedKey = null; }
-	function toggleExpanded(key: string) { expandedKey = expandedKey === key ? null : key; }
+	function toggleMenu() {
+		menuOpen = !menuOpen;
+	}
+	function closeMenu() {
+		menuOpen = false;
+		expandedKey = null;
+	}
+	function toggleExpanded(key: string) {
+		expandedKey = expandedKey === key ? null : key;
+	}
 </script>
 
 <header class="pointer-events-none fixed top-6 right-0 left-0 z-50 flex justify-center px-4">
@@ -43,7 +56,7 @@
 		class:rounded-3xl={menuOpen}
 		class:rounded-full={!menuOpen}
 	>
-		<!-- ══�?Top bar (always visible) ══�?-->
+		<!-- ══Top bar (always visible) ══-->
 		<div class="flex items-center justify-between px-4 py-2">
 			<!-- Logo -->
 			<a href="/" class="flex shrink-0 items-center gap-2 font-bold">
@@ -55,17 +68,30 @@
 			<nav class="hidden items-center gap-1 lg:flex" aria-label="Main navigation">
 				{#each navigationConfig as item (item.key)}
 					{#if item.megaMenu}
-						<NavMegaMenu menu={item.megaMenu} delay={150}>
-							{#snippet trigger()}
-								<a
-									href={item.href}
-									class={cn(
-										'rounded-full px-4 py-1.5 text-sm font-medium transition-colors hover:text-primary',
-										isActive(item.href) ? 'bg-primary/10 text-primary' : 'text-muted-foreground'
-									)}
-								>
-									{item.label}
-								</a>
+						<NavMegaMenu menu={item.megaMenu} delay={150} triggerAsButton={item.href === '#'} serverData={item.key === 'nav_posts' ? (postsData ?? null) : item.key === 'nav_notes' ? (notesData ?? null) : item.key === 'nav_timeline' ? (timelineData ?? null) : null}>
+							{#snippet trigger(state)}
+								{#if item.href === '#'}
+									<button
+										{...state.props}
+										class={cn(
+											'cursor-pointer rounded-full px-4 py-1.5 text-sm font-medium transition-colors hover:text-primary',
+											'text-muted-foreground'
+										)}
+									>
+										{tLabel(item.labelKey)}
+									</button>
+								{:else}
+									<a
+										{...state.props}
+										href={item.href}
+										class={cn(
+											'rounded-full px-4 py-1.5 text-sm font-medium transition-colors hover:text-primary',
+											isActive(item.href) ? 'bg-primary/10 text-primary' : 'text-muted-foreground'
+										)}
+									>
+										{tLabel(item.labelKey)}
+									</a>
+								{/if}
 							{/snippet}
 						</NavMegaMenu>
 					{:else}
@@ -76,7 +102,7 @@
 								isActive(item.href) ? 'bg-primary/10 text-primary' : 'text-muted-foreground'
 							)}
 						>
-							{item.label}
+							{tLabel(item.labelKey)}
 						</a>
 					{/if}
 				{/each}
@@ -99,7 +125,7 @@
 						onclick={toggleMenu}
 						aria-expanded={menuOpen}
 						aria-label={menuOpen ? m.close_menu() : m.open_menu()}
-						class="inline-flex size-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+						class="inline-flex size-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
 					>
 						{#if menuOpen}
 							<IconX class="size-5" data-icon="inline-start" />
@@ -111,12 +137,12 @@
 			</div>
 		</div>
 
-		<!-- ══�?Expandable menu (mobile only) ══�?-->
+		<!-- ══Expandable menu (mobile only) ══-->
 		{#if menuOpen}
 			<div>
 				<Separator class="mx-4" />
 
-				<div class="px-5 pb-5 pt-6">
+				<div class="px-5 pt-6 pb-5">
 					<nav class="max-h-[70svh] overflow-y-auto" aria-label="Mobile navigation">
 						<div class="flex flex-col">
 							{#each navigationConfig as item (item.key)}
@@ -125,22 +151,25 @@
 									{#if item.children && item.children.length > 0}
 										<button
 											onclick={() => toggleExpanded(item.key)}
-											class="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-colors text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+											class="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
 										>
-											<span>{item.label}</span>
+											<span>{tLabel(item.labelKey)}</span>
 											<IconChevronDown
-											class={cn('size-4 transition-transform duration-200', expandedKey === item.key && 'rotate-180')}
+												class={cn(
+													'size-4 transition-transform duration-200',
+													expandedKey === item.key && 'rotate-180'
+												)}
 											/>
 										</button>
 										{#if expandedKey === item.key}
-											<div class="ml-3 flex flex-col border-l pb-1 pl-3 pt-0.5">
+											<div class="ml-3 flex flex-col border-l pt-0.5 pb-1 pl-3">
 												{#each item.children as child (child.href)}
 													<a
 														href={child.href}
 														onclick={closeMenu}
-														class="flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+														class="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
 													>
-														<span>{child.label}</span>
+														<span>{child.label ?? tLabel(child.labelKey!)}</span>
 														{#if child.badge}
 															<span class="text-xs text-muted-foreground">{child.badge}</span>
 														{/if}
@@ -159,7 +188,7 @@
 													: 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
 											)}
 										>
-											{item.label}
+											{tLabel(item.labelKey)}
 										</a>
 									{/if}
 								</div>
@@ -172,9 +201,10 @@
 					<div class="pt-4">
 						{#if auth?.user}
 							<div class="flex items-center gap-3">
-								<div class="flex size-9 items-center justify-center rounded-full bg-muted text-sm font-medium">
-									{auth.profile?.displayName?.charAt(0) ??
-										auth.user.name?.charAt(0) ?? '?'}
+								<div
+									class="flex size-9 items-center justify-center rounded-full bg-muted text-sm font-medium"
+								>
+									{auth.profile?.displayName?.charAt(0) ?? auth.user.name?.charAt(0) ?? '?'}
 								</div>
 								<div class="min-w-0 flex-1">
 									<p class="truncate text-sm font-medium">
@@ -204,7 +234,8 @@
 						{:else}
 							<a
 								href="/login?redirectTo={encodeURIComponent(page.url.pathname + page.url.search)}"
-								onclick={closeMenu}								class="flex items-center justify-center rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted/50"
+								onclick={closeMenu}
+								class="flex items-center justify-center rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted/50"
 							>
 								{m.nav_sign_in()}
 							</a>
