@@ -4,7 +4,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import LangSwitcher from '$lib/components/layout/LangSwitcher.svelte';
 	import ThemeToggle from '$lib/components/layout/ThemeToggle.svelte';
-	import { IconCodeCircle2, IconRss, IconExternalLink } from '@tabler/icons-svelte';
+	import { IconCodeCircle2, IconRss, IconExternalLink } from '@tabler/icons-svelte-runes';
 
 	/** Footer link item descriptor */
 	interface FooterLink {
@@ -23,7 +23,7 @@
 	interface FooterProps {
 		/** Optional custom navigation sections; falls back to localized defaults */
 		sections?: FooterSection[];
-		/** ICP 备案号 (for China-based sites) */
+		/** ICP 备案�?(for China-based sites) */
 		icpNumber?: string;
 		/** Online visitor count (optional) */
 		onlineCount?: number;
@@ -33,7 +33,7 @@
 
 	let { sections: sectionProp, icpNumber, onlineCount, class: className }: FooterProps = $props();
 
-	/** Resolved sections — user-supplied or auto-generated localized defaults */
+	/** Resolved sections �?user-supplied or auto-generated localized defaults */
 	let sections = $derived(sectionProp ?? buildDefaultSections());
 
 	function buildDefaultSections(): FooterSection[] {

@@ -4,7 +4,7 @@
 	import { localeStore, localeLabels } from '$lib/stores/locale.svelte';
 	import { getLocale } from '$lib/paraglide/runtime';
 	import { m } from '$lib/paraglide/messages';
-	import { IconLanguage } from '@tabler/icons-svelte';
+	import { IconLanguage } from '@tabler/icons-svelte-runes';
 
 	const locales = $derived(
 		localeStore.available.map((tag) => ({

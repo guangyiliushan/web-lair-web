@@ -13,7 +13,7 @@
 		IconBrandTelegram,
 		IconBrandX,
 		IconChevronDown
-	} from '@tabler/icons-svelte';
+	} from '@tabler/icons-svelte-runes';
 
 	type SocialPlatform = 'github' | 'twitter' | 'email' | 'rss' | 'telegram' | 'x';
 
@@ -47,26 +47,35 @@
 		alt: m.hero_avatar_alt(),
 		fallback: 'GL'
 	};
+
+	/** 平滑滚动�?#content，兼容所有设�?*/
+	function scrollToContent(e: MouseEvent) {
+		e.preventDefault();
+		const target = document.querySelector('#content');
+		if (target) {
+			target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		}
+	}
 </script>
 
 <section
-	class="relative flex min-h-[calc(100vh-6rem)] flex-col items-center justify-center overflow-hidden px-4"
+	class="relative flex h-[calc(100dvh-6rem)] min-h-137.5 flex-col items-center overflow-hidden px-4"
 >
 	<div
-		class="z-10 container flex w-full max-w-5xl flex-col-reverse items-center justify-between gap-12 md:flex-row"
+		class="z-10 container flex w-full max-w-5xl flex-1 flex-col-reverse items-center justify-center gap-8 sm:gap-10 lg:flex-row lg:gap-16"
 	>
-		<!-- 文字区域：左滑入场 -->
+		<!-- 文字区域：左滑入�?-->
 		<motion.div
-			class="flex flex-1 flex-col items-start"
+			class="flex min-w-0 flex-1 flex-col items-start"
 			initial={{ opacity: 0, x: -30 }}
 			animate={{ opacity: 1, x: 0 }}
 			transition={{ duration: 0.6 }}
 		>
-			<h1 class="mb-4 text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
+			<h1 class="mb-4 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
 				{m.hero_title()}
 			</h1>
 
-			<h2 class="mb-6 text-2xl font-semibold sm:text-3xl md:text-4xl">
+			<h2 class="mb-6 text-2xl font-semibold sm:text-3xl lg:text-4xl">
 				{m.hero_subtitle_prefix()}
 				<span class="font-mono text-primary">{m.hero_subtitle_highlight()}</span>
 			</h2>
@@ -103,9 +112,9 @@
 			</div>
 		</motion.div>
 
-		<!-- 头像区域：弹性缩放入场 -->
+		<!-- 头像区域：弹性缩放入�?-->
 		<motion.div
-			class="relative size-64 shrink-0 sm:size-80 md:size-96"
+			class="relative size-56 shrink-0 sm:size-72 md:size-80 lg:size-96"
 			initial={{ opacity: 0, scale: 0.6 }}
 			animate={{ opacity: 1, scale: 1 }}
 			transition={{ type: 'spring', stiffness: 260, damping: 20, delay: 0.3 }}
@@ -119,16 +128,21 @@
 		</motion.div>
 	</div>
 
-	<!-- 底部欢迎语 + 可点击滚动指示器 -->
-	<div class="z-10 flex flex-col items-center gap-2 pt-8">
-		<p class="max-w-xs text-center text-xs text-muted-foreground sm:text-sm">
+	<!-- 底部欢迎�?+ 可点击滚动指示器：多断点响应式，shrink-0 固定于首屏底�?-->
+	<div
+		class="z-10 flex shrink-0 flex-col items-center gap-2 pb-4 pt-2 sm:gap-2.5 sm:pb-6 sm:pt-3 md:gap-3 md:pb-8 md:pt-4 lg:pb-10 lg:pt-6"
+	>
+		<p
+			class="max-w-[18rem] text-center text-xs leading-relaxed text-muted-foreground sm:max-w-xs sm:text-sm md:max-w-sm md:text-base"
+		>
 			{m.hero_welcome()}
 		</p>
 		<a
 			href="#content"
-			class="animate-bounce text-muted-foreground transition-colors hover:text-foreground"
+			onclick={scrollToContent}
+			class="animate-bounce rounded-full text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
 		>
-			<IconChevronDown class="size-5" />
+			<IconChevronDown class="size-4 sm:size-5 md:size-6" />
 			<span class="sr-only">{m.hero_scroll_down()}</span>
 		</a>
 	</div>

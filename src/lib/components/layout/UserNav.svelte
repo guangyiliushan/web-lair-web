@@ -4,10 +4,10 @@
 	import { m } from '$lib/paraglide/messages';
 	import * as Avatar from '$lib/components/ui/avatar';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import IconUser from '@tabler/icons-svelte/icons/user';
-	import IconLayoutDashboard from '@tabler/icons-svelte/icons/layout-dashboard';
-	import IconUserCircle from '@tabler/icons-svelte/icons/user-circle';
-	import IconLogout from '@tabler/icons-svelte/icons/logout';
+	import IconUser from '@tabler/icons-svelte-runes/icons/user';
+	import IconLayoutDashboard from '@tabler/icons-svelte-runes/icons/layout-dashboard';
+	import IconUserCircle from '@tabler/icons-svelte-runes/icons/user-circle';
+	import IconLogout from '@tabler/icons-svelte-runes/icons/logout';
 	import akkarinPng from '$lib/assets/akkarin.png';
 
 	type AuthData = {
@@ -26,7 +26,7 @@
 
 	let { auth }: { auth?: AuthData } = $props();
 
-	// Avatar source priority: profile.avatarUrl â†’ user.image â†’ akkarin.png
+	// Avatar source priority: profile.avatarUrl â†?user.image â†?akkarin.png
 	const avatarSrc = $derived(
 		auth?.profile?.avatarUrl ?? auth?.user?.image ?? akkarinPng
 	);

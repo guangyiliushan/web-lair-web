@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Pagination as PaginationPrimitive } from 'bits-ui';
-	import { IconChevronLeft } from '@tabler/icons-svelte';
+	import { IconChevronLeft } from '@tabler/icons-svelte-runes';
 	import { cn } from '$lib/utils.js';
 	import { buttonVariants } from '../button/index.js';
 

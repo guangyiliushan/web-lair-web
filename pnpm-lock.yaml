@@ -66,7 +66,7 @@ importers:
       '@sveltejs/vite-plugin-svelte':
         specifier: ^7.0.0
         version: 7.1.2(svelte@5.55.9(@typescript-eslint/types@8.59.4))(vite@8.0.14(@types/node@24.12.4)(esbuild@0.28.0)(jiti@2.7.0)(tsx@4.22.3))
-      '@tabler/icons-svelte':
+      '@tabler/icons-svelte-runes':
         specifier: ^3.44.0
         version: 3.44.0(svelte@5.55.9(@typescript-eslint/types@8.59.4))
       '@tailwindcss/forms':
@@ -1723,10 +1723,10 @@ packages:
   '@swc/helpers@0.5.23':
     resolution: {integrity: sha512-5lSsMOTXURePglDfvuAQUqkGek9Hg2kksOYay2m0+XR++b2NWYL/4sWyuvVBIs8oKnJaxkdi9whaL/sqN13afw==}
 
-  '@tabler/icons-svelte@3.44.0':
-    resolution: {integrity: sha512-ZJJMCHoqpvb9hLVn9dU+pn8LCdX/e+mJ/fC+EUaJT5nHEm0+IW4aKKYkYQI+rFMzN8ivj36MnMC5TGFi4H6zew==}
+  '@tabler/icons-svelte-runes@3.44.0':
+    resolution: {integrity: sha512-kncwVrQByKnhquybudKYQ1m9OT2Pjl2MEyGhAJmySPjm3uG5CjmcE66jag7A9Hz/D+fuRXYNcHtq99ontyi4aA==}
     peerDependencies:
-      svelte: '>=3 <6 || >=5.0.0-next.0'
+      svelte: ^5.0.0
 
   '@tabler/icons@3.44.0':
     resolution: {integrity: sha512-Wn0AOZG9sg0L+bjfMqq4eNhC6pQjIrk94LvvWYNYkY8KH8wC3YILRzQlrnVJc4FUeMxH/AK97QsYCX35H3LndA==}
@@ -5399,7 +5399,7 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@tabler/icons-svelte@3.44.0(svelte@5.55.9(@typescript-eslint/types@8.59.4))':
+  '@tabler/icons-svelte-runes@3.44.0(svelte@5.55.9(@typescript-eslint/types@8.59.4))':
     dependencies:
       '@tabler/icons': 3.44.0
       svelte: 5.55.9(@typescript-eslint/types@8.59.4)

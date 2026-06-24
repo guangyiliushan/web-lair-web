@@ -21,14 +21,14 @@ test.describe('Language Switcher', () => {
 		const count = await menuItems.count();
 		expect(count).toBeGreaterThanOrEqual(3);
 		await expect(menuItems.filter({ hasText: 'English' })).toBeVisible();
-		await expect(menuItems.filter({ hasText: '简体中文' })).toBeVisible();
-		await expect(menuItems.filter({ hasText: '日本語' })).toBeVisible();
+		await expect(menuItems.filter({ hasText: '简体中�? })).toBeVisible();
+		await expect(menuItems.filter({ hasText: '日本�? })).toBeVisible();
 	});
 
 	test('selecting a language updates locale and persists across reload', async ({ page }) => {
 		await page.goto('/en');
 		await page.locator('[data-slot="dropdown-menu-trigger"]').first().click();
-		await page.locator('[role="menuitemradio"]').filter({ hasText: '简体中文' }).click();
+		await page.locator('[role="menuitemradio"]').filter({ hasText: '简体中�? }).click();
 		await page.waitForURL(/\/zh-cn/, { timeout: 5000 });
 		expect(page.url()).toContain('/zh-cn');
 

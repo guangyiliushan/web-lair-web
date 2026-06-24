@@ -2,7 +2,7 @@
 	import { Pagination as PaginationPrimitive } from 'bits-ui';
 	import { cn } from '$lib/utils.js';
 	import { buttonVariants } from '$lib/components/ui/button/index.js';
-	import { IconChevronRight } from '@tabler/icons-svelte';
+	import { IconChevronRight } from '@tabler/icons-svelte-runes';
 
 	let {
 		ref = $bindable(null),

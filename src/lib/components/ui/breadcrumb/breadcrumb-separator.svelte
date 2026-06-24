@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { cn, type WithElementRef } from '$lib/utils.js';
 	import type { HTMLLiAttributes } from 'svelte/elements';
-	import { IconChevronRight } from '@tabler/icons-svelte';
+	import { IconChevronRight } from '@tabler/icons-svelte-runes';
 
 	let {
 		ref = $bindable(null),

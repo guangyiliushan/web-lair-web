@@ -3,8 +3,8 @@
 	import type { PageServerData } from './$types';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
-	import IconLogout from '@tabler/icons-svelte/icons/logout';
-	import IconUser from '@tabler/icons-svelte/icons/user';
+	import IconLogout from '@tabler/icons-svelte-runes/icons/logout';
+	import IconUser from '@tabler/icons-svelte-runes/icons/user';
 
 	let { data }: { data: PageServerData } = $props();
 </script>

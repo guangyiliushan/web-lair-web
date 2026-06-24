@@ -26,3 +26,14 @@ test-results
 # Paraglide
 src/lib/paraglide
 project.inlang/cache/
+
+# ── AI / IDE personal configs ──
+# Each developer uses different AI tools & editors.
+# Only .vscode/ is shared for team-wide editor consistency.
+.agents/
+.claude/
+.codex/
+.cursor/
+.gemini/
+.opencode/
+.trae/

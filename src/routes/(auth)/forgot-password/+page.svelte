@@ -5,8 +5,8 @@
 	import * as Field from '$lib/components/ui/field';
 	import { Input } from '$lib/components/ui/input';
 	import { Button } from '$lib/components/ui/button';
-	import IconMail from '@tabler/icons-svelte/icons/mail';
-	import IconAlertCircle from '@tabler/icons-svelte/icons/alert-circle';
+	import IconMail from '@tabler/icons-svelte-runes/icons/mail';
+	import IconAlertCircle from '@tabler/icons-svelte-runes/icons/alert-circle';
 
 	let { form }: { form: ActionData } = $props();
 </script>

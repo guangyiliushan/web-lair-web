@@ -1,7 +1,7 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
-	import IconMailForward from '@tabler/icons-svelte/icons/mail-forward';
+	import IconMailForward from '@tabler/icons-svelte-runes/icons/mail-forward';
 </script>
 
 <div class="flex min-h-svh flex-col items-center justify-center px-4 py-12">

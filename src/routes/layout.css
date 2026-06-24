@@ -20,7 +20,7 @@
 
 	--popover-foreground: oklch(0.148 0.004 228.8);
 
-	--primary: oklch(0.508 0.118 165.612);
+	--primary: oklch(0.666 0.096 169.696);
 
 	--primary-foreground: oklch(0.979 0.021 166.113);
 
@@ -59,8 +59,7 @@
 	--sidebar: oklch(0.987 0.002 197.1);
 
 	--sidebar-foreground: oklch(0.148 0.004 228.8);
-
-	--sidebar-primary: oklch(0.596 0.145 163.225);
+	--sidebar-primary: oklch(0.696 0.196 166.696);
 
 	--sidebar-primary-foreground: oklch(0.979 0.021 166.113);
 
@@ -234,6 +233,7 @@
 	}
 	html {
 		font-family: var(--font-mono);
+		scroll-behavior: smooth;
 		scrollbar-width: thin;
 		scrollbar-color: var(--scrollbar-thumb) transparent;
 		scrollbar-gutter: stable;

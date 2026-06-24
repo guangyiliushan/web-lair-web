@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { DropdownMenu as DropdownMenuPrimitive } from 'bits-ui';
-	import { IconChevronRight } from '@tabler/icons-svelte';
+	import { IconChevronRight } from '@tabler/icons-svelte-runes';
 	import { cn } from '$lib/utils.js';
 
 	let {

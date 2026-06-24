@@ -5,9 +5,9 @@
 	import * as Field from '$lib/components/ui/field';
 	import { Input } from '$lib/components/ui/input';
 	import { Button } from '$lib/components/ui/button';
-	import IconLock from '@tabler/icons-svelte/icons/lock';
-	import IconArrowLeft from '@tabler/icons-svelte/icons/arrow-left';
-	import IconAlertCircle from '@tabler/icons-svelte/icons/alert-circle';
+	import IconLock from '@tabler/icons-svelte-runes/icons/lock';
+	import IconArrowLeft from '@tabler/icons-svelte-runes/icons/arrow-left';
+	import IconAlertCircle from '@tabler/icons-svelte-runes/icons/alert-circle';
 
 	let { data, form }: { data: PageServerData; form: ActionData } = $props();
 </script>
