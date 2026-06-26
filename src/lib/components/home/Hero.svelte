@@ -48,7 +48,7 @@
 		fallback: 'GL'
 	};
 
-	/** 平滑滚动�?#content，兼容所有设�?*/
+	/** 平滑滚动 #content，兼容所有设 */
 	function scrollToContent(e: MouseEvent) {
 		e.preventDefault();
 		const target = document.querySelector('#content');
@@ -64,7 +64,7 @@
 	<div
 		class="z-10 container flex w-full max-w-5xl flex-1 flex-col-reverse items-center justify-center gap-8 sm:gap-10 lg:flex-row lg:gap-16"
 	>
-		<!-- 文字区域：左滑入�?-->
+		<!-- 文字区域：左滑入 -->
 		<motion.div
 			class="flex min-w-0 flex-1 flex-col items-start"
 			initial={{ opacity: 0, x: -30 }}
@@ -112,7 +112,7 @@
 			</div>
 		</motion.div>
 
-		<!-- 头像区域：弹性缩放入�?-->
+		<!-- 头像区域：弹性缩放入 -->
 		<motion.div
 			class="relative size-56 shrink-0 sm:size-72 md:size-80 lg:size-96"
 			initial={{ opacity: 0, scale: 0.6 }}
@@ -128,7 +128,7 @@
 		</motion.div>
 	</div>
 
-	<!-- 底部欢迎�?+ 可点击滚动指示器：多断点响应式，shrink-0 固定于首屏底�?-->
+	<!-- 底部欢迎 + 可点击滚动指示器：多断点响应式，shrink-0 固定于首屏底 -->
 	<div
 		class="z-10 flex shrink-0 flex-col items-center gap-2 pb-4 pt-2 sm:gap-2.5 sm:pb-6 sm:pt-3 md:gap-3 md:pb-8 md:pt-4 lg:pb-10 lg:pt-6"
 	>
