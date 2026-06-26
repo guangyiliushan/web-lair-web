@@ -4,7 +4,7 @@
 	import IconMailForward from '@tabler/icons-svelte-runes/icons/mail-forward';
 </script>
 
-<div class="flex min-h-svh flex-col items-center justify-center px-4 py-12">
+<div class="flex w-full flex-col items-center justify-center">
 	<Card.Root class="w-full max-w-md text-center">
 		<Card.Header>
 			<Card.Title class="text-2xl">Check your email</Card.Title>

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
 	import type { PageServerData } from './$types';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
@@ -9,7 +8,7 @@
 	let { data }: { data: PageServerData } = $props();
 </script>
 
-<div class="flex min-h-svh flex-col items-center justify-center px-4 py-12">
+<div class="flex w-full flex-col items-center justify-center px-4 py-12">
 	<Card.Root class="w-full max-w-md">
 		<Card.Header class="text-center">
 			<Card.Title class="text-2xl">
@@ -24,7 +23,7 @@
 			</div>
 		</Card.Content>
 		<Card.Footer class="justify-center">
-			<form method="post" action="?/signOut" use:enhance>
+			<form method="post" action="/auth/sign-out">
 				<Button variant="outline" type="submit">
 					<IconLogout data-icon="inline-start" />
 					Sign out

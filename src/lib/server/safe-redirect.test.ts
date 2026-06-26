@@ -3,15 +3,15 @@ import { safeRedirect } from './safe-redirect';
 
 describe('safeRedirect', () => {
 	it('returns the fallback for null', () => {
-		expect(safeRedirect(null)).toBe('/dashboard');
+		expect(safeRedirect(null)).toBe('/admin');
 	});
 
 	it('returns the fallback for undefined', () => {
-		expect(safeRedirect(undefined)).toBe('/dashboard');
+		expect(safeRedirect(undefined)).toBe('/admin');
 	});
 
 	it('returns the fallback for an empty string', () => {
-		expect(safeRedirect('')).toBe('/dashboard');
+		expect(safeRedirect('')).toBe('/admin');
 	});
 
 	it('returns the fallback for a custom fallback', () => {
@@ -19,7 +19,7 @@ describe('safeRedirect', () => {
 	});
 
 	it('returns a valid relative path', () => {
-		expect(safeRedirect('/dashboard')).toBe('/dashboard');
+		expect(safeRedirect('/admin')).toBe('/admin');
 	});
 
 	it('returns a valid relative path with query string', () => {
@@ -27,26 +27,26 @@ describe('safeRedirect', () => {
 	});
 
 	it('rejects an absolute http URL', () => {
-		expect(safeRedirect('https://evil.com')).toBe('/dashboard');
+		expect(safeRedirect('https://evil.com')).toBe('/admin');
 	});
 
 	it('rejects an absolute http URL with path', () => {
-		expect(safeRedirect('http://evil.com/phish')).toBe('/dashboard');
+		expect(safeRedirect('http://evil.com/phish')).toBe('/admin');
 	});
 
 	it('rejects a protocol-relative URL', () => {
-		expect(safeRedirect('//evil.com')).toBe('/dashboard');
+		expect(safeRedirect('//evil.com')).toBe('/admin');
 	});
 
 	it('rejects a protocol-relative URL with path', () => {
-		expect(safeRedirect('//evil.com/phish')).toBe('/dashboard');
+		expect(safeRedirect('//evil.com/phish')).toBe('/admin');
 	});
 
 	it('rejects a backslash-prefixed URL', () => {
-		expect(safeRedirect('\\evil.com')).toBe('/dashboard');
+		expect(safeRedirect('\\evil.com')).toBe('/admin');
 	});
 
 	it('rejects a relative path containing double slashes', () => {
-		expect(safeRedirect('/a//b')).toBe('/dashboard');
+		expect(safeRedirect('/a//b')).toBe('/admin');
 	});
 });

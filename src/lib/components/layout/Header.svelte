@@ -3,12 +3,18 @@
 	import { m } from '$lib/paraglide/messages';
 	import { page } from '$app/state';
 	import { IconCodeCircle2, IconMenu2, IconX, IconChevronDown } from '@tabler/icons-svelte-runes';
+	import { slide } from 'svelte/transition';
+	import { cubicInOut, quartInOut } from 'svelte/easing';
 	import ThemeToggle from '$lib/components/layout/ThemeToggle.svelte';
 	import LangSwitcher from '$lib/components/layout/LangSwitcher.svelte';
 	import UserNav from '$lib/components/layout/UserNav.svelte';
 	import { Separator } from '$lib/components/ui/separator';
 	import NavMegaMenu from '$lib/components/layout/NavMegaMenu.svelte';
-	import { navigationConfig, tLabel, type MegaMenuDynamicData } from '$lib/config/navigation.config';
+	import {
+		navigationConfig,
+		tLabel,
+		type MegaMenuDynamicData
+	} from '$lib/config/navigation.config';
 
 	// ── Types ──
 	type AuthData = {
@@ -23,7 +29,17 @@
 	} | null;
 
 	// ── Props ──
-	let { auth, postsData, notesData, timelineData }: { auth?: AuthData; postsData?: MegaMenuDynamicData | null; notesData?: MegaMenuDynamicData | null; timelineData?: MegaMenuDynamicData | null } = $props();
+	let {
+		auth,
+		postsData,
+		notesData,
+		timelineData
+	}: {
+		auth?: AuthData;
+		postsData?: MegaMenuDynamicData | null;
+		notesData?: MegaMenuDynamicData | null;
+		timelineData?: MegaMenuDynamicData | null;
+	} = $props();
 
 	// ── Derived ──
 	const currentPath = $derived(page.url.pathname);
@@ -50,12 +66,8 @@
 </script>
 
 <header class="pointer-events-none fixed top-6 right-0 left-0 z-50 flex justify-center px-4">
-	<!-- Single cohesive card: rounded-full when closed, rounded-3xl when open -->
-	<div
-		class="pointer-events-auto w-full max-w-5xl overflow-hidden border bg-background/70 shadow-sm backdrop-blur-md transition-all duration-300"
-		class:rounded-3xl={menuOpen}
-		class:rounded-full={!menuOpen}
-	>
+	<!-- Single cohesive card: fixed rounded-3xl to prevent morphing artifacts during height transition -->
+	<div class="pointer-events-auto w-full max-w-5xl overflow-hidden rounded-3xl border bg-background/70 shadow-sm backdrop-blur-md">
 		<!-- ══Top bar (always visible) ══-->
 		<div class="flex items-center justify-between px-4 py-2">
 			<!-- Logo -->
@@ -68,7 +80,18 @@
 			<nav class="hidden items-center gap-1 lg:flex" aria-label="Main navigation">
 				{#each navigationConfig as item (item.key)}
 					{#if item.megaMenu}
-						<NavMegaMenu menu={item.megaMenu} delay={150} triggerAsButton={item.href === '#'} serverData={item.key === 'nav_posts' ? (postsData ?? null) : item.key === 'nav_notes' ? (notesData ?? null) : item.key === 'nav_timeline' ? (timelineData ?? null) : null}>
+						<NavMegaMenu
+							menu={item.megaMenu}
+							delay={150}
+							triggerAsButton={item.href === '#'}
+							serverData={item.key === 'nav_posts'
+								? (postsData ?? null)
+								: item.key === 'nav_notes'
+									? (notesData ?? null)
+									: item.key === 'nav_timeline'
+										? (timelineData ?? null)
+										: null}
+						>
 							{#snippet trigger(state)}
 								{#if item.href === '#'}
 									<button
@@ -139,109 +162,114 @@
 
 		<!-- ══Expandable menu (mobile only) ══-->
 		{#if menuOpen}
-			<div>
+			<div transition:slide={{ duration: 400, easing: quartInOut }}>
 				<Separator class="mx-4" />
 
 				<div class="px-5 pt-6 pb-5">
-					<nav class="max-h-[70svh] overflow-y-auto" aria-label="Mobile navigation">
-						<div class="flex flex-col">
-							{#each navigationConfig as item (item.key)}
-								<div>
-									<!-- Top-level: click to expand accordion (if has children), else direct link -->
-									{#if item.children && item.children.length > 0}
-										<button
-											onclick={() => toggleExpanded(item.key)}
-											class="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
-										>
-											<span>{tLabel(item.labelKey)}</span>
-											<IconChevronDown
-												class={cn(
-													'size-4 transition-transform duration-200',
-													expandedKey === item.key && 'rotate-180'
-												)}
-											/>
-										</button>
-										{#if expandedKey === item.key}
-											<div class="ml-3 flex flex-col border-l pt-0.5 pb-1 pl-3">
-												{#each item.children as child (child.href)}
-													<a
-														href={child.href}
-														onclick={closeMenu}
-														class="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+						<nav class="max-h-[70svh] overflow-y-auto" aria-label="Mobile navigation">
+							<div class="flex flex-col">
+								{#each navigationConfig as item (item.key)}
+									<div>
+										<!-- Top-level: click to expand accordion (if has children), else direct link -->
+										{#if item.children && item.children.length > 0}
+											<button
+												onclick={() => toggleExpanded(item.key)}
+												class="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+											>
+												<span>{tLabel(item.labelKey)}</span>
+												<span
+													class={cn(
+														"transition-transform duration-300",
+														expandedKey === item.key ? "rotate-180" : ""
+													)}
+												>
+													<IconChevronDown class="size-4" />
+												</span>
+											</button>
+												{#if expandedKey === item.key}
+													<div
+														transition:slide={{ duration: 300, easing: cubicInOut }}
+														class="ml-3 flex flex-col border-l pt-0.5 pb-1 pl-3"
 													>
-														<span>{child.label ?? tLabel(child.labelKey!)}</span>
-														{#if child.badge}
-															<span class="text-xs text-muted-foreground">{child.badge}</span>
-														{/if}
-													</a>
-												{/each}
-											</div>
+														{#each item.children as child (child.href)}
+															<a
+																href={child.href}
+																onclick={closeMenu}
+																class="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+															>
+																<span>{child.label ?? tLabel(child.labelKey!)}</span>
+																{#if child.badge}
+																	<span class="text-xs text-muted-foreground">{child.badge}</span>
+																{/if}
+															</a>
+														{/each}
+													</div>
+												{/if}
+										{:else}
+											<a
+												href={item.href}
+												onclick={closeMenu}
+												class={cn(
+													'flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+													isActive(item.href)
+														? 'bg-primary/10 text-primary'
+														: 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+												)}
+											>
+												{tLabel(item.labelKey)}
+											</a>
 										{/if}
-									{:else}
-										<a
-											href={item.href}
-											onclick={closeMenu}
-											class={cn(
-												'flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-												isActive(item.href)
-													? 'bg-primary/10 text-primary'
-													: 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
-											)}
-										>
-											{tLabel(item.labelKey)}
-										</a>
-									{/if}
-								</div>
-							{/each}
-						</div>
-					</nav>
+									</div>
+								{/each}
+							</div>
+						</nav>
 
-					<!-- Bottom: user section -->
-					<Separator class="mt-4" />
-					<div class="pt-4">
-						{#if auth?.user}
-							<div class="flex items-center gap-3">
-								<div
-									class="flex size-9 items-center justify-center rounded-full bg-muted text-sm font-medium"
-								>
-									{auth.profile?.displayName?.charAt(0) ?? auth.user.name?.charAt(0) ?? '?'}
+						<!-- Bottom: user section -->
+						<Separator class="mt-4" />
+						<div class="pt-4">
+							{#if auth?.user}
+								<div class="flex items-center gap-3">
+									<div
+										class="flex size-9 items-center justify-center rounded-full bg-muted text-sm font-medium"
+									>
+										{auth.profile?.displayName?.charAt(0) ?? auth.user.name?.charAt(0) ?? '?'}
+									</div>
+									<div class="min-w-0 flex-1">
+										<p class="truncate text-sm font-medium">
+											{auth.profile?.displayName ?? auth.user.name}
+										</p>
+										<p class="truncate text-xs text-muted-foreground">
+											{auth.user.email}
+										</p>
+									</div>
 								</div>
-								<div class="min-w-0 flex-1">
-									<p class="truncate text-sm font-medium">
-										{auth.profile?.displayName ?? auth.user.name}
-									</p>
-									<p class="truncate text-xs text-muted-foreground">
-										{auth.user.email}
-									</p>
+								<div class="mt-3 flex flex-col gap-0.5">
+									<a
+										href="/admin"
+										onclick={closeMenu}
+										class="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+									>
+										{m.nav_dashboard()}
+									</a>
+									<a
+										href="/account"
+										onclick={closeMenu}
+										class="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+									>
+										{m.nav_account()}
+									</a>
 								</div>
-							</div>
-							<div class="mt-3 flex flex-col gap-0.5">
+							{:else}
 								<a
-									href="/dashboard"
+									href="/login?redirectTo={encodeURIComponent(page.url.pathname + page.url.search)}"
 									onclick={closeMenu}
-									class="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+									class="flex items-center justify-center rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted/50"
 								>
-									{m.nav_dashboard()}
+									{m.nav_sign_in()}
 								</a>
-								<a
-									href="/account"
-									onclick={closeMenu}
-									class="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
-								>
-									{m.nav_account()}
-								</a>
-							</div>
-						{:else}
-							<a
-								href="/login?redirectTo={encodeURIComponent(page.url.pathname + page.url.search)}"
-								onclick={closeMenu}
-								class="flex items-center justify-center rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted/50"
-							>
-								{m.nav_sign_in()}
-							</a>
-						{/if}
+							{/if}
+						</div>
 					</div>
-				</div>
 			</div>
 		{/if}
 	</div>

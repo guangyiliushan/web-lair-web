@@ -5,7 +5,7 @@ import { APIError } from 'better-auth/api';
 
 export const load: PageServerLoad = (event) => {
 	if (event.locals.user) {
-		redirect(302, '/dashboard');
+		redirect(302, '/admin');
 	}
 	return {};
 };

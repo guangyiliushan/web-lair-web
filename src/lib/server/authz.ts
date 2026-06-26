@@ -33,7 +33,7 @@ export async function requireRole(...roles: string[]) {
 	const hasRole = roles.some((r) => userRoles.includes(r));
 
 	if (!hasRole) {
-		redirect(303, '/dashboard');
+		redirect(303, '/admin');
 	}
 
 	return { user, roles: userRoles };

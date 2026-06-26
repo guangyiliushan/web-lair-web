@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { enhance } from '$app/forms';
 	import { m } from '$lib/paraglide/messages';
 	import * as Avatar from '$lib/components/ui/avatar';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
@@ -26,7 +25,7 @@
 
 	let { auth }: { auth?: AuthData } = $props();
 
-	// Avatar source priority: profile.avatarUrl â†?user.image â†?akkarin.png
+	// Avatar source priority: profile.avatarUrl ï¿½?user.image ï¿½?akkarin.png
 	const avatarSrc = $derived(
 		auth?.profile?.avatarUrl ?? auth?.user?.image ?? akkarinPng
 	);
@@ -37,8 +36,6 @@
 	const loginHref = $derived(
 		`/login?redirectTo=${encodeURIComponent(page.url.pathname + page.url.search)}`
 	);
-
-	let signOutForm = $state<HTMLFormElement>();
 </script>
 
 {#if auth?.user}
@@ -69,7 +66,7 @@
 
 			<DropdownMenu.Group>
 				<DropdownMenu.Item>
-					<a href="/dashboard" class="flex items-center gap-1.5">
+					<a href="/admin" class="flex items-center gap-1.5">
 						<IconLayoutDashboard />
 						{m.nav_dashboard()}
 					</a>
@@ -85,9 +82,11 @@
 			<DropdownMenu.Separator />
 
 			<DropdownMenu.Group>
-				<DropdownMenu.Item variant="destructive" onclick={() => signOutForm?.requestSubmit()}>
-					<IconLogout />
-					{m.nav_sign_out()}
+				<DropdownMenu.Item variant="destructive">
+					<button type="submit" form="user-nav-sign-out" class="flex w-full items-center gap-1.5 text-left">
+						<IconLogout />
+						{m.nav_sign_out()}
+					</button>
 				</DropdownMenu.Item>
 			</DropdownMenu.Group>
 		</DropdownMenu.Content>
@@ -103,4 +102,4 @@
 {/if}
 
 <!-- Hidden form bound for programmatic sign-out -->
-<form bind:this={signOutForm} method="post" action="?/signOut" use:enhance class="hidden"></form>
+<form id="user-nav-sign-out" method="post" action="/auth/sign-out" class="hidden"></form>

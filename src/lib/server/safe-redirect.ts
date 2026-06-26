@@ -1,4 +1,4 @@
-const FALLBACK = '/dashboard';
+const FALLBACK = '/admin';
 
 export function safeRedirect(url: string | null | undefined, fallback = FALLBACK): string {
 	if (!url) return fallback;

@@ -23,7 +23,7 @@
 	interface FooterProps {
 		/** Optional custom navigation sections; falls back to localized defaults */
 		sections?: FooterSection[];
-		/** ICP 备案�?(for China-based sites) */
+		/** ICP 备案号 (for China-based sites) */
 		icpNumber?: string;
 		/** Online visitor count (optional) */
 		onlineCount?: number;
@@ -33,7 +33,7 @@
 
 	let { sections: sectionProp, icpNumber, onlineCount, class: className }: FooterProps = $props();
 
-	/** Resolved sections �?user-supplied or auto-generated localized defaults */
+	/** Resolved sections — user-supplied or auto-generated localized defaults */
 	let sections = $derived(sectionProp ?? buildDefaultSections());
 
 	function buildDefaultSections(): FooterSection[] {
@@ -72,7 +72,7 @@
 <footer
 	class={cn(
 		'relative w-full',
-		'bg-gradient-to-b from-muted/50 via-background to-background',
+		'bg-linear-to-b from-muted/50 via-background to-background',
 		'dark:from-muted/30 dark:via-background dark:to-background',
 		'border-t border-border/50',
 		className
@@ -80,7 +80,7 @@
 	aria-label={m.footer_aria_label()}
 >
 	<div
-		class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-border to-transparent"
+		class="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-border to-transparent"
 	></div>
 
 	<div class="mx-auto w-full max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
