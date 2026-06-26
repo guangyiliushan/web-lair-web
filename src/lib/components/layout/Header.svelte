@@ -13,7 +13,8 @@
 	import {
 		navigationConfig,
 		tLabel,
-		type MegaMenuDynamicData
+		type MegaMenuDynamicData,
+		type NavChild
 	} from '$lib/config/navigation.config';
 
 	// ── Types ──
@@ -47,6 +48,29 @@
 	function isActive(path: string): boolean {
 		if (path === '/') return currentPath === '/' || !currentPath.startsWith('/en');
 		return currentPath.startsWith(path);
+	}
+
+	function getMobileChildren(item: typeof navigationConfig[number]): NavChild[] {
+		if (item.key === 'nav_posts') {
+			const cats = postsData?.leftItems || [];
+			return [...cats, { labelKey: 'nav_posts_view_all' as const, href: '/posts' }];
+		}
+		if (item.key === 'nav_timeline') {
+			return [
+				{ label: 'Posts', href: '/timeline?type=post' },
+				{ label: 'Notes', href: '/timeline?type=note' },
+				{ label: 'Thinking', href: '/timeline?type=thinking' }
+			];
+		}
+		if (item.key === 'nav_notes') {
+			return [];
+		}
+		return item.children || [];
+	}
+
+	/** Safely resolve display label from NavChild */
+	function childLabel(child: NavChild): string {
+		return child.label ?? (child.labelKey ? tLabel(child.labelKey) : '');
 	}
 
 	// ── Mobile menu state ──
@@ -168,37 +192,50 @@
 				<div class="px-5 pt-6 pb-5">
 						<nav class="max-h-[70svh] overflow-y-auto" aria-label="Mobile navigation">
 							<div class="flex flex-col">
-								{#each navigationConfig as item (item.key)}
+								{#each navigationConfig.filter(i => i.key !== 'nav_more') as item (item.key)}
+									{@const mobileChildren = getMobileChildren(item)}
 									<div>
 										<!-- Top-level: click to expand accordion (if has children), else direct link -->
-										{#if item.children && item.children.length > 0}
-											<button
-												onclick={() => toggleExpanded(item.key)}
-												class="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
-											>
-												<span>{tLabel(item.labelKey)}</span>
-												<span
+										{#if mobileChildren.length > 0}
+											<div class="flex items-center justify-between rounded-lg transition-colors hover:bg-muted/50">
+												<a
+													href={item.href}
+													onclick={closeMenu}
 													class={cn(
-														"transition-transform duration-300",
-														expandedKey === item.key ? "rotate-180" : ""
+														'flex-1 px-3 py-2.5 text-sm font-medium transition-colors hover:text-foreground',
+														isActive(item.href) ? 'text-primary' : 'text-muted-foreground'
 													)}
 												>
-													<IconChevronDown class="size-4" />
-												</span>
-											</button>
+													{tLabel(item.labelKey)}
+												</a>
+												<button
+													onclick={() => toggleExpanded(item.key)}
+													class="flex items-center justify-center px-4 py-2.5 text-muted-foreground transition-colors hover:text-foreground"
+													aria-label={expandedKey === item.key ? "Collapse" : "Expand"}
+												>
+													<span
+														class={cn(
+															"transition-transform duration-300",
+															expandedKey === item.key ? "rotate-180" : ""
+														)}
+													>
+														<IconChevronDown class="size-4" />
+													</span>
+												</button>
+											</div>
 												{#if expandedKey === item.key}
 													<div
 														transition:slide={{ duration: 300, easing: cubicInOut }}
 														class="ml-3 flex flex-col border-l pt-0.5 pb-1 pl-3"
 													>
-														{#each item.children as child (child.href)}
+														{#each mobileChildren as child (child.href)}
 															<a
 																href={child.href}
 																onclick={closeMenu}
 																class="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
 															>
-																<span>{child.label ?? tLabel(child.labelKey!)}</span>
-																{#if child.badge}
+													<span>{childLabel(child)}</span>
+													{#if child.badge}
 																	<span class="text-xs text-muted-foreground">{child.badge}</span>
 																{/if}
 															</a>
@@ -210,10 +247,10 @@
 												href={item.href}
 												onclick={closeMenu}
 												class={cn(
-													'flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+													'flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-colors hover:bg-muted/50 hover:text-foreground',
 													isActive(item.href)
 														? 'bg-primary/10 text-primary'
-														: 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+														: 'text-muted-foreground'
 												)}
 											>
 												{tLabel(item.labelKey)}
@@ -222,6 +259,22 @@
 									</div>
 								{/each}
 							</div>
+
+							<!-- Unrolled More Items -->
+							{#if navigationConfig.find(i => i.key === 'nav_more')?.children}
+								<Separator class="my-2" />
+								<div class="flex flex-wrap justify-between gap-1 px-1">
+									{#each navigationConfig.find(i => i.key === 'nav_more')!.children! as child (child.href)}
+										<a
+											href={child.href}
+											onclick={closeMenu}
+											class="rounded-lg px-2 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+										>
+											{tLabel(child.labelKey!)}
+										</a>
+									{/each}
+								</div>
+							{/if}
 						</nav>
 
 						<!-- Bottom: user section -->
