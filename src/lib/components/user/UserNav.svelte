@@ -25,7 +25,7 @@
 
 	let { auth }: { auth?: AuthData } = $props();
 
-	// Avatar source priority: profile.avatarUrl �?user.image �?akkarin.png
+	// Avatar source priority: profile.avatarUrl user.image akkarin.png
 	const avatarSrc = $derived(
 		auth?.profile?.avatarUrl ?? auth?.user?.image ?? akkarinPng
 	);
