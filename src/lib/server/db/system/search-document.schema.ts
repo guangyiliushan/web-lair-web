@@ -37,18 +37,18 @@ export const searchDocuments = pgTable(
 		publicAt: timestamp('public_at', { withTimezone: true }),
 		hasPassword: boolean('has_password').notNull().default(false),
 		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-		modifiedAt: timestamp('modified_at', { withTimezone: true }),
+		modifiedAt: timestamp('modified_at', { withTimezone: true })
 	},
 	(table) => [
 		uniqueIndex('search_documents_ref_lang_uniq').on(
 			table.refType,
 			table.refId,
-			table.lang,
+			table.lang
 		),
 		index('search_documents_published_idx').on(
 			table.isPublished,
-			table.publicAt,
+			table.publicAt
 		),
-		index('search_documents_lang_idx').on(table.lang),
-	],
+		index('search_documents_lang_idx').on(table.lang)
+	]
 )
