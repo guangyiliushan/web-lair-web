@@ -10,13 +10,23 @@
 			<a href="/admin" class="text-lg font-semibold tracking-tight">Lair Admin</a>
 		</div>
 		<nav class="flex flex-1 flex-col gap-1 overflow-y-auto p-4 text-sm">
-			<a class="rounded-md px-3 py-2 transition-colors hover:bg-muted" href="/admin">Overview</a>
+			<a class="rounded-md px-3 py-2 transition-colors hover:bg-muted" href="/admin"
+				>Overview</a
+			>
 			<div class="mt-3 mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Shorthand</div>
-			<a class="rounded-md px-3 py-2 transition-colors hover:bg-muted" href="/admin/analytics">Analytics</a>
-			<a class="rounded-md px-3 py-2 transition-colors hover:bg-muted" href="/admin/comments">Comments</a>
-			<a class="rounded-md px-3 py-2 transition-colors hover:bg-muted" href="/admin/notes">Notes</a>
+			<a class="rounded-md px-3 py-2 transition-colors hover:bg-muted" href="/admin/analytics"
+				>Analytics</a
+			>
+			<a class="rounded-md px-3 py-2 transition-colors hover:bg-muted" href="/admin/comments"
+				>Comments</a
+			>
+			<a class="rounded-md px-3 py-2 transition-colors hover:bg-muted" href="/admin/notes"
+				>Notes</a
+			>
 			<a class="rounded-md px-3 py-2 transition-colors hover:bg-muted" href="/admin/posts">Posts</a>
-			<a class="rounded-md px-3 py-2 transition-colors hover:bg-muted" href="/admin/settings">Settings</a>
+			<a class="rounded-md px-3 py-2 transition-colors hover:bg-muted" href="/admin/settings"
+				>Settings</a
+			>
 		</nav>
 	</aside>
 

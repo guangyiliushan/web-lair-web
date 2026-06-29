@@ -1,4 +1,4 @@
-import type { User, Session } from 'better-auth/minimal';
+import type { User, Session } from 'better-auth';
 
 declare global {
 	namespace App {
@@ -12,6 +12,12 @@ declare global {
 				avatarUrl: string | null;
 				status: 'active' | 'suspended' | 'deleted';
 			};
+			admin?: {
+				userId: string;
+				sessionId: string;
+				issuedAt: number;
+				expiresAt: number;
+			} | null;
 		}
 		interface PageData {
 			auth?: {

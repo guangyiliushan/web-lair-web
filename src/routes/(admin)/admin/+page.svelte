@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Component } from 'svelte';
-	import type { PageServerData } from './$types';
+	import type { PageData } from './$types';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import IconLogout from '@tabler/icons-svelte-runes/icons/logout';
@@ -13,7 +13,6 @@
 	import IconFilePencil from '@tabler/icons-svelte-runes/icons/file-pencil';
 	import IconSparkles from '@tabler/icons-svelte-runes/icons/sparkles';
 	import IconPuzzle from '@tabler/icons-svelte-runes/icons/puzzle';
-	import IconLogin2 from '@tabler/icons-svelte-runes/icons/login-2';
 	import IconTool from '@tabler/icons-svelte-runes/icons/tool';
 	import IconFiles from '@tabler/icons-svelte-runes/icons/files';
 	import IconUsers from '@tabler/icons-svelte-runes/icons/users';
@@ -27,7 +26,7 @@
 	import IconApi from '@tabler/icons-svelte-runes/icons/api';
 	import IconAdjustmentsCog from '@tabler/icons-svelte-runes/icons/adjustments-cog';
 
-	let { data }: { data: PageServerData } = $props();
+	let { data }: { data: PageData } = $props();
 
 	interface Shortcut {
 		label: string;
@@ -45,7 +44,6 @@
 		{ label: 'Drafts', href: '/admin/drafts', icon: IconFilePencil, available: true },
 		{ label: 'Enrichment', href: '/admin/enrichment', icon: IconSparkles, available: true },
 		{ label: 'Extra Features', href: '/admin/extra-features', icon: IconPuzzle, available: true },
-		{ label: 'Login', href: '/admin/login', icon: IconLogin2, available: true },
 		{ label: 'Maintenance', href: '/admin/maintenance', icon: IconTool, available: true },
 		{ label: 'Files', href: '/admin/files', icon: IconFiles, available: true },
 		{ label: 'Friends', href: '/admin/friends', icon: IconUsers, available: true },
@@ -57,7 +55,7 @@
 		{ label: 'Reader', href: '/admin/reader', icon: IconBook, available: true },
 		{ label: 'Settings', href: '/admin/settings', icon: IconSettings, available: true },
 		{ label: 'Setup API', href: '/admin/setup-api', icon: IconApi, available: true },
-		{ label: 'Setup', href: '/admin/setup', icon: IconAdjustmentsCog, available: true },
+		{ label: 'Setup', href: '/admin/setup', icon: IconAdjustmentsCog, available: true }
 	];
 </script>
 
@@ -66,14 +64,14 @@
 	<Card.Root class="mx-auto w-full max-w-md">
 		<Card.Header class="text-center">
 			<Card.Title class="text-2xl">
-				Welcome, {data.profile?.displayName ?? data.user.name}!
+				Welcome, {data.profile?.displayName ?? data.user?.name ?? 'Admin'}!
 			</Card.Title>
 			<Card.Description>This is your personal dashboard.</Card.Description>
 		</Card.Header>
 		<Card.Content class="flex flex-col items-center gap-4">
 			<div class="flex items-center gap-2 rounded-md bg-secondary px-4 py-2 text-sm">
 				<IconUser class="size-4" />
-				<span>{data.user.email}</span>
+				<span>{data.user?.email ?? '—'}</span>
 			</div>
 		</Card.Content>
 		<Card.Footer class="justify-center">

@@ -26,6 +26,16 @@ describe('safeRedirect', () => {
 		expect(safeRedirect('/posts/abc?q=1')).toBe('/posts/abc?q=1');
 	});
 
+	it('rejects a path outside the allowed prefix', () => {
+		expect(safeRedirect('/settings', '/admin', { allowedPrefix: '/admin' })).toBe('/admin');
+	});
+
+	it('accepts a path inside the allowed prefix', () => {
+		expect(safeRedirect('/admin/posts/new', '/admin', { allowedPrefix: '/admin' })).toBe(
+			'/admin/posts/new'
+		);
+	});
+
 	it('rejects an absolute http URL', () => {
 		expect(safeRedirect('https://evil.com')).toBe('/admin');
 	});

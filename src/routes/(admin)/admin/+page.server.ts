@@ -1,7 +1,7 @@
 import type { PageServerLoad } from './$types';
-import { requireUser } from '$lib/server/authz';
+import { requireAdminOwner } from '$lib/server/authz';
 
 export const load: PageServerLoad = (event) => {
-	requireUser();
+	requireAdminOwner();
 	return { user: event.locals.user, profile: event.locals.profile };
 };

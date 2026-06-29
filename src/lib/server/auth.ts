@@ -1,11 +1,20 @@
 import { betterAuth } from 'better-auth/minimal';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { sveltekitCookies } from 'better-auth/svelte-kit';
+import { passkey } from '@better-auth/passkey';
 import { env } from '$env/dynamic/private';
 import { getRequestEvent } from '$app/server';
 import { db } from '$lib/server/db';
-import { appUserProfile } from '$lib/server/db/app-profile.schema';
-import { userRole } from '$lib/server/db/app-role.schema';
+import { userProfiles } from '$lib/server/db/account/user-profile.schema';
+import { userRoles } from '$lib/server/db/account/user-role.schema';
+
+function deriveRpId(origin: string): string {
+	try {
+		return new URL(origin).hostname;
+	} catch {
+		return 'localhost';
+	}
+}
 
 function generateSlug(name: string): string {
 	return (
@@ -59,13 +68,13 @@ export const auth = betterAuth({
 		user: {
 			create: {
 				after: async (newUser) => {
-					await db.insert(appUserProfile).values({
+					await db.insert(userProfiles).values({
 						userId: newUser.id,
 						displayName: newUser.name,
 						slug: generateSlug(newUser.name)
 					});
 
-					await db.insert(userRole).values({
+					await db.insert(userRoles).values({
 						id: crypto.randomUUID(),
 						userId: newUser.id,
 						role: 'reader'
@@ -76,6 +85,11 @@ export const auth = betterAuth({
 	},
 
 	plugins: [
+		passkey({
+			rpID: deriveRpId(env.ORIGIN),
+			rpName: 'Web Lair',
+			origin: env.ORIGIN
+		}),
 		sveltekitCookies(getRequestEvent) // make sure this is the last plugin in the array
 	]
 });

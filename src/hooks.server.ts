@@ -6,8 +6,10 @@ import type { Handle } from '@sveltejs/kit';
 import { getTextDirection } from '$lib/paraglide/runtime';
 import { paraglideMiddleware } from '$lib/paraglide/server';
 import { db } from '$lib/server/db';
-import { appUserProfile } from '$lib/server/db/app-profile.schema';
+import { userProfiles } from '$lib/server/db/account/user-profile.schema';
 import { eq } from 'drizzle-orm';
+import { env } from '$env/dynamic/private';
+import { getAdminSessionContext } from '$lib/server/security/admin-cookie';
 
 const handleParaglide: Handle = ({ event, resolve }) =>
 	paraglideMiddleware(event.request, ({ request, locale }) => {
@@ -23,10 +25,11 @@ const handleParaglide: Handle = ({ event, resolve }) =>
 
 const handleBetterAuth: Handle = async ({ event, resolve }) => {
 	const session = await auth.api.getSession({ headers: event.request.headers });
+	event.locals.admin = null;
 
 	if (session) {
-		const profile = await db.query.appUserProfile.findFirst({
-			where: eq(appUserProfile.userId, session.user.id)
+		const profile = await db.query.userProfiles.findFirst({
+			where: eq(userProfiles.userId, session.user.id)
 		});
 
 		if (profile?.status === 'suspended') {
@@ -35,6 +38,12 @@ const handleBetterAuth: Handle = async ({ event, resolve }) => {
 
 		event.locals.session = session.session;
 		event.locals.user = session.user;
+		event.locals.admin = getAdminSessionContext(
+			event.cookies,
+			session.user,
+			session.session,
+			env.BETTER_AUTH_SECRET
+		);
 		if (profile) {
 			event.locals.profile = {
 				displayName: profile.displayName,

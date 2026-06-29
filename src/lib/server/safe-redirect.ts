@@ -1,6 +1,14 @@
 const FALLBACK = '/admin';
 
-export function safeRedirect(url: string | null | undefined, fallback = FALLBACK): string {
+interface SafeRedirectOptions {
+	allowedPrefix?: string;
+}
+
+export function safeRedirect(
+	url: string | null | undefined,
+	fallback = FALLBACK,
+	options?: SafeRedirectOptions
+): string {
 	if (!url) return fallback;
 	const trimmed = url.trim();
 
@@ -16,6 +24,10 @@ export function safeRedirect(url: string | null | undefined, fallback = FALLBACK
 
 	// 只允许以 / 开头且不含 // 的相对路径
 	if (trimmed.startsWith('/') && !trimmed.includes('//')) {
+		if (options?.allowedPrefix && !trimmed.startsWith(options.allowedPrefix)) {
+			return fallback;
+		}
+
 		return trimmed;
 	}
 
