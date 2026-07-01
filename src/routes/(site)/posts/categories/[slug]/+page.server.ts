@@ -1,7 +1,7 @@
 import type { PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
-import { post, category, tag, postTag } from '$lib/server/db/schema';
-import { eq, and, desc, sql } from 'drizzle-orm';
+import { posts, categories } from '$lib/server/db/schema';
+import { eq, and, desc } from 'drizzle-orm';
 import { error } from '@sveltejs/kit';
 
 export interface CategoryPostItem {
@@ -25,115 +25,83 @@ export interface YearGroup {
 
 export const load: PageServerLoad = async ({ params }) => {
 	// ── Fetch category ──
-	const cat = await db.query.category.findFirst({
-		where: eq(category.slug, params.slug)
+	const cat = await db.query.categories.findFirst({
+		where: eq(categories.slug, params.slug)
 	});
 
 	if (!cat) throw error(404, 'Category not found');
 
 	// ── Fetch published posts in this category ──
-	const posts = await db.query.post.findMany({
-		where: and(eq(post.categoryId, cat.id), eq(post.status, 'published')),
-		orderBy: desc(post.publishedAt),
+	const postRows = await db.query.posts.findMany({
+		where: and(eq(posts.categoryId, cat.id), eq(posts.isPublished, true)),
+		orderBy: desc(posts.createdAt),
 		columns: {
 			id: true,
 			title: true,
 			slug: true,
-			publishedAt: true
+			createdAt: true,
+			tags: true
 		}
 	});
 
-	// ── Fetch tags for these posts ──
-	const postIds = posts.map((p) => p.id);
-	const tagRelations =
-		postIds.length > 0
-			? await db
-					.select({
-						postId: postTag.postId,
-						name: tag.name,
-						slug: tag.slug
-					})
-					.from(postTag)
-					.innerJoin(tag, eq(postTag.tagId, tag.id))
-					.where(sql`${postTag.postId} = ANY(${postIds})`)
-			: [];
-
 	// ── Assemble posts with tags ──
-	const tagMap = new Map<string, string[]>();
-	for (const tr of tagRelations) {
-		if (!tagMap.has(tr.postId)) tagMap.set(tr.postId, []);
-		tagMap.get(tr.postId)!.push(tr.name);
-	}
-
-	const assembled: CategoryPostItem[] = posts.map((p) => ({
+	const assembled: CategoryPostItem[] = postRows.map((p) => ({
 		slug: p.slug,
 		title: p.title,
-		date: p.publishedAt
-			? new Date(p.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+		date: p.createdAt
+			? new Date(p.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 			: '',
-		tags: tagMap.get(p.id) ?? []
+		tags: p.tags ?? []
 	}));
 
 	// ── Group by year ──
-	const yearMap = new Map<number, CategoryPostItem[]>();
-	for (const p of assembled) {
-		// Extract year from slug-based date or use sort position as fallback
-		// For now, infer year from any date-like pattern in the post
-		const year = new Date().getFullYear(); // TODO: derive from publishedAt
-		if (!yearMap.has(year)) yearMap.set(year, []);
-		yearMap.get(year)!.push(p);
-	}
-
-	// Re-derive years properly from assembled posts
 	const byYear = new Map<number, CategoryPostItem[]>();
-	for (const p of posts) {
-		const y = p.publishedAt ? new Date(p.publishedAt).getFullYear() : new Date().getFullYear();
-		const item: CategoryPostItem = {
-			slug: p.slug,
-			title: p.title,
-			date: p.publishedAt
-				? new Date(p.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-				: '',
-			tags: tagMap.get(p.id) ?? []
-		};
-		if (!byYear.has(y)) byYear.set(y, []);
-		byYear.get(y)!.push(item);
+	for (const p of assembled) {
+		// Extract year from the post date (first 4 chars of date string, or current year as fallback)
+		const year = p.date
+			? new Date(p.date).getFullYear()
+			: new Date().getFullYear();
+		if (!byYear.has(year)) byYear.set(year, []);
+		byYear.get(year)!.push(p);
 	}
 
-	const sortedYears = [...byYear.entries()]
+	// Fallback: if no date parsed, use current year
+	if (byYear.size === 0 && assembled.length > 0) {
+		const year = new Date().getFullYear();
+		byYear.set(year, assembled);
+	}
+
+	const sortedYears: YearGroup[] = [...byYear.entries()]
 		.sort(([a], [b]) => b - a)
 		.map(([year, yposts]) => ({ year, count: yposts.length, posts: yposts }));
 
 	// ── Tag counts within this category ──
-	const tagCounts = new Map<string, { slug: string; count: number }>();
-	for (const tr of tagRelations) {
-		const existing = tagCounts.get(tr.name);
-		if (existing) {
-			existing.count++;
-		} else {
-			tagCounts.set(tr.name, { slug: tr.slug, count: 1 });
+	const tagCounts = new Map<string, number>();
+	for (const p of postRows) {
+		for (const tag of p.tags ?? []) {
+			tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
 		}
 	}
 
 	const tags: CategoryTagCount[] = [...tagCounts.entries()]
-		.map(([name, { slug, count }]) => ({ name, slug, count }))
+		.map(([name, count]) => ({ name, slug: name.toLowerCase().replace(/\s+/g, '-'), count }))
 		.sort((a, b) => b.count - a.count);
 
 	// ── Earliest year for display ──
 	const earliestYear =
-		posts.length > 0
-			? posts.reduce(
-					(earliest, p) =>
-						p.publishedAt && new Date(p.publishedAt).getFullYear() < earliest
-							? new Date(p.publishedAt).getFullYear()
-							: earliest,
+		postRows.length > 0
+			? postRows.reduce(
+					(earliest: number, p) => {
+						const y = p.createdAt ? new Date(p.createdAt).getFullYear() : new Date().getFullYear();
+						return y < earliest ? y : earliest;
+					},
 					new Date().getFullYear()
 				)
 			: new Date().getFullYear();
 
 	return {
-		category: { name: cat.name, slug: cat.slug, description: cat.description },
-		totalCount: posts.length,
+		category: { name: cat.name, slug: cat.slug },
+		totalCount: postRows.length,
 		earliestYear,
 		years: sortedYears,
 		tags

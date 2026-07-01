@@ -6,7 +6,6 @@ import { env } from '$env/dynamic/private';
 import { getRequestEvent } from '$app/server';
 import { db } from '$lib/server/db';
 import { userProfiles } from '$lib/server/db/account/user-profile.schema';
-import { userRoles } from '$lib/server/db/account/user-role.schema';
 
 function deriveRpId(origin: string): string {
 	try {
@@ -72,12 +71,6 @@ export const auth = betterAuth({
 						userId: newUser.id,
 						displayName: newUser.name,
 						slug: generateSlug(newUser.name)
-					});
-
-					await db.insert(userRoles).values({
-						id: crypto.randomUUID(),
-						userId: newUser.id,
-						role: 'reader'
 					});
 				}
 			}

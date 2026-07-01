@@ -9,7 +9,8 @@ import { db } from '$lib/server/db';
 import { userProfiles } from '$lib/server/db/account/user-profile.schema';
 import { eq } from 'drizzle-orm';
 import { env } from '$env/dynamic/private';
-import { getAdminSessionContext } from '$lib/server/security/admin-cookie';
+import { getAdminSessionContext, issueAdminSessionCookie } from '$lib/server/security/admin-cookie';
+import { tryTailscaleAutoLogin } from '$lib/server/security/tailscale-auth';
 
 const handleParaglide: Handle = ({ event, resolve }) =>
 	paraglideMiddleware(event.request, ({ request, locale }) => {
@@ -52,6 +53,41 @@ const handleBetterAuth: Handle = async ({ event, resolve }) => {
 				avatarUrl: profile.avatarUrl,
 				status: profile.status
 			};
+		}
+	}
+
+	// Tailscale 自动登录：在 /admin 路径下无 Better Auth session 时尝试
+	if (!session && event.url.pathname.startsWith('/admin')) {
+		const autoLogin = await tryTailscaleAutoLogin();
+		if (autoLogin) {
+			event.locals.user = autoLogin.user;
+			event.locals.session = autoLogin.session;
+
+			issueAdminSessionCookie(
+				event.cookies,
+				autoLogin.user,
+				autoLogin.session,
+				env.BETTER_AUTH_SECRET
+			);
+			event.locals.admin = getAdminSessionContext(
+				event.cookies,
+				autoLogin.user,
+				autoLogin.session,
+				env.BETTER_AUTH_SECRET
+			);
+
+			const profile = await db.query.userProfiles.findFirst({
+				where: eq(userProfiles.userId, autoLogin.user.id)
+			});
+			if (profile) {
+				event.locals.profile = {
+					displayName: profile.displayName,
+					slug: profile.slug,
+					bio: profile.bio,
+					avatarUrl: profile.avatarUrl,
+					status: profile.status
+				};
+			}
 		}
 	}
 

@@ -4,7 +4,7 @@ import { APIError } from 'better-auth/api';
 import { ne, eq, and } from 'drizzle-orm';
 import { auth } from '$lib/server/auth';
 import { db } from '$lib/server/db';
-import { userRoles } from '$lib/server/db/account/user-role.schema';
+import { adminAccounts } from '$lib/server/db/account/admin-account.schema';
 import { session as authSession } from '$lib/server/db/auth.schema';
 import {
 	ADMIN_BASE_PATH,
@@ -35,13 +35,14 @@ function getSessionId(session: Session | undefined): string | null {
 	return typeof maybeId === 'string' && maybeId.length > 0 ? maybeId : null;
 }
 
-async function hasOwnerRole(userId: string): Promise<boolean> {
+async function isAdminAccount(userId: string): Promise<boolean> {
 	const rows = await db
-		.select({ role: userRoles.role })
-		.from(userRoles)
-		.where(eq(userRoles.userId, userId));
+		.select({ userId: adminAccounts.userId })
+		.from(adminAccounts)
+		.where(eq(adminAccounts.userId, userId))
+		.limit(1);
 
-	return rows.some((row) => row.role === 'owner');
+	return rows.length > 0;
 }
 
 async function pruneOtherSessions(userId: string, currentSessionId: string) {
@@ -97,7 +98,7 @@ export const actions: Actions = {
 				return fail(403, { message: 'This account cannot access admin', redirectTo });
 			}
 
-			if (!(await hasOwnerRole(result.user.id))) {
+			if (!(await isAdminAccount(result.user.id))) {
 				return fail(403, { message: 'This account cannot access admin', redirectTo });
 			}
 

@@ -22,7 +22,8 @@
 		"db:studio": "drizzle-kit studio",
 		"storybook": "storybook dev -p 6006",
 		"build-storybook": "storybook build",
-		"auth:schema": "better-auth generate --config src/lib/server/auth.ts --output src/lib/server/db/auth.schema.ts --yes"
+		"auth:schema": "better-auth generate --config src/lib/server/auth.ts --output src/lib/server/db/auth.schema.ts --yes",
+		"db:seed-owner": "node --loader ts-node/esm scripts/seed-owner.ts"
 	},
 	"devDependencies": {
 		"@better-auth/cli": "~1.4.21",

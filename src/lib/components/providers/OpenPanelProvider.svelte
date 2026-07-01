@@ -4,9 +4,11 @@
 	 * Reads from PUBLIC_ environment variables.
 	 */
 	import { onMount } from 'svelte';
+	import type { Snippet } from 'svelte';
 	import { browser } from '$app/environment';
 	import { env } from '$env/dynamic/public';
 
+	let { children }: { children: Snippet } = $props();
 	let initialized = $state(false);
 
 	onMount(() => {

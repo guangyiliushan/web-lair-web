@@ -1,9 +1,9 @@
-import { redirect } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import { getRequestEvent } from '$app/server';
 import { db } from '$lib/server/db';
-import { userRole } from '$lib/server/db/app-role.schema';
+import { adminAccounts } from '$lib/server/db/account/admin-account.schema';
 import { eq } from 'drizzle-orm';
-import { ADMIN_BASE_PATH, getAdminConfig, isAllowedAdminEmail } from '$lib/server/config/admin';
+import { getAdminConfig, isAllowedAdminEmail } from '$lib/server/config/admin';
 
 export function requireUser() {
 	const { locals, url } = getRequestEvent();
@@ -22,37 +22,13 @@ export function requireVerifiedUser() {
 	return user;
 }
 
-export async function requireRole(...roles: string[]) {
-	const user = requireUser();
-
-	const rows = await db
-		.select({ role: userRoles.role })
-		.from(userRoles)
-		.where(eq(userRoles.userId, user.id));
-
-	const assignedRoles = rows.map((r) => r.role) as string[];
-	const hasRole = roles.some((r) => assignedRoles.includes(r));
-
-	if (!hasRole) {
-		redirect(303, ADMIN_BASE_PATH);
-	}
-
-	return { user, roles: assignedRoles };
-}
-
-export async function requireOwner() {
-	return requireRole('owner');
-}
-
-export async function requireEditor() {
-	return requireRole('owner', 'editor');
-}
-
 export function requireAllowedAdminEmail() {
 	const user = requireVerifiedUser();
 
 	if (!isAllowedAdminEmail(user.email)) {
-		redirect(303, '/');
+		error(403, {
+			message: 'Your email is not authorized for admin access.'
+		});
 	}
 
 	return user;
@@ -71,9 +47,29 @@ export function requireAdminSession() {
 }
 
 export async function requireAdminOwner() {
-	const user = requireAllowedAdminEmail();
-	const adminSession = requireAdminSession();
-	const { roles } = await requireOwner();
+	const { locals, url } = getRequestEvent();
 
-	return { user, roles, adminSession };
+	if (!locals.user) {
+		const config = getAdminConfig();
+		redirect(
+			303,
+			`${config.loginPath}?redirectTo=${encodeURIComponent(url.pathname + url.search)}`
+		);
+	}
+
+	if (!locals.user.emailVerified) {
+		redirect(303, '/verify-email');
+	}
+
+	const rows = await db
+		.select({ userId: adminAccounts.userId })
+		.from(adminAccounts)
+		.where(eq(adminAccounts.userId, locals.user.id))
+		.limit(1);
+
+	if (rows.length === 0) {
+		error(403, { message: 'Admin access required.' });
+	}
+
+	return locals.user;
 }

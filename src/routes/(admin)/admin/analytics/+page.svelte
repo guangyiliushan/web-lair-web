@@ -1,7 +1,5 @@
 <script lang="ts">
 	import type { PageServerData } from './$types';
-	import { AnalyticsSummaryCard } from '$lib/components/admin/analytics/AnalyticsSummaryCard.svelte';
-	import { OpenPanelQuickLinkCard } from '$lib/components/admin/analytics/OpenPanelQuickLinkCard.svelte';
 
 	let { data }: { data: PageServerData } = $props();
 </script>
@@ -19,8 +17,20 @@
 	</div>
 
 	<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-		<AnalyticsSummaryCard title="Today Views" value={data.overview.todayPv} />
+		<div class="rounded-lg border bg-card p-4">
+			<p class="text-xs text-muted-foreground uppercase tracking-wide">Today Views</p>
+			<p class="mt-1 text-2xl font-bold">{data.overview.todayPv}</p>
+		</div>
 	</div>
 
-	<OpenPanelQuickLinkCard url={data.dashboardUrl} />
+	{#if data.dashboardUrl}
+		<div class="rounded-lg border bg-card p-4">
+			<p class="text-sm text-muted-foreground">
+				OpenPanel Dashboard:
+				<a href={data.dashboardUrl} target="_blank" rel="noopener noreferrer" class="underline">
+					Open in new tab
+				</a>
+			</p>
+		</div>
+	{/if}
 </div>
