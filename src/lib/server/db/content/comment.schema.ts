@@ -45,7 +45,9 @@ export const comments = pgTable(
 		avatar: text('avatar'),
 		authProvider: text('auth_provider'),
 		meta: text('meta'),
-		readerId: text('reader_id'),
+		readerId: text('reader_id').references(() => user.id, {
+			onDelete: 'set null',
+		}),
 		editedAt: timestamp('edited_at', { withTimezone: true }),
 		anchor: jsonb('anchor').$type<Record<string, unknown> | null>(),
 		isOwnerReply: boolean('is_owner_reply').notNull().default(false),

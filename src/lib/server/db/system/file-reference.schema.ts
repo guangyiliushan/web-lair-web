@@ -1,4 +1,5 @@
 import { bigint, index, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import { user } from '../auth.schema'
 
 export const fileReferences = pgTable(
 	'file_references',
@@ -11,8 +12,12 @@ export const fileReferences = pgTable(
 		refId: text('ref_id'),
 		refType: text('ref_type'),
 		s3ObjectKey: text('s3_object_key'),
-		readerId: text('reader_id'),
-		uploadedBy: text('uploaded_by'),
+		readerId: text('reader_id').references(() => user.id, {
+			onDelete: 'set null',
+		}),
+		uploadedBy: text('uploaded_by').references(() => user.id, {
+			onDelete: 'set null',
+		}),
 		mimeType: text('mime_type'),
 		byteSize: bigint('byte_size', { mode: 'number' }),
 		detachedAt: timestamp('detached_at', { withTimezone: false })
