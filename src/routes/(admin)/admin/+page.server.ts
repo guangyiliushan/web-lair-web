@@ -1,7 +1,6 @@
 import type { PageServerLoad } from './$types';
-import { requireAdminOwner } from '$lib/server/authz';
 
-export const load: PageServerLoad = async (event) => {
-	await requireAdminOwner();
-	return { user: event.locals.user, profile: event.locals.profile };
+export const load: PageServerLoad = async () => {
+	// 仪表盘数据通常在这里获取
+	return {};
 };
