@@ -8,6 +8,7 @@
 	import IconShieldLock from '@tabler/icons-svelte-runes/icons/shield-lock';
 	import IconAlertCircle from '@tabler/icons-svelte-runes/icons/alert-circle';
 	import IconMail from '@tabler/icons-svelte-runes/icons/mail';
+	import IconAlertTriangle from '@tabler/icons-svelte-runes/icons/alert-triangle';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 </script>
@@ -30,6 +31,32 @@
 			</Card.Description>
 		</Card.Header>
 		<Card.Content>
+			{#if !data.allowedEmailsConfigured}
+				<div
+					class="mb-6 flex items-start gap-2 rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+					role="alert"
+				>
+					<IconAlertTriangle class="mt-0.5 size-4 shrink-0" />
+					<span>
+						<strong>ADMIN_ALLOWED_EMAILS</strong> is not configured. Add allowed admin emails to your
+						environment variables before proceeding.
+					</span>
+				</div>
+			{/if}
+
+			{#if !data.setupTokenConfigured}
+				<div
+					class="mb-6 flex items-start gap-2 rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+					role="alert"
+				>
+					<IconAlertTriangle class="mt-0.5 size-4 shrink-0" />
+					<span>
+						<strong>ADMIN_SETUP_TOKEN</strong> is not set. Set it to a long random string in your environment
+						variables to secure this page.
+					</span>
+				</div>
+			{/if}
+
 			{#if form?.message}
 				<div
 					class="mb-6 flex items-center gap-2 rounded-md bg-destructive/10 px-4 py-3 text-sm text-destructive"
@@ -44,13 +71,7 @@
 				<Field.FieldGroup>
 					<Field.Field>
 						<Field.FieldLabel for="name">Display Name</Field.FieldLabel>
-						<Input
-							id="name"
-							name="name"
-							type="text"
-							autocomplete="name"
-							placeholder="Admin"
-						/>
+						<Input id="name" name="name" type="text" autocomplete="name" placeholder="Admin" />
 					</Field.Field>
 					<Field.Field>
 						<Field.FieldLabel for="email">Admin Email</Field.FieldLabel>
@@ -74,7 +95,24 @@
 							required
 						/>
 					</Field.Field>
-					<Button type="submit" class="w-full">
+					{#if data.setupTokenConfigured}
+						<Field.Field>
+							<Field.FieldLabel for="setupToken">Setup Token</Field.FieldLabel>
+							<Input
+								id="setupToken"
+								name="setupToken"
+								type="password"
+								autocomplete="off"
+								placeholder="Enter the setup token from server config"
+								required
+							/>
+						</Field.Field>
+					{/if}
+					<Button
+						type="submit"
+						class="w-full"
+						disabled={!data.allowedEmailsConfigured || !data.setupTokenConfigured}
+					>
 						<IconMail data-icon="inline-start" />
 						Create Admin Account
 					</Button>
@@ -82,7 +120,8 @@
 			</form>
 
 			<p class="mt-4 text-center text-xs text-muted-foreground">
-				This page is only available when no admin account exists. It will be disabled after the first admin is created.
+				This page is only available when no admin account exists. It will be disabled after the
+				first admin is created.
 			</p>
 		</Card.Content>
 	</Card.Root>

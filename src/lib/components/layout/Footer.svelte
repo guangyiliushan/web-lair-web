@@ -2,8 +2,8 @@
 	import { cn } from '$lib/utils';
 	import { Separator } from '$lib/components/ui/separator';
 	import { m } from '$lib/paraglide/messages';
-	import LangSwitcher from '$lib/components/common/LangSwitcher.svelte';
-	import ThemeToggle from '$lib/components/common/ThemeToggle.svelte';
+	import LangSwitcher from '$lib/components/layout/LangSwitcher.svelte';
+	import ThemeToggle from '$lib/components/layout/ThemeToggle.svelte';
 	import { IconCodeCircle2, IconRss, IconExternalLink } from '@tabler/icons-svelte-runes';
 
 	/** Footer link item descriptor */

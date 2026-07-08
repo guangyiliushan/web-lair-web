@@ -5,9 +5,9 @@
 	import { IconCodeCircle2, IconMenu2, IconX, IconChevronDown } from '@tabler/icons-svelte-runes';
 	import { slide } from 'svelte/transition';
 	import { cubicInOut, quartInOut } from 'svelte/easing';
-	import ThemeToggle from '$lib/components/common/ThemeToggle.svelte';
-	import LangSwitcher from '$lib/components/common/LangSwitcher.svelte';
-	import UserNav from '$lib/components/user/UserNav.svelte';
+	import ThemeToggle from '$lib/components/layout/ThemeToggle.svelte';
+	import LangSwitcher from '$lib/components/layout/LangSwitcher.svelte';
+	import UserNav from '$lib/components/account/UserNav.svelte';
 	import { Separator } from '$lib/components/ui/separator';
 	import NavMegaMenu from '$lib/components/layout/NavMegaMenu.svelte';
 	import {

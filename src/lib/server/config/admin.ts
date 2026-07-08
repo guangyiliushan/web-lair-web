@@ -41,6 +41,7 @@ export interface AdminConfig {
 	sessionCookieName: string;
 	sessionMaxAge: number;
 	devBypass: boolean;
+	setupToken: string;
 }
 
 export function getAdminConfig(): AdminConfig {
@@ -53,7 +54,8 @@ export function getAdminConfig(): AdminConfig {
 		allowedEmails: parseAllowedEmails(env.ADMIN_ALLOWED_EMAILS),
 		sessionCookieName: env.ADMIN_SESSION_COOKIE_NAME?.trim() || 'admin_session',
 		sessionMaxAge: parseNumber(env.ADMIN_SESSION_MAX_AGE, DEFAULT_ADMIN_COOKIE_MAX_AGE),
-		devBypass: parseBoolean(env.DEV_ADMIN_BYPASS, false)
+		devBypass: parseBoolean(env.DEV_ADMIN_BYPASS, false),
+		setupToken: env.ADMIN_SETUP_TOKEN?.trim() || ''
 	};
 }
 
@@ -65,9 +67,7 @@ export function isAllowedAdminEmail(email: string, config = getAdminConfig()): b
 	return config.allowedEmails.includes(email.trim().toLowerCase());
 }
 
-export function safeAdminRedirectTarget(
-	target: string | null | undefined,
-): string {
+export function safeAdminRedirectTarget(target: string | null | undefined): string {
 	if (!target) {
 		return ADMIN_BASE_PATH;
 	}

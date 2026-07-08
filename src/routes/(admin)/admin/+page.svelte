@@ -2,6 +2,8 @@
 	import type { PageData } from './$types';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
+	import { Separator } from '$lib/components/ui/separator';
+	import { ChartPanel, MaintenanceCard, LoginStat } from '$lib/components/admin';
 	import IconArticle from '@tabler/icons-svelte-runes/icons/article';
 	import IconNotebook from '@tabler/icons-svelte-runes/icons/notebook';
 	import IconQuote from '@tabler/icons-svelte-runes/icons/quote';
@@ -14,6 +16,12 @@
 	import IconTrendingUp from '@tabler/icons-svelte-runes/icons/trending-up';
 	import IconActivity from '@tabler/icons-svelte-runes/icons/activity';
 	import IconRefresh from '@tabler/icons-svelte-runes/icons/refresh';
+	import IconPieChart from '@tabler/icons-svelte-runes/icons/chart-pie';
+	import IconTraffic from '@tabler/icons-svelte-runes/icons/chart-dots';
+	import IconFlame from '@tabler/icons-svelte-runes/icons/flame';
+	import IconTag from '@tabler/icons-svelte-runes/icons/tag';
+	import IconBrush from '@tabler/icons-svelte-runes/icons/brush';
+	import IconSearch from '@tabler/icons-svelte-runes/icons/search';
 
 	let { data }: { data: PageData } = $props();
 
@@ -72,26 +80,6 @@
 		{ label: '站点点赞', value: '3,775', icon: IconTrendingUp },
 	];
 
-	// 发布趋势数据 (模拟)
-	const publishTrend = [
-		{ month: '1月', posts: 2, diaries: 3 },
-		{ month: '2月', posts: 4, diaries: 2 },
-		{ month: '3月', posts: 3, diaries: 4 },
-		{ month: '4月', posts: 5, diaries: 3 },
-		{ month: '5月', posts: 2, diaries: 5 },
-		{ month: '6月', posts: 4, diaries: 2 },
-	];
-
-	// 分类分布数据 (模拟)
-	const categoryData = [
-		{ name: '归档', value: 45, color: '#3b82f6' },
-		{ name: '编程', value: 25, color: '#10b981' },
-		{ name: '技术', value: 15, color: '#f59e0b' },
-		{ name: '折腾', value: 8, color: '#ef4444' },
-		{ name: '开发日志', value: 5, color: '#8b5cf6' },
-		{ name: '设计交互学', value: 2, color: '#ec4899' },
-	];
-
 	const lastUpdated = $state(new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
 </script>
 
@@ -101,7 +89,7 @@
 		<div>
 			<h1 class="text-2xl font-bold tracking-tight">欢迎回来</h1>
 			<p class="text-sm text-muted-foreground">
-				{data.profile?.displayName ?? data.user?.name ?? 'Admin'}，这是你的个人仪表盘
+				{data.auth?.profile?.displayName ?? data.auth?.user?.name ?? 'Admin'}，这是你的个人仪表盘
 			</p>
 		</div>
 		<Button variant="outline" size="sm" onclick={() => location.reload()}>
@@ -111,18 +99,18 @@
 	</div>
 
 	<!-- 实时数据 -->
-	<section class="space-y-3">
-		<h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">实时数据</h2>
-		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+	<section class="flex flex-col gap-2 sm:gap-3">
+		<h2 class="text-xs sm:text-sm font-semibold uppercase tracking-wider text-muted-foreground">实时数据</h2>
+		<div class="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			{#each realtimeStats as stat (stat.label)}
 				<Card.Root>
-					<Card.Content class="flex items-center gap-4 p-6">
-						<div class="flex size-12 items-center justify-center rounded-lg {stat.bgColor}">
-							<stat.icon class="size-6 {stat.color}" />
+					<Card.Content class="flex items-center gap-3 sm:gap-4 p-4 sm:p-6">
+						<div class="flex size-10 sm:size-12 items-center justify-center rounded-lg {stat.bgColor}">
+							<stat.icon class="size-5 sm:size-6 {stat.color}" />
 						</div>
 						<div>
-							<p class="text-2xl font-bold">{stat.value}</p>
-							<p class="text-sm text-muted-foreground">{stat.label}</p>
+							<p class="text-xl sm:text-2xl font-bold">{stat.value}</p>
+							<p class="text-xs sm:text-sm text-muted-foreground">{stat.label}</p>
 						</div>
 					</Card.Content>
 				</Card.Root>
@@ -131,28 +119,26 @@
 	</section>
 
 	<!-- 快速操作 -->
-	<section class="space-y-3">
-		<h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">快速操作</h2>
-		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+	<section class="flex flex-col gap-2 sm:gap-3">
+		<h2 class="text-xs sm:text-sm font-semibold uppercase tracking-wider text-muted-foreground">快速操作</h2>
+		<div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
 			{#each quickActions as action (action.title)}
 				<Card.Root>
-					<Card.Content class="p-6">
-						<div class="flex items-start justify-between">
-							<div class="flex items-center gap-3">
-								<div class="flex size-10 items-center justify-center rounded-lg bg-muted">
-									<action.icon class="size-5 text-muted-foreground" />
-								</div>
-								<div>
-									<p class="text-sm font-medium text-muted-foreground">{action.title}</p>
-									<p class="text-2xl font-bold">{action.count}</p>
-								</div>
+					<Card.Content class="p-3 sm:p-6">
+						<div class="flex items-center gap-2 sm:gap-3">
+							<div class="flex size-8 sm:size-10 shrink-0 items-center justify-center rounded-lg bg-muted">
+								<action.icon class="size-4 sm:size-5 text-muted-foreground" />
+							</div>
+							<div class="min-w-0">
+								<p class="truncate text-xs sm:text-sm font-medium text-muted-foreground">{action.title}</p>
+								<p class="text-xl sm:text-2xl font-bold tabular-nums">{action.count}</p>
 							</div>
 						</div>
-						<div class="mt-4 flex gap-2">
-							<Button size="sm" variant="default" href={action.writeHref}>
+						<div class="mt-3 sm:mt-4 flex gap-1.5 sm:gap-2">
+							<Button size="sm" variant="default" href={action.writeHref} class="flex-1 sm:flex-none">
 								撰写
 							</Button>
-							<Button size="sm" variant="outline" href={action.manageHref}>
+							<Button size="sm" variant="outline" href={action.manageHref} class="flex-1 sm:flex-none">
 								管理
 							</Button>
 						</div>
@@ -163,27 +149,27 @@
 	</section>
 
 	<!-- 数据统计 -->
-	<section class="space-y-3">
+	<section class="flex flex-col gap-2 sm:gap-3">
 		<div class="flex items-center justify-between">
-			<h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">数据统计</h2>
-			<span class="text-xs text-muted-foreground">更新于 {lastUpdated}</span>
+			<h2 class="text-xs sm:text-sm font-semibold uppercase tracking-wider text-muted-foreground">数据统计</h2>
+			<span class="text-[10px] sm:text-xs text-muted-foreground">更新于 {lastUpdated}</span>
 		</div>
-		<Card.Root>
-			<Card.Content class="p-6">
-				<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
+		<Card.Root data-size="sm">
+			<Card.Content class="p-4 sm:p-6">
+				<div class="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4 xl:grid-cols-6">
 					{#each dataStats as stat (stat.label)}
-						<div class="flex items-center gap-3">
-							<div class="flex size-9 items-center justify-center rounded-md bg-muted/50">
-								<stat.icon class="size-4 text-muted-foreground" />
+						<div class="flex items-center gap-2 sm:gap-3">
+							<div class="flex size-7 sm:size-9 shrink-0 items-center justify-center rounded-md bg-muted/50">
+								<stat.icon class="size-3.5 sm:size-4 text-muted-foreground" />
 							</div>
-							<div>
-								<div class="flex items-center gap-1.5">
-									<p class="text-lg font-semibold">{stat.value}</p>
+							<div class="min-w-0">
+								<div class="flex items-center gap-1 sm:gap-1.5">
+									<p class="truncate text-base sm:text-lg font-semibold tabular-nums">{stat.value}</p>
 									{#if stat.badge}
-										<span class="flex size-2 rounded-full bg-red-500"></span>
+										<span class="flex size-1.5 sm:size-2 shrink-0 rounded-full bg-red-500"></span>
 									{/if}
 								</div>
-								<p class="text-xs text-muted-foreground">{stat.label}</p>
+								<p class="truncate text-[10px] sm:text-xs text-muted-foreground">{stat.label}</p>
 							</div>
 						</div>
 					{/each}
@@ -192,86 +178,107 @@
 		</Card.Root>
 	</section>
 
-	<!-- 数据图表 -->
-	<section class="space-y-3">
-		<h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">数据图表</h2>
-		<div class="grid gap-4 lg:grid-cols-2">
-			<!-- 发布趋势 -->
-			<Card.Root>
-				<Card.Header>
-					<Card.Title class="text-base">发布趋势</Card.Title>
-					<Card.Description>博文与日记的月度发布统计</Card.Description>
-				</Card.Header>
-				<Card.Content>
-					<div class="flex h-50 items-end gap-2">
-						{#each publishTrend as trend (trend.month)}
-							<div class="flex flex-1 flex-col items-center gap-1">
-								<div class="flex w-full gap-0.5">
-									<div 
-										class="flex-1 rounded-t bg-primary/80 transition-all hover:bg-primary"
-										style="height: {trend.posts * 30}px"
-										title="博文: {trend.posts}"
-									></div>
-									<div 
-										class="flex-1 rounded-t bg-emerald-500/80 transition-all hover:bg-emerald-500"
-										style="height: {trend.diaries * 30}px"
-										title="日记: {trend.diaries}"
-									></div>
-								</div>
-								<span class="text-xs text-muted-foreground">{trend.month}</span>
-							</div>
-						{/each}
-					</div>
-					<div class="mt-4 flex items-center justify-center gap-4 text-xs">
-						<div class="flex items-center gap-1.5">
-							<div class="size-3 rounded bg-primary"></div>
-							<span>博文</span>
-						</div>
-						<div class="flex items-center gap-1.5">
-							<div class="size-3 rounded bg-emerald-500"></div>
-							<span>日记</span>
-						</div>
-					</div>
-				</Card.Content>
-			</Card.Root>
+	<Separator />
 
-			<!-- 分类分布 -->
+	<!-- ## 数据洞察 -->
+	<section class="flex flex-col gap-2 sm:gap-3">
+		<h2 class="text-xs sm:text-sm font-semibold uppercase tracking-wider text-muted-foreground">数据洞察</h2>
+
+		<!-- 发布趋势 + 分类分布 -->
+		<div class="mt-6 grid gap-4 xl:grid-cols-2">
+			<ChartPanel title="发布趋势" description="内容发布时间线统计" icon={IconTrendingUp} empty={true} />
+			<ChartPanel title="分类分布" description="各内容分类占比统计" icon={IconPieChart} empty={true} />
+		</div>
+
+		<!-- 评论活动 + 流量来源 -->
+		<div class="grid gap-4 xl:grid-cols-2">
+			<ChartPanel title="评论活动" description="日期维度评论量统计" icon={IconChartBar} empty={true} />
+			
+			<!-- 流量来源 -->
 			<Card.Root>
 				<Card.Header>
-					<Card.Title class="text-base">分类分布</Card.Title>
-					<Card.Description>内容分类占比统计</Card.Description>
+					<div class="flex items-center gap-2">
+						<IconTraffic class="size-4 text-muted-foreground" />
+						<Card.Title class="text-sm font-medium">流量来源</Card.Title>
+					</div>
+					<Card.Description>浏览器与操作系统访问分布</Card.Description>
 				</Card.Header>
 				<Card.Content>
-					<div class="flex h-50 items-center justify-center">
-						<svg viewBox="0 0 100 100" class="size-40 -rotate-90">
-							{#each categoryData as cat, i (cat.name)}
-								{@const total = categoryData.reduce((a, b) => a + b.value, 0)}
-								{@const offset = categoryData.slice(0, i).reduce((a, b) => a + b.value, 0) / total * 100}
-								<circle
-									cx="50"
-									cy="50"
-									r="40"
-									fill="none"
-									stroke={cat.color}
-									stroke-width="20"
-									stroke-dasharray="{cat.value / total * 100} {100 - cat.value / total * 100}"
-									stroke-dashoffset="{-offset}"
-									class="transition-all hover:opacity-80"
-								/>
-							{/each}
-							<circle cx="50" cy="50" r="25" fill="hsl(var(--background))" />
-						</svg>
-					</div>
-					<div class="mt-4 flex flex-wrap items-center justify-center gap-3 text-xs">
-						{#each categoryData as cat (cat.name)}
-							<div class="flex items-center gap-1.5">
-								<div class="size-3 rounded-full" style="background-color: {cat.color}"></div>
-								<span>{cat.name}</span>
+					<div class="grid gap-px bg-border sm:grid-cols-2">
+						<div class="bg-surface-card p-4">
+							<h3 class="mb-3 text-xs font-medium uppercase text-muted-foreground">Browser</h3>
+							<div class="flex min-h-24 items-center justify-center text-sm text-muted-foreground">
+								暂无数据
 							</div>
-						{/each}
+						</div>
+						<div class="bg-surface-card p-4">
+							<h3 class="mb-3 text-xs font-medium uppercase text-muted-foreground">OS</h3>
+							<div class="flex min-h-24 items-center justify-center text-sm text-muted-foreground">
+								暂无数据
+							</div>
+						</div>
 					</div>
 				</Card.Content>
 			</Card.Root>
 		</div>
+
+		<!-- 热门文章 + 标签云 -->
+		<div class="grid gap-4 xl:grid-cols-2">
+			<ChartPanel title="热门文章" description="阅读量 TOP 排行榜" icon={IconFlame} empty={true} />
+			<ChartPanel title="标签云" description="标签热度权重云图" icon={IconTag} empty={true} />
+		</div>
 	</section>
+
+	<Separator />
+
+	<!-- ## 系统操作 -->
+	<section class="flex flex-col gap-2 sm:gap-3">
+		<h2 class="text-xs sm:text-sm font-semibold uppercase tracking-wider text-muted-foreground">系统操作</h2>
+
+		<Card.Root class="mt-6">
+			<Card.Header>
+				<div class="flex items-center gap-2">
+					<IconBrush class="size-4 text-muted-foreground" />
+					<Card.Title class="text-sm font-medium">缓存管理</Card.Title>
+				</div>
+				<Card.Description>API 数据缓存与 HTTP 数据缓存（存储介质：Redis）</Card.Description>
+			</Card.Header>
+			<Card.Content>
+				<div class="grid gap-px bg-border sm:grid-cols-2">
+					<MaintenanceCard icon={IconBrush} label="API 缓存" value="HTTP">
+						<Button variant="outline" size="sm">清除</Button>
+					</MaintenanceCard>
+					<MaintenanceCard icon={IconBrush} label="数据缓存" value="Redis">
+						<Button variant="outline" size="sm">清除</Button>
+					</MaintenanceCard>
+				</div>
+			</Card.Content>
+		</Card.Root>
+
+		<Card.Root>
+			<Card.Header>
+				<div class="flex items-center gap-2">
+					<IconSearch class="size-4 text-muted-foreground" />
+					<Card.Title class="text-sm font-medium">搜索索引管理</Card.Title>
+				</div>
+				<Card.Description>按需重建全文索引；强制模式会清空后全量重建。</Card.Description>
+			</Card.Header>
+			<Card.Content>
+				<div class="grid gap-px bg-border sm:grid-cols-2 xl:grid-cols-3">
+					<MaintenanceCard icon={IconSearch} label="搜索索引" value="BM25" description="按需重建全文索引；强制模式会清空后全量重建。">
+						<Button variant="outline" size="sm">增量重建</Button>
+						<Button variant="outline" size="sm" class="border-amber-200 text-amber-700 hover:bg-amber-50 dark:border-amber-950 dark:text-amber-300 dark:hover:bg-amber-950/30">强制全量重建</Button>
+					</MaintenanceCard>
+				</div>
+			</Card.Content>
+		</Card.Root>
+	</section>
+
+	<Separator />
+
+	<!-- ## 账号登录信息 -->
+	<LoginStat
+		lastLoginTime="2026/07/06 19:09"
+		lastLoginIp={null}
+	/>
 </div>

@@ -3,8 +3,6 @@
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import * as Avatar from '$lib/components/ui/avatar';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import { Separator } from '$lib/components/ui/separator';
-	import { Button } from '$lib/components/ui/button';
 	import IconDashboard from '@tabler/icons-svelte-runes/icons/layout-dashboard';
 	import IconArticle from '@tabler/icons-svelte-runes/icons/article';
 	import IconNotebook from '@tabler/icons-svelte-runes/icons/notebook';
@@ -26,6 +24,7 @@
 	import IconUser from '@tabler/icons-svelte-runes/icons/user';
 	import IconExternalLink from '@tabler/icons-svelte-runes/icons/external-link';
 	import { page } from '$app/state';
+	import { AdminHeader } from '$lib/components/admin';
 
 	let { children, data }: LayoutProps = $props();
 
@@ -131,21 +130,7 @@
 	</Sidebar.Root>
 
 	<Sidebar.Inset class="flex min-h-screen flex-col">
-		<header class="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background/95 px-4 backdrop-blur sm:px-6">
-			<Sidebar.Trigger class="-ml-1" />
-			<Separator orientation="vertical" class="h-6" />
-			<div class="flex flex-1 items-center justify-between">
-				<div class="flex items-center gap-2">
-					<span class="text-sm font-medium text-muted-foreground">管理后台</span>
-				</div>
-				<div class="flex items-center gap-2">
-					<Button variant="ghost" size="sm" onclick={() => window.open('/', '_blank')}>
-						<IconExternalLink data-icon="inline-start" />
-						访问站点
-					</Button>
-				</div>
-			</div>
-		</header>
+		<AdminHeader />
 
 		<main class="flex-1 p-4 sm:p-6 lg:p-8">
 			{@render children()}
