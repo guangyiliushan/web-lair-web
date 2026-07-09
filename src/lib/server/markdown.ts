@@ -1,0 +1,104 @@
+import { unified, type Processor } from 'unified';
+import type { Root as MdastRoot } from 'mdast';
+import type { Root as HastRoot } from 'hast';
+import remarkParse from 'remark-parse';
+import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import remarkDirective from 'remark-directive';
+import remarkRehype from 'remark-rehype';
+import rehypeKatex from 'rehype-katex';
+import rehypePrettyCode from 'rehype-pretty-code';
+import rehypeRaw from 'rehype-raw';
+import rehypeSanitize from 'rehype-sanitize';
+import rehypeStringify from 'rehype-stringify';
+import { remarkMxSpace } from '$lib/components/markdown/plugins/remark-mx-space';
+import { remarkSpoilerInline } from '$lib/components/markdown/plugins/remark-spoiler-inline';
+import { remarkMention } from '$lib/components/markdown/plugins/remark-mention';
+import { rehypeMermaid } from '$lib/components/markdown/plugins/rehype-mermaid';
+import { buildSanitizeSchema } from '$lib/components/markdown/markdown-config';
+
+/**
+ * 管线 Processor 的精确类型。
+ *
+ * unified() 链的类型推断：
+ *   remarkParse:      string → MdastRoot (mdast 语法树)
+ *   remarkRehype:     MdastRoot (mdast) → HastRoot (hast HTML 树)
+ *   rehypeStringify:  HastRoot → string (HTML)
+ *
+ * Processor<ParserInput, ParserOutput, CompilerInput, CompilerOutput, Result>
+ */
+type MarkdownProcessor = Processor<MdastRoot, MdastRoot, HastRoot, HastRoot, string>;
+
+/**
+ * Processor 单例。
+ *
+ * Shiki 首次初始化需加载语法文件（~100-200ms），后续调用复用同一 processor。
+ * Promise 包装：unified().use() 链是同步的，但 rehype-pretty-code 内部
+ * 会异步初始化 Shiki highlighter。使用 once 模式确保只初始化一次。
+ */
+let processorCache: MarkdownProcessor | null = null;
+let processorInitPromise: Promise<MarkdownProcessor> | null = null;
+
+async function getProcessor(): Promise<MarkdownProcessor> {
+	if (processorCache) return processorCache;
+	if (processorInitPromise) return processorInitPromise;
+
+	processorInitPromise = (async () => {
+		const processor = unified()
+			.use(remarkParse)
+			.use(remarkGfm)
+			.use(remarkMath)
+			.use(remarkDirective)
+			.use(remarkMxSpace)
+			.use(remarkSpoilerInline)
+			.use(remarkMention)
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TS overload 限制
+			.use(remarkRehype as any, { allowDangerousHtml: true })
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- rehype-katex Options vs boolean overload
+			.use(rehypeKatex as any, {
+				throwOnError: false,
+				output: 'htmlAndMathml'
+			})
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- rehype-pretty-code Options 类型兼容
+			.use(rehypePrettyCode as any, {
+				theme: {
+					dark: 'github-dark-default',
+					light: 'github-light-default'
+				},
+				keepBackground: false
+			})
+			.use(rehypeMermaid)
+			.use(rehypeRaw)
+			.use(rehypeSanitize, buildSanitizeSchema())
+			.use(rehypeStringify);
+
+		// rehype-pretty-code 在首次 run 时异步初始化 Shiki
+		await processor.process('');
+		processorCache = processor;
+		return processor;
+	})();
+
+	return processorInitPromise;
+}
+
+/**
+ * 服务端渲染：Markdown → 安全 HTML（含 KaTeX + Shiki 高亮）。
+ *
+ * 仅可在 server context 调用（+page.server.ts / +server.ts）。
+ * SvelteKit 通过 $lib/server 路径约定确保此模块不会被打包到客户端。
+ *
+ * @param markdown 原始 Markdown 字符串
+ * @returns 已清洗的安全 HTML 字符串
+ */
+export async function renderMarkdownToHtml(markdown: string): Promise<string> {
+	if (!markdown?.trim()) return '';
+	const processor = await getProcessor();
+	const result = await processor.process(markdown);
+	return String(result);
+}
+
+/** 清除 processor 缓存（主要用于测试和热重载场景） */
+export function clearServerProcessorCache(): void {
+	processorCache = null;
+	processorInitPromise = null;
+}

@@ -1,6 +1,6 @@
 import type { PageServerLoad, Actions } from './$types';
 
-export const load: PageServerLoad = async ({ params }) => {
+export const load: PageServerLoad = async () => {
 	// TODO: Load single post + translations + AI task status
 	return {
 		post: null as {

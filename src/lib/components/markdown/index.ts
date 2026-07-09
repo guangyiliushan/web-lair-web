@@ -1,18 +1,17 @@
 /**
  * Markdown 组件模块统一导出。
- * 
+ *
  * @module markdown
- * @description 提供基于 Lexical 的 WYSIWYG 编辑器与基于 markdown-it 的安全渲染器。
+ * @description 基于 Unified (remark/rehype) 渲染管线 + Lexical 编辑器的 Markdown 组件层。
  */
 
 export { default as MarkdownRenderer } from './MarkdownRenderer.svelte';
 export { default as MarkdownEditor } from './MarkdownEditor.svelte';
 
 export {
-	getMarkdownRenderer,
-	renderMarkdownToHtml,
-	sanitizeRenderedHtml,
-	clearRendererCache
+	renderMarkdownToHtmlSync,
+	clearRendererCache,
+	buildSanitizeSchema
 } from './markdown-config';
 
 export type {
@@ -22,3 +21,7 @@ export type {
 	MarkdownEditorChangeDetail,
 	MarkdownRendererProps
 } from './markdown-config';
+
+// 服务端渲染（仅在 server context 可用）
+// 注：不要在这里 re-export src/lib/server/markdown.ts，
+// 由调用方直接 import '$lib/server/markdown' 以确保 server-only 边界。

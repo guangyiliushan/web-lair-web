@@ -1,6 +1,6 @@
 // TODO: OpenPanel client utility — custom event tracking
 
-let opClient: { track?: (name: string, props?: Record<string, unknown>) => void } | null = null;
+const opClient: { track?: (name: string, props?: Record<string, unknown>) => void } | null = null;
 
 export function initOpenPanelClient() {
 	// TODO: Initialize @openpanel/web client

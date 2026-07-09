@@ -2,6 +2,7 @@
 @import 'tw-animate-css';
 @import 'shadcn-svelte/tailwind.css';
 @import '@fontsource-variable/jetbrains-mono';
+@import 'katex/dist/katex.min.css';
 
 @custom-variant dark (&:is(.dark *));
 @plugin '@tailwindcss/forms';
@@ -259,5 +260,34 @@
 
 	::-webkit-scrollbar-corner {
 		background: transparent;
+	}
+
+	.spoiler {
+		filter: invert(25%);
+		transition: filter 0.2s;
+	}
+	.spoiler:hover {
+		filter: none;
+	}
+
+	.mermaid {
+		background: var(--muted);
+		border-radius: var(--radius-lg);
+		padding: 1rem;
+		overflow-x: auto;
+	}
+
+	/* Shiki 双主题：配合项目 .dark 类切换 */
+	[data-theme='light'] {
+		display: block;
+	}
+	[data-theme='dark'] {
+		display: none;
+	}
+	.dark [data-theme='light'] {
+		display: none;
+	}
+	.dark [data-theme='dark'] {
+		display: block;
 	}
 }

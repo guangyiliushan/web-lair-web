@@ -80,7 +80,7 @@
 		}
 		if (pathname.startsWith('/admin/posts')) {
 			return [
-				{ label: '新建博文', icon: IconPlus, variant: 'default', size: 'sm', href: '/admin/posts/new' },
+				{ label: '新建博文', icon: IconPlus, variant: 'default', size: 'sm', href: '/admin/posts/edit' },
 				{ label: '访问站点', icon: IconExternalLink, variant: 'ghost', size: 'sm', onclick: () => window.open('/', '_blank') }
 			];
 		}
