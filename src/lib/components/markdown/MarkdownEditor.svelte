@@ -11,13 +11,22 @@
 		type MarkdownEditorChangeDetail
 	} from './markdown-config';
 	import EditorToolbar from './EditorToolbar.svelte';
+	import FloatingFormatToolbar from './FloatingFormatToolbar.svelte';
 	import CodeModeToggle from './CodeModeToggle.svelte';
+
+	// Lexical 编辑器全局样式（由 PostCSS 处理 @apply / Tailwind 指令）
+	import './lexical-editor.css';
 
 	import {
 		$getRoot as getLexicalRoot,
 		$createParagraphNode as createLexicalParagraph,
 		$createTextNode as createLexicalText
 	} from 'lexical';
+	import {
+		$convertToMarkdownString as convertToMarkdown,
+		$convertFromMarkdownString as convertFromMarkdown,
+		TRANSFORMERS
+	} from '@lexical/markdown';
 
 	let {
 		value,
@@ -90,17 +99,24 @@
 	// 代码模式 → 切换回富文本时，将编辑后的 markdown 同步回 Lexical
 	function toggleCodeMode() {
 		if (!codeMode) {
-			// 进入代码模式：从 Lexical 提取当前 markdown
+			// 进入代码模式：从 Lexical 导出 markdown（保留标题/列表等格式）
 			editor?.getEditorState().read(() => {
-				codeModeText = getLexicalRoot().getTextContent();
+				codeModeText = convertToMarkdown(TRANSFORMERS);
 			});
 		} else {
-			// 退出代码模式：将编辑后的 markdown 写回 Lexical
+			// 退出代码模式：将编辑后的 markdown 解析回 Lexical 节点树
 			editor?.update(
 				() => {
 					const root = getLexicalRoot();
 					root.clear();
-					root.append(createLexicalParagraph(), createLexicalText(codeModeText));
+					try {
+						convertFromMarkdown(codeModeText, TRANSFORMERS);
+					} catch {
+						// 解析失败时作为纯文本回退
+						const p = createLexicalParagraph();
+						p.append(createLexicalText(codeModeText));
+						root.append(p);
+					}
 				},
 				{ discrete: true }
 			);
@@ -138,6 +154,9 @@
 			/>
 			<CodeModeToggle {codeMode} onToggle={toggleCodeMode} />
 		</div>
+
+		<!-- 浮动格式工具栏：选中文本时出现 -->
+		<FloatingFormatToolbar {editor} />
 	{/if}
 
 	<!-- Editor area -->
@@ -183,17 +202,10 @@
 
 	<!-- Preview area -->
 	{#if previewVisible && previewHtml}
-		<div class="overflow-y-auto rounded-lg border border-border bg-background p-4">
+		<div class="prose prose-neutral max-w-none overflow-y-auto rounded-lg border border-border bg-background p-4 dark:prose-invert">
 			<!-- eslint-disable-next-line svelte/no-at-html-tags -- Safe: HTML is sanitized by rehype-sanitize -->
 			{@html previewHtml}
 		</div>
 	{/if}
 </div>
 
-<style>
-	[data-placeholder]:empty::before {
-		content: attr(data-placeholder);
-		color: hsl(var(--muted-foreground) / 0.5);
-		pointer-events: none;
-	}
-</style>

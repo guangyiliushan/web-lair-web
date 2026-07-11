@@ -1,4 +1,4 @@
-import { createEditor, type LexicalEditor, type LexicalCommand } from 'lexical';
+import { createEditor, type LexicalEditor, type LexicalCommand, type EditorThemeClasses } from 'lexical';
 import { registerRichText } from '@lexical/rich-text';
 import { registerHistory, createEmptyHistoryState } from '@lexical/history';
 import {
@@ -22,21 +22,27 @@ import {
 	INSERT_ORDERED_LIST_COMMAND,
 	REMOVE_LIST_COMMAND
 } from '@lexical/list';
-import { LinkNode } from '@lexical/link';
-import { CodeNode, CodeHighlightNode } from '@lexical/code';
+import { LinkNode, $createLinkNode } from '@lexical/link';
+import { CodeNode, CodeHighlightNode, $createCodeNode } from '@lexical/code';
 import { HorizontalRuleNode, INSERT_HORIZONTAL_RULE_COMMAND } from '@lexical/extension';
 import { $setBlocksType } from '@lexical/selection';
+import { TagNode, $createTagNode } from './tag-node';
 import {
 	$getRoot,
 	$createParagraphNode,
 	$createTextNode,
 	$getSelection,
 	$isRangeSelection,
+	$isElementNode,
+	$insertNodes,
 	FORMAT_TEXT_COMMAND,
+	FORMAT_ELEMENT_COMMAND,
+	SELECTION_CHANGE_COMMAND,
 	CLEAR_EDITOR_COMMAND,
 	UNDO_COMMAND,
 	REDO_COMMAND,
-	type TextFormatType
+	type TextFormatType,
+	type ElementFormatType
 } from 'lexical';
 
 export interface LexicalActionOptions {
@@ -70,8 +76,47 @@ const EDITOR_NODES = [
 	CodeNode,
 	CodeHighlightNode,
 	LinkNode,
-	HorizontalRuleNode
+	HorizontalRuleNode,
+	TagNode
 ];
+
+/**
+ * Lexical 编辑器 Theme 配置。
+ *
+ * 将各节点类型映射到语义化 CSS 类名，由组件层 CSS 提供实际样式。
+ * 参考 Mx Space Admin 的 rich-heading-h1/h2/h3 命名惯例。
+ *
+ * 注意：类名通过 `:global()` 定义在 MarkdownEditor.svelte 的 scoped style 中，
+ * 支持 Tailwind `@apply` 以确保与设计系统一致。
+ */
+const EDITOR_THEME: EditorThemeClasses = {
+	heading: {
+		h1: 'rich-editor-h1',
+		h2: 'rich-editor-h2',
+		h3: 'rich-editor-h3',
+		h4: 'rich-editor-h4',
+		h5: 'rich-editor-h5',
+		h6: 'rich-editor-h6'
+	},
+	list: {
+		ul: 'rich-editor-ul',
+		ol: 'rich-editor-ol',
+		listitem: 'rich-editor-li',
+		nested: {
+			listitem: 'rich-editor-nested-li'
+		}
+	},
+	quote: 'rich-editor-quote',
+	code: 'rich-editor-code-block',
+	text: {
+		bold: 'rich-editor-bold',
+		italic: 'rich-editor-italic',
+		underline: 'rich-editor-underline',
+		strikethrough: 'rich-editor-strikethrough',
+		code: 'rich-editor-inline-code',
+		highlight: 'rich-editor-highlight'
+	}
+};
 
 /**
  * Svelte 5 Action：将 HTMLElement 绑定为 Lexical 编辑器。
@@ -90,6 +135,7 @@ export function lexicalEditor(node: HTMLElement, initialOptions: LexicalActionOp
 	const editor: LexicalEditor = createEditor({
 		namespace: 'markdown-editor',
 		nodes: EDITOR_NODES,
+		theme: EDITOR_THEME,
 		onError: (error: Error) => console.error('Lexical editor error:', error)
 	});
 
@@ -206,6 +252,8 @@ export function lexicalEditor(node: HTMLElement, initialOptions: LexicalActionOp
 // ── 导出供 toolbar 使用 ──
 export {
 	FORMAT_TEXT_COMMAND,
+	FORMAT_ELEMENT_COMMAND,
+	SELECTION_CHANGE_COMMAND,
 	CLEAR_EDITOR_COMMAND,
 	UNDO_COMMAND,
 	REDO_COMMAND,
@@ -295,6 +343,89 @@ export function insertHorizontalRule(editor: LexicalEditor) {
 	editor.dispatchCommand(INSERT_HORIZONTAL_RULE_COMMAND, undefined);
 }
 
+// ── 插入辅助：链接 / 图片 / 表格 / 待办（markdown 语法 + Lexical 节点混合）──
+
+/**
+ * 插入链接。选中文本包裹为 LinkNode（WYSIWYG），
+ * 未选中时以 URL 为文本创建链接。
+ */
+export function insertLink(editor: LexicalEditor, url: string) {
+	editor.update(() => {
+		const selection = $getSelection();
+		if (!$isRangeSelection(selection)) return;
+		const text = selection.isCollapsed() ? url : selection.getTextContent();
+		const linkNode = $createLinkNode(url);
+		linkNode.append($createTextNode(text));
+		selection.insertNodes([linkNode]);
+	});
+}
+
+/**
+ * 插入图片（markdown 语法 !\[alt](url)）。
+ * 编辑器内显示为文本，渲染管线会转为 <img>。
+ */
+export function insertImage(editor: LexicalEditor, url: string, alt: string = '') {
+	editor.update(() => {
+		const selection = $getSelection();
+		if (!$isRangeSelection(selection)) return;
+		selection.insertNodes([$createTextNode(`![${alt}](${url})`)]);
+	});
+}
+
+/**
+ * 插入 3×2 Markdown 表格模板。
+ * 编辑器内显示为文本，渲染管线会转为 <table>。
+ */
+export function insertTable(editor: LexicalEditor) {
+	const tableMd = '\n| 列 1 | 列 2 | 列 3 |\n| --- | --- | --- |\n|     |     |     |\n|     |     |     |\n';
+	editor.update(() => {
+		const selection = $getSelection();
+		if (!$isRangeSelection(selection)) return;
+		selection.insertNodes([$createTextNode(tableMd)]);
+	});
+}
+
+/**
+ * 插入代码块（CodeNode，WYSIWYG）。
+ * 使用 Lexical 原生 CodeNode，编辑器内即可见代码块样式。
+ */
+export function insertCodeBlock(editor: LexicalEditor, language: string = '') {
+	editor.update(() => {
+		const selection = $getSelection();
+		if (!$isRangeSelection(selection)) return;
+		const codeNode = $createCodeNode(language);
+		codeNode.append($createTextNode(''));
+		selection.insertNodes([codeNode]);
+	});
+}
+
+/**
+ * 插入待办列表项。
+ * 利用 Lexical ListNode + ListItemNode 的 checklist 变体。
+ */
+export function insertCheckList(editor: LexicalEditor) {
+	editor.update(() => {
+		const selection = $getSelection();
+		if (!$isRangeSelection(selection)) return;
+		// 通过 markdown 语法 `- [ ] ` 插入，由 TRANSFORMERS 转为 checklist
+		selection.insertNodes([$createTextNode('- [ ] ')]);
+	});
+}
+
+/**
+ * 插入 Tag（内联彩色标签，TextNode 子类）。
+ * 选中文本则转为 Tag，否则插入默认文本 "tag"。
+ */
+export function insertTag(editor: LexicalEditor) {
+	editor.update(() => {
+		const selection = $getSelection();
+		if (!$isRangeSelection(selection)) return;
+		const text = selection.isCollapsed() ? 'tag' : selection.getTextContent();
+		const tagNode = $createTagNode(text);
+		selection.insertNodes([tagNode]);
+	});
+}
+
 // ── 工具栏状态读取（封装 $ 前缀函数，避免 .svelte 文件直接导入）──
 
 /** 工具栏需要追踪的格式状态 */
@@ -303,9 +434,13 @@ export interface ToolbarState {
 	isItalic: boolean;
 	isUnderline: boolean;
 	isStrikethrough: boolean;
+	isSuperscript: boolean;
+	isSubscript: boolean;
 	isCode: boolean;
 	isHighlight: boolean;
-	blockType: 'paragraph' | 'h1' | 'h2' | 'h3' | 'bullet' | 'number' | 'quote';
+	blockType: 'paragraph' | 'h1' | 'h2' | 'h3' | 'bullet' | 'number' | 'check' | 'quote';
+	/** 当前块级元素的对齐方式 */
+	alignment: ElementFormatType | '';
 }
 
 /**
@@ -321,9 +456,12 @@ export function readToolbarState(): ToolbarState {
 		isItalic: false,
 		isUnderline: false,
 		isStrikethrough: false,
+		isSuperscript: false,
+		isSubscript: false,
 		isCode: false,
 		isHighlight: false,
-		blockType: 'paragraph'
+		blockType: 'paragraph',
+		alignment: ''
 	};
 
 	if ($isRangeSelection(selection)) {
@@ -331,8 +469,20 @@ export function readToolbarState(): ToolbarState {
 		state.isItalic = selection.hasFormat('italic');
 		state.isUnderline = selection.hasFormat('underline');
 		state.isStrikethrough = selection.hasFormat('strikethrough');
+		state.isSuperscript = selection.hasFormat('superscript');
+		state.isSubscript = selection.hasFormat('subscript');
 		state.isCode = selection.hasFormat('code');
 		state.isHighlight = selection.hasFormat('highlight');
+
+		// 读取当前块的对齐方式
+		const anchorNode = selection.anchor.getNode();
+		let el = anchorNode;
+		while (el.getParent() !== null && $isElementNode(el.getParent())) {
+			el = el.getParent()!;
+		}
+		if ($isElementNode(el)) {
+			state.alignment = el.getFormatType() || '';
+		}
 	}
 
 	const root = $getRoot();
@@ -361,4 +511,18 @@ export function applyParagraph(editor: LexicalEditor) {
 			root.append($createParagraphNode());
 		}
 	});
+}
+
+/**
+ * 获取当前文本选区的 DOM 矩形，用于浮动工具栏定位。
+ * 返回 null 表示无有效选区。
+ */
+export function getSelectionRect(): DOMRect | null {
+	const sel = window.getSelection();
+	if (!sel || sel.isCollapsed || sel.rangeCount === 0) return null;
+	const range = sel.getRangeAt(0);
+	// 忽略编辑器外的选区
+	const editorRoot = document.querySelector('[data-lexical-editor="true"]');
+	if (editorRoot && !editorRoot.contains(range.commonAncestorContainer)) return null;
+	return range.getBoundingClientRect();
 }

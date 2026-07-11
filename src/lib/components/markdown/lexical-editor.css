@@ -1,0 +1,122 @@
+/* ── Lexical 编辑器全局样式 ──
+ * 从 MarkdownEditor.svelte 导入，作用于 Lexical 动态创建的 DOM 节点。
+ *
+ * Tailwind v4: 独立 CSS 文件需通过 @reference 引用主样式表，
+ * 才能访问 @apply 中的 utility（包括 shadcn-svelte 自定义类）。
+ * @see https://tailwindcss.com/docs/functions-and-directives#reference-directive
+ */
+@reference "../../../routes/layout.css";
+
+/* ── 标题 ── */
+.rich-editor-h1 {
+	@apply text-3xl font-bold leading-tight mt-8 mb-4;
+}
+.rich-editor-h2 {
+	@apply text-2xl font-semibold leading-tight mt-6 mb-3;
+}
+.rich-editor-h3 {
+	@apply text-xl font-semibold leading-snug mt-5 mb-2;
+}
+.rich-editor-h4 {
+	@apply text-lg font-medium leading-snug mt-4 mb-2;
+}
+.rich-editor-h5 {
+	@apply text-base font-medium leading-snug mt-3 mb-1;
+}
+.rich-editor-h6 {
+	@apply text-sm font-medium leading-snug mt-3 mb-1 text-muted-foreground;
+}
+
+/* ── 编辑态 H1/H2/H3 标签（::before 伪元素）──
+ * 参考 @haklex/rich-editor：仅在 contenteditable=true 时在标题左侧显示
+ * "H1"/"H2"/"H3" 标签，方便写作时识别标题层级。只读渲染模式下不显示。
+ */
+[contenteditable="true"] .rich-editor-h1,
+[contenteditable="true"] .rich-editor-h2,
+[contenteditable="true"] .rich-editor-h3 {
+	position: relative;
+}
+
+[contenteditable="true"] .rich-editor-h1::before,
+[contenteditable="true"] .rich-editor-h2::before,
+[contenteditable="true"] .rich-editor-h3::before {
+	color: hsl(var(--muted-foreground));
+	opacity: 0.5;
+	pointer-events: none;
+	font-size: 0.625rem;
+	font-weight: 600;
+	font-family: var(--font-mono, "JetBrains Mono Variable", monospace);
+	position: absolute;
+	left: -1.25rem;
+	display: flex;
+	align-items: flex-end;
+}
+
+[contenteditable="true"] .rich-editor-h1::before {
+	content: "H1";
+	bottom: 0.5em;
+}
+
+[contenteditable="true"] .rich-editor-h2::before {
+	content: "H2";
+	bottom: 0.4em;
+}
+
+[contenteditable="true"] .rich-editor-h3::before {
+	content: "H3";
+	bottom: 0.3em;
+}
+
+/* ── 列表 ── */
+.rich-editor-ul {
+	@apply list-disc pl-6 my-2;
+}
+.rich-editor-ol {
+	@apply list-decimal pl-6 my-2;
+}
+.rich-editor-li {
+	@apply my-0.5;
+}
+
+/* ── 引用块 ── */
+.rich-editor-quote {
+	@apply border-l-2 border-border pl-4 my-3 text-muted-foreground italic;
+}
+
+/* ── 行内格式 ── */
+.rich-editor-bold {
+	@apply font-bold;
+}
+.rich-editor-italic {
+	@apply italic;
+}
+.rich-editor-underline {
+	@apply underline;
+}
+.rich-editor-strikethrough {
+	@apply line-through;
+}
+.rich-editor-inline-code {
+	@apply rounded bg-muted/50 px-1 py-0.5 font-mono text-sm;
+}
+.rich-editor-highlight {
+	@apply bg-yellow-200/40 dark:bg-yellow-600/30 rounded-sm;
+}
+
+/* ── 内联 Tag ── */
+.rich-editor-tag {
+	font-size: 0.875em;
+	vertical-align: baseline;
+	border-radius: 999px;
+	padding-inline: 0.75em;
+	line-height: 1.6;
+	display: inline-block;
+	color: hsl(var(--foreground));
+}
+
+/* ── 占位符 ── */
+[data-placeholder]:empty::before {
+	content: attr(data-placeholder);
+	color: hsl(var(--muted-foreground) / 0.5);
+	pointer-events: none;
+}

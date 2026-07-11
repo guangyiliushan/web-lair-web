@@ -1,0 +1,218 @@
+<script lang="ts">
+	import { Button } from '$lib/components/ui/button';
+	import type { LexicalEditor, TextFormatType } from 'lexical';
+	import {
+		FORMAT_TEXT_COMMAND,
+		insertLink,
+		readToolbarState,
+		getSelectionRect,
+		type ToolbarState
+	} from './lexical-action';
+
+	// ── 图标 ──
+	import IconBold from '@tabler/icons-svelte-runes/icons/bold';
+	import IconItalic from '@tabler/icons-svelte-runes/icons/italic';
+	import IconUnderline from '@tabler/icons-svelte-runes/icons/underline';
+	import IconStrikethrough from '@tabler/icons-svelte-runes/icons/strikethrough';
+	import IconSuperscript from '@tabler/icons-svelte-runes/icons/superscript';
+	import IconSubscript from '@tabler/icons-svelte-runes/icons/subscript';
+	import IconCode from '@tabler/icons-svelte-runes/icons/code';
+	import IconHighlight from '@tabler/icons-svelte-runes/icons/highlight';
+	import IconLink from '@tabler/icons-svelte-runes/icons/link';
+
+	// ── Props ──
+	type Props = {
+		editor: LexicalEditor | null;
+	};
+
+	let { editor }: Props = $props();
+
+	// ── 可见性与位置 ──
+	let visible = $state(false);
+	let top = $state(0);
+	let left = $state(0);
+
+	// ── 格式状态 ──
+	let toolbarState = $state<ToolbarState>({
+		isBold: false,
+		isItalic: false,
+		isUnderline: false,
+		isStrikethrough: false,
+		isSuperscript: false,
+		isSubscript: false,
+		isCode: false,
+		isHighlight: false,
+		blockType: 'paragraph',
+		alignment: ''
+	});
+
+	// ── 监听选区变化 ──
+	$effect(() => {
+		if (!editor) return;
+
+		const unregister = editor.registerUpdateListener(({ editorState }) => {
+			editorState.read(() => {
+				toolbarState = readToolbarState();
+			});
+		});
+
+		// 监听原生 selectionchange 以更新位置和可见性
+		function onSelectionChange() {
+			const rect = getSelectionRect();
+			if (!rect) {
+				visible = false;
+				return;
+			}
+			// 计算位置：选区上方居中，留 10px 间距
+			const toolbarH = 36; // 预估工具栏高度
+			top = rect.top - toolbarH - 10;
+			left = rect.left + rect.width / 2;
+			// 上方空间不足则放到下方
+			if (top < 8) {
+				top = rect.bottom + 10;
+			}
+			visible = true;
+		}
+
+		document.addEventListener('selectionchange', onSelectionChange);
+
+		return () => {
+			unregister();
+			document.removeEventListener('selectionchange', onSelectionChange);
+		};
+	});
+
+	// ── 点击按钮后保持编辑器焦点 ──
+	function formatAndFocus(format: TextFormatType) {
+		editor?.dispatchCommand(FORMAT_TEXT_COMMAND, format);
+		// 保持编辑器焦点——不在此处 blur
+		editor?.focus();
+	}
+
+	function handleInsertLink() {
+		if (!editor) return;
+		const url = window.prompt('输入链接地址:', 'https://');
+		if (url) {
+			insertLink(editor, url.trim());
+			editor.focus();
+		}
+	}
+
+	// ── 辅助：active 态按钮 ──
+	function isActive(key: keyof ToolbarState): boolean {
+		return !!toolbarState[key];
+	}
+</script>
+
+{#if visible}
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div
+		class="fixed z-50 flex items-center gap-0.5 rounded-xl border border-border bg-background/95 p-1 shadow-lg backdrop-blur"
+		style="top: {top}px; left: {left}px; transform: translateX(-50%);"
+		role="toolbar"
+		aria-label="文本格式"
+		tabindex="-1"
+		onmousedown={(e) => e.preventDefault()}
+	>
+		<!-- 文本格式组 1: B I U S -->
+		<Button
+			variant={isActive('isBold') ? 'secondary' : 'ghost'}
+			size="icon-sm"
+			onclick={() => formatAndFocus('bold')}
+			aria-pressed={isActive('isBold')}
+			aria-label="粗体"
+			title="粗体 (⌘B)"
+		>
+			<IconBold data-icon="inline-start" />
+		</Button>
+		<Button
+			variant={isActive('isItalic') ? 'secondary' : 'ghost'}
+			size="icon-sm"
+			onclick={() => formatAndFocus('italic')}
+			aria-pressed={isActive('isItalic')}
+			aria-label="斜体"
+			title="斜体 (⌘I)"
+		>
+			<IconItalic data-icon="inline-start" />
+		</Button>
+		<Button
+			variant={isActive('isUnderline') ? 'secondary' : 'ghost'}
+			size="icon-sm"
+			onclick={() => formatAndFocus('underline')}
+			aria-pressed={isActive('isUnderline')}
+			aria-label="下划线"
+			title="下划线 (⌘U)"
+		>
+			<IconUnderline data-icon="inline-start" />
+		</Button>
+		<Button
+			variant={isActive('isStrikethrough') ? 'secondary' : 'ghost'}
+			size="icon-sm"
+			onclick={() => formatAndFocus('strikethrough')}
+			aria-pressed={isActive('isStrikethrough')}
+			aria-label="删除线"
+			title="删除线"
+		>
+			<IconStrikethrough data-icon="inline-start" />
+		</Button>
+
+		<!-- 分隔 -->
+		<span class="mx-0.5 h-5 w-px bg-border" aria-hidden="true"></span>
+
+		<!-- 文本格式组 2: 上标 / 下标 -->
+		<Button
+			variant={isActive('isSuperscript') ? 'secondary' : 'ghost'}
+			size="icon-sm"
+			onclick={() => formatAndFocus('superscript')}
+			aria-pressed={isActive('isSuperscript')}
+			aria-label="上标"
+			title="上标"
+		>
+			<IconSuperscript data-icon="inline-start" />
+		</Button>
+		<Button
+			variant={isActive('isSubscript') ? 'secondary' : 'ghost'}
+			size="icon-sm"
+			onclick={() => formatAndFocus('subscript')}
+			aria-pressed={isActive('isSubscript')}
+			aria-label="下标"
+			title="下标"
+		>
+			<IconSubscript data-icon="inline-start" />
+		</Button>
+
+		<!-- 分隔 -->
+		<span class="mx-0.5 h-5 w-px bg-border" aria-hidden="true"></span>
+
+		<!-- 特殊格式: 行内代码 / 高亮 / 链接 -->
+		<Button
+			variant={isActive('isCode') ? 'secondary' : 'ghost'}
+			size="icon-sm"
+			onclick={() => formatAndFocus('code')}
+			aria-pressed={isActive('isCode')}
+			aria-label="行内代码"
+			title="行内代码"
+		>
+			<IconCode data-icon="inline-start" />
+		</Button>
+		<Button
+			variant={isActive('isHighlight') ? 'secondary' : 'ghost'}
+			size="icon-sm"
+			onclick={() => formatAndFocus('highlight')}
+			aria-pressed={isActive('isHighlight')}
+			aria-label="高亮"
+			title="高亮"
+		>
+			<IconHighlight data-icon="inline-start" />
+		</Button>
+		<Button
+			variant="ghost"
+			size="icon-sm"
+			onclick={handleInsertLink}
+			aria-label="插入链接"
+			title="插入链接"
+		>
+			<IconLink data-icon="inline-start" />
+		</Button>
+	</div>
+{/if}

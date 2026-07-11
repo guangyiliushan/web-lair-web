@@ -1,26 +1,32 @@
-<script lang="ts">
+﻿<script lang="ts">
 	import { cn } from '$lib/utils';
 	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import * as Tooltip from '$lib/components/ui/tooltip';
-	import type { LexicalEditor, TextFormatType, LexicalCommand } from 'lexical';
+	import type { LexicalEditor, TextFormatType, LexicalCommand, ElementFormatType } from 'lexical';
 	import {
 		FORMAT_TEXT_COMMAND,
+		FORMAT_ELEMENT_COMMAND,
 		UNDO_COMMAND,
 		REDO_COMMAND,
-		INSERT_UNORDERED_LIST_COMMAND,
 		toggleHeading,
 		toggleBulletList,
 		toggleOrderedList,
+		toggleBlockquote,
 		insertHorizontalRule,
+		insertLink,
+		insertImage,
+		insertTable,
+		insertCodeBlock,
+		insertTag,
+		insertCheckList,
 		applyParagraph,
 		readToolbarState,
 		type ToolbarState
 	} from './lexical-action';
 	import EditorDebugDialog from './EditorDebugDialog.svelte';
 
-	// ── 常用图标 ──
+	// ── 图标 ──
 	import IconH1 from '@tabler/icons-svelte-runes/icons/h-1';
 	import IconH2 from '@tabler/icons-svelte-runes/icons/h-2';
 	import IconH3 from '@tabler/icons-svelte-runes/icons/h-3';
@@ -28,31 +34,36 @@
 	import IconArrowForwardUp from '@tabler/icons-svelte-runes/icons/arrow-forward-up';
 	import IconBold from '@tabler/icons-svelte-runes/icons/bold';
 	import IconItalic from '@tabler/icons-svelte-runes/icons/italic';
-	import IconList from '@tabler/icons-svelte-runes/icons/list';
-	import IconListNumbers from '@tabler/icons-svelte-runes/icons/list-numbers';
-	import IconCode from '@tabler/icons-svelte-runes/icons/code';
-	import IconEye from '@tabler/icons-svelte-runes/icons/eye';
-	import IconEyeOff from '@tabler/icons-svelte-runes/icons/eye-off';
-	import IconDots from '@tabler/icons-svelte-runes/icons/dots';
-	import IconChevronDown from '@tabler/icons-svelte-runes/icons/chevron-down';
-	import IconBug from '@tabler/icons-svelte-runes/icons/bug';
-
-	// ── 溢出菜单图标 ──
 	import IconUnderline from '@tabler/icons-svelte-runes/icons/underline';
 	import IconStrikethrough from '@tabler/icons-svelte-runes/icons/strikethrough';
+	import IconCode from '@tabler/icons-svelte-runes/icons/code';
+	import IconCodeDots from '@tabler/icons-svelte-runes/icons/code-dots';
 	import IconHighlight from '@tabler/icons-svelte-runes/icons/highlight';
+	import IconLink from '@tabler/icons-svelte-runes/icons/link';
+	import IconPhoto from '@tabler/icons-svelte-runes/icons/photo';
+	import IconList from '@tabler/icons-svelte-runes/icons/list';
+	import IconListNumbers from '@tabler/icons-svelte-runes/icons/list-numbers';
+	import IconListCheck from '@tabler/icons-svelte-runes/icons/list-check';
+	import IconAlignLeft from '@tabler/icons-svelte-runes/icons/align-left';
+	import IconAlignCenter from '@tabler/icons-svelte-runes/icons/align-center';
+	import IconAlignRight from '@tabler/icons-svelte-runes/icons/align-right';
+	import IconAlignJustified from '@tabler/icons-svelte-runes/icons/align-justified';
+	import IconBlockquote from '@tabler/icons-svelte-runes/icons/blockquote';
 	import IconSeparator from '@tabler/icons-svelte-runes/icons/separator';
+	import IconTable from '@tabler/icons-svelte-runes/icons/table';
+	import IconTag from '@tabler/icons-svelte-runes/icons/tag';
 	import IconInfoCircle from '@tabler/icons-svelte-runes/icons/info-circle';
 	import IconBulb from '@tabler/icons-svelte-runes/icons/bulb';
 	import IconAlertTriangle from '@tabler/icons-svelte-runes/icons/alert-triangle';
-	import IconCodeDots from '@tabler/icons-svelte-runes/icons/code-dots';
-	import IconPhoto from '@tabler/icons-svelte-runes/icons/photo';
 	import IconMath from '@tabler/icons-svelte-runes/icons/math';
-	import IconListCheck from '@tabler/icons-svelte-runes/icons/list-check';
-	import IconBlockquote from '@tabler/icons-svelte-runes/icons/blockquote';
+	import IconBug from '@tabler/icons-svelte-runes/icons/bug';
+	import IconDots from '@tabler/icons-svelte-runes/icons/dots';
+	import IconChevronDown from '@tabler/icons-svelte-runes/icons/chevron-down';
+	import IconEye from '@tabler/icons-svelte-runes/icons/eye';
+	import IconEyeOff from '@tabler/icons-svelte-runes/icons/eye-off';
 	import IconArticle from '@tabler/icons-svelte-runes/icons/article';
 
-	// ── 块类型定义 ──
+	// ── 类型 ──
 	type BlockType = 'paragraph' | 'h1' | 'h2' | 'h3' | 'bullet' | 'number' | 'check' | 'quote';
 
 	interface BlockOption {
@@ -61,6 +72,9 @@
 		icon: typeof IconArticle;
 	}
 
+	/** 断点级别: 0=mobile, 1=sm(640px), 2=md(768px), 3=lg(1024px), 4=xl(1280px) */
+	type BpLevel = 0 | 1 | 2 | 3 | 4;
+
 	const BLOCK_OPTIONS: BlockOption[] = [
 		{ type: 'paragraph', label: '正文', icon: IconArticle },
 		{ type: 'h1', label: '标题 1', icon: IconH1 },
@@ -68,6 +82,7 @@
 		{ type: 'h3', label: '标题 3', icon: IconH3 }
 	];
 
+	// ── Props ──
 	type Props = {
 		editor: LexicalEditor | null;
 		previewVisible: boolean;
@@ -86,23 +101,49 @@
 		class: className
 	}: Props = $props();
 
-	// ── 工具栏状态追踪 ──
+	// ── 响应式断点检测 ──
+	let bp = $state<BpLevel>(0);
+
+	$effect(() => {
+		const queries = [
+			window.matchMedia('(min-width: 1280px)'),
+			window.matchMedia('(min-width: 1024px)'),
+			window.matchMedia('(min-width: 768px)'),
+			window.matchMedia('(min-width: 640px)')
+		];
+
+		function update() {
+			if (queries[0].matches) bp = 4;
+			else if (queries[1].matches) bp = 3;
+			else if (queries[2].matches) bp = 2;
+			else if (queries[3].matches) bp = 1;
+			else bp = 0;
+		}
+
+		update();
+		for (const q of queries) q.addEventListener('change', update);
+		return () => {
+			for (const q of queries) q.removeEventListener('change', update);
+		};
+	});
+
+	// ── 工具栏状态 ──
 	let toolbarState = $state<ToolbarState>({
 		isBold: false,
 		isItalic: false,
 		isUnderline: false,
 		isStrikethrough: false,
+		isSuperscript: false,
+		isSubscript: false,
 		isCode: false,
 		isHighlight: false,
-		blockType: 'paragraph'
+		blockType: 'paragraph',
+		alignment: ''
 	});
 
 	let debugOpen = $state(false);
 	let debugJson = $state('');
 
-	// 注册更新监听器追踪格式状态
-	// 注意：readToolbarState 封装了 Lexical 的 $ 前缀函数，
-	// 避免 .svelte 文件直接导入 $getSelection 等（Svelte 5 编译器会误解析为 store）
 	$effect(() => {
 		if (!editor) return;
 		const unregister = editor.registerUpdateListener(({ editorState }) => {
@@ -113,14 +154,16 @@
 		return unregister;
 	});
 
+	// ── 通用工具函数 ──
 	function dispatchCmd(cmd: LexicalCommand<unknown>, payload?: unknown) {
 		editor?.dispatchCommand(cmd, payload);
 	}
 	function formatText(format: TextFormatType) {
 		editor?.dispatchCommand(FORMAT_TEXT_COMMAND, format);
 	}
-
-	// 防止点击工具栏时丢失编辑器选区
+	function setAlignment(align: ElementFormatType) {
+		editor?.dispatchCommand(FORMAT_ELEMENT_COMMAND, align);
+	}
 	function preventSelectionLoss(e: MouseEvent) {
 		e.preventDefault();
 	}
@@ -128,27 +171,14 @@
 	function applyBlockType(type: BlockType) {
 		if (!editor) return;
 		switch (type) {
-			case 'paragraph':
-				applyParagraph(editor);
-				break;
-			case 'h1':
-				toggleHeading(editor, 'h1');
-				break;
-			case 'h2':
-				toggleHeading(editor, 'h2');
-				break;
-			case 'h3':
-				toggleHeading(editor, 'h3');
-				break;
-			case 'bullet':
-				toggleBulletList(editor);
-				break;
-			case 'number':
-				toggleOrderedList(editor);
-				break;
-			case 'check':
-				dispatchCmd(INSERT_UNORDERED_LIST_COMMAND);
-				break;
+			case 'paragraph': applyParagraph(editor); break;
+			case 'h1': toggleHeading(editor, 'h1'); break;
+			case 'h2': toggleHeading(editor, 'h2'); break;
+			case 'h3': toggleHeading(editor, 'h3'); break;
+			case 'bullet': toggleBulletList(editor); break;
+			case 'number': toggleOrderedList(editor); break;
+			case 'check': insertCheckList(editor); break;
+			case 'quote': toggleBlockquote(editor); break;
 		}
 	}
 
@@ -158,10 +188,101 @@
 		debugOpen = true;
 	}
 
+	function handleInsertLink() {
+		if (!editor) return;
+		const url = window.prompt('输入链接地址:', 'https://');
+		if (url) insertLink(editor, url.trim());
+	}
+
+	function handleInsertImage() {
+		if (!editor) return;
+		const url = window.prompt('输入图片地址:', 'https://');
+		if (url) {
+			const alt = window.prompt('图片描述 (可选):', '') ?? '';
+			insertImage(editor, url.trim(), alt.trim());
+		}
+	}
+
+	function handleInsertTable() {
+		if (!editor) return;
+		insertTable(editor);
+	}
+
 	// 当前激活的块选项
 	let activeBlock = $derived(
 		BLOCK_OPTIONS.find((o) => o.type === toolbarState.blockType) ?? BLOCK_OPTIONS[0]
 	);
+
+	// ── 溢出菜单定义 ──
+	interface OverflowItemDef {
+		id: string;
+		label: string;
+		icon: typeof IconArticle;
+		shortcut?: string;
+		action: () => void;
+		/** 工具栏可见的最低断点；bp < minBp 时进溢出菜单，99 = 永远溢出 */
+		minBp: BpLevel | 99;
+	}
+
+	interface OverflowGroupDef {
+		heading: string;
+		items: OverflowItemDef[];
+	}
+
+	const ALL_OVERFLOW_GROUPS: OverflowGroupDef[] = [
+		{
+			heading: '文本格式',
+			items: [
+				{ id: 'underline', label: '下划线', icon: IconUnderline, shortcut: '⌘U', action: () => formatText('underline'), minBp: 2 },
+				{ id: 'strikethrough', label: '删除线', icon: IconStrikethrough, action: () => formatText('strikethrough'), minBp: 2 },
+				{ id: 'highlight', label: '高亮', icon: IconHighlight, action: () => formatText('highlight'), minBp: 3 },
+				{ id: 'inlineCode', label: '行内代码', icon: IconCode, action: () => formatText('code'), minBp: 1 }
+			]
+		},
+		{
+			heading: '编辑',
+			items: [
+				{ id: 'undo', label: '撤销', icon: IconArrowBackUp, shortcut: '⌘Z', action: () => dispatchCmd(UNDO_COMMAND), minBp: 1 },
+				{ id: 'redo', label: '重做', icon: IconArrowForwardUp, shortcut: '⌘⇧Z', action: () => dispatchCmd(REDO_COMMAND), minBp: 1 }
+			]
+		},
+		{
+			heading: '列表与排版',
+			items: [
+				{ id: 'bulletList', label: '无序列表', icon: IconList, action: () => toggleBulletList(editor!), minBp: 1 },
+				{ id: 'orderedList', label: '有序列表', icon: IconListNumbers, action: () => toggleOrderedList(editor!), minBp: 1 },
+				{ id: 'checkList', label: '待办列表', icon: IconListCheck, action: () => applyBlockType('check'), minBp: 1 },
+				{ id: 'quote', label: '引用', icon: IconBlockquote, action: () => applyBlockType('quote'), minBp: 2 },
+				{ id: 'horizontalRule', label: '分割线', icon: IconSeparator, action: () => insertHorizontalRule(editor!), minBp: 2 },
+				{ id: 'table', label: '插入表格', icon: IconTable, action: handleInsertTable, minBp: 2 }
+			]
+		},
+		{
+			heading: '插入',
+			items: [
+				{ id: 'link', label: '链接', icon: IconLink, action: handleInsertLink, minBp: 0 },
+				{ id: 'image', label: '图片', icon: IconPhoto, action: handleInsertImage, minBp: 0 },
+				{ id: 'codeBlock', label: '代码块', icon: IconCodeDots, action: () => insertCodeBlock(editor!), minBp: 3 },
+				{ id: 'calloutInfo', label: 'Callout · 信息', icon: IconInfoCircle, action: () => onInsertCallout('info'), minBp: 3 },
+				{ id: 'calloutTip', label: 'Callout · 提示', icon: IconBulb, action: () => onInsertCallout('tip'), minBp: 3 },
+				{ id: 'calloutWarning', label: 'Callout · 警告', icon: IconAlertTriangle, action: () => onInsertCallout('warning'), minBp: 3 },			{ id: 'tag', label: '标签', icon: IconTag, action: () => insertTag(editor!), minBp: 3 },				{ id: 'formula', label: '公式', icon: IconMath, action: () => {}, minBp: 4 }
+			]
+		}
+	];
+
+	let overflowGroups = $derived(
+		ALL_OVERFLOW_GROUPS
+			.map((g) => ({
+				heading: g.heading,
+				items: g.items.filter((it) => bp < (it.minBp as number))
+			}))
+			.filter((g) => g.items.length > 0)
+	);
+
+	let overflowNotEmpty = $derived(overflowGroups.length > 0);
+
+	// 移动端隐藏分隔符
+	let sepClass = $derived(cn(bp < 1 && 'hidden'));
 </script>
 
 <div
@@ -175,13 +296,13 @@
 	role="toolbar"
 	aria-label="编辑器工具栏"
 >
-	<!-- BlockMenu：正文/H1/H2/H3 下拉选择 -->
+	<!-- ═══════════ 块类型下拉 (Tier 0) ═══════════ -->
 	<DropdownMenu.Root>
 		<DropdownMenu.Trigger>
 			{#snippet child({ props })}
-				<Button variant="ghost" size="sm" {...props} class="gap-1 text-xs font-medium">
+				<Button variant="ghost" size={bp >= 1 ? 'sm' : 'icon-sm'} {...props} class="gap-1 text-xs font-medium">
 					<activeBlock.icon data-icon="inline-start" />
-					<span class="truncate">{activeBlock.label}</span>
+					<span class={cn('truncate', bp < 1 && 'hidden')}>{activeBlock.label}</span>
 					<IconChevronDown class="size-3 opacity-60" />
 				</Button>
 			{/snippet}
@@ -199,204 +320,174 @@
 		</DropdownMenu.Content>
 	</DropdownMenu.Root>
 
-	<Separator orientation="vertical" decorative />
+	<!-- ═══════════ 撤销/重做 (Tier 1: sm+) ═══════════ -->
+	{#if bp >= 1}
+		<Separator orientation="vertical" decorative class={sepClass} />
+		<Button variant="ghost" size="icon-sm" onclick={() => dispatchCmd(UNDO_COMMAND)} onmousedown={preventSelectionLoss} aria-label="撤销" title="撤销 (⌘Z)">
+			<IconArrowBackUp data-icon="inline-start" />
+		</Button>
+		<Button variant="ghost" size="icon-sm" onclick={() => dispatchCmd(REDO_COMMAND)} onmousedown={preventSelectionLoss} aria-label="重做" title="重做 (⌘⇧Z)">
+			<IconArrowForwardUp data-icon="inline-start" />
+		</Button>
+	{/if}
 
-	<!-- 撤销/重做 -->
-	<Button
-		variant="ghost"
-		size="icon-sm"
-		onclick={() => dispatchCmd(UNDO_COMMAND)}
-		onmousedown={preventSelectionLoss}
-		aria-label="撤销"
-		title="撤销 (⌘Z)"
-	>
-		<IconArrowBackUp data-icon="inline-start" />
-	</Button>
-	<Button
-		variant="ghost"
-		size="icon-sm"
-		onclick={() => dispatchCmd(REDO_COMMAND)}
-		onmousedown={preventSelectionLoss}
-		aria-label="重做"
-		title="重做 (⌘⇧Z)"
-	>
-		<IconArrowForwardUp data-icon="inline-start" />
-	</Button>
+	<!-- ═══════════ 文本格式：B / I / U / S / Code (Tier 0/1/2) ═══════════ -->
+	<Separator orientation="vertical" decorative class={sepClass} />
 
-	<Separator orientation="vertical" decorative />
-
-	<!-- 常用格式（带激活态） -->
-	<Button
-		variant={toolbarState.isBold ? 'secondary' : 'ghost'}
-		size="icon-sm"
-		onclick={() => formatText('bold')}
-		onmousedown={preventSelectionLoss}
-		aria-pressed={toolbarState.isBold}
-		aria-label="粗体"
-		title="粗体 (⌘B)"
-	>
+	<Button variant={toolbarState.isBold ? 'secondary' : 'ghost'} size="icon-sm" onclick={() => formatText('bold')} onmousedown={preventSelectionLoss} aria-pressed={toolbarState.isBold} aria-label="粗体" title="粗体 (⌘B)">
 		<IconBold data-icon="inline-start" />
 	</Button>
-	<Button
-		variant={toolbarState.isItalic ? 'secondary' : 'ghost'}
-		size="icon-sm"
-		onclick={() => formatText('italic')}
-		onmousedown={preventSelectionLoss}
-		aria-pressed={toolbarState.isItalic}
-		aria-label="斜体"
-		title="斜体 (⌘I)"
-	>
+	<Button variant={toolbarState.isItalic ? 'secondary' : 'ghost'} size="icon-sm" onclick={() => formatText('italic')} onmousedown={preventSelectionLoss} aria-pressed={toolbarState.isItalic} aria-label="斜体" title="斜体 (⌘I)">
 		<IconItalic data-icon="inline-start" />
 	</Button>
-	<Button
-		variant={toolbarState.isCode ? 'secondary' : 'ghost'}
-		size="icon-sm"
-		onclick={() => formatText('code')}
-		onmousedown={preventSelectionLoss}
-		aria-pressed={toolbarState.isCode}
-		aria-label="行内代码"
-		title="行内代码"
-	>
-		<IconCode data-icon="inline-start" />
+
+	{#if bp >= 2}
+		<Button variant={toolbarState.isUnderline ? 'secondary' : 'ghost'} size="icon-sm" onclick={() => formatText('underline')} onmousedown={preventSelectionLoss} aria-pressed={toolbarState.isUnderline} aria-label="下划线" title="下划线 (⌘U)">
+			<IconUnderline data-icon="inline-start" />
+		</Button>
+		<Button variant={toolbarState.isStrikethrough ? 'secondary' : 'ghost'} size="icon-sm" onclick={() => formatText('strikethrough')} onmousedown={preventSelectionLoss} aria-pressed={toolbarState.isStrikethrough} aria-label="删除线" title="删除线">
+			<IconStrikethrough data-icon="inline-start" />
+		</Button>
+	{/if}
+
+	{#if bp >= 1}
+		<Button variant={toolbarState.isCode ? 'secondary' : 'ghost'} size="icon-sm" onclick={() => formatText('code')} onmousedown={preventSelectionLoss} aria-pressed={toolbarState.isCode} aria-label="行内代码" title="行内代码">
+			<IconCode data-icon="inline-start" />
+		</Button>
+	{/if}
+
+	<!-- ═══════════ 高亮 (Tier 3: lg+) ═══════════ -->
+	{#if bp >= 3}
+		<Button variant={toolbarState.isHighlight ? 'secondary' : 'ghost'} size="icon-sm" onclick={() => formatText('highlight')} onmousedown={preventSelectionLoss} aria-pressed={toolbarState.isHighlight} aria-label="高亮" title="高亮">
+			<IconHighlight data-icon="inline-start" />
+		</Button>
+	{/if}
+
+	<!-- ═══════════ 链接 / 图片 (Tier 0) ═══════════ -->
+	<Separator orientation="vertical" decorative class={sepClass} />
+
+	<Button variant="ghost" size="icon-sm" onclick={handleInsertLink} onmousedown={preventSelectionLoss} aria-label="插入链接" title="插入链接 (⌘K)">
+		<IconLink data-icon="inline-start" />
+	</Button>
+	<Button variant="ghost" size="icon-sm" onclick={handleInsertImage} onmousedown={preventSelectionLoss} aria-label="插入图片" title="插入图片">
+		<IconPhoto data-icon="inline-start" />
 	</Button>
 
-	<Separator orientation="vertical" decorative />
+	<!-- ═══════════ 列表（互斥）(Tier 1: sm+) ═══════════ -->
+	{#if bp >= 1}
+		<Separator orientation="vertical" decorative class={sepClass} />
 
-	<!-- 列表（带激活态） -->
-	<Button
-		variant={toolbarState.blockType === 'bullet' ? 'secondary' : 'ghost'}
-		size="icon-sm"
-		onclick={() => toggleBulletList(editor!)}
-		onmousedown={preventSelectionLoss}
-		aria-pressed={toolbarState.blockType === 'bullet'}
-		aria-label="无序列表"
-		title="无序列表"
-	>
-		<IconList data-icon="inline-start" />
-	</Button>
-	<Button
-		variant={toolbarState.blockType === 'number' ? 'secondary' : 'ghost'}
-		size="icon-sm"
-		onclick={() => toggleOrderedList(editor!)}
-		onmousedown={preventSelectionLoss}
-		aria-pressed={toolbarState.blockType === 'number'}
-		aria-label="有序列表"
-		title="有序列表"
-	>
-		<IconListNumbers data-icon="inline-start" />
-	</Button>
+		<Button variant={toolbarState.blockType === 'bullet' ? 'secondary' : 'ghost'} size="icon-sm" onclick={() => toggleBulletList(editor!)} onmousedown={preventSelectionLoss} aria-pressed={toolbarState.blockType === 'bullet'} aria-label="无序列表" title="无序列表">
+			<IconList data-icon="inline-start" />
+		</Button>
+		<Button variant={toolbarState.blockType === 'number' ? 'secondary' : 'ghost'} size="icon-sm" onclick={() => toggleOrderedList(editor!)} onmousedown={preventSelectionLoss} aria-pressed={toolbarState.blockType === 'number'} aria-label="有序列表" title="有序列表">
+			<IconListNumbers data-icon="inline-start" />
+		</Button>
+		<Button variant={toolbarState.blockType === 'check' ? 'secondary' : 'ghost'} size="icon-sm" onclick={() => applyBlockType('check')} onmousedown={preventSelectionLoss} aria-label="待办列表" title="待办列表">
+			<IconListCheck data-icon="inline-start" />
+		</Button>
+	{/if}
 
-	<Separator orientation="vertical" decorative />
+	<!-- ═══════════ 对齐（互斥）(Tier 3: lg+) ═══════════ -->
+	{#if bp >= 3}
+		<Separator orientation="vertical" decorative class={sepClass} />
 
-	<!-- 引用 + 分割线 -->
-	<Button
-		variant={toolbarState.blockType === 'quote' ? 'secondary' : 'ghost'}
-		size="icon-sm"
-		onmousedown={preventSelectionLoss}
-		aria-label="引用"
-		title="引用"
-	>
-		<IconBlockquote data-icon="inline-start" />
-	</Button>
-	<Button
-		variant="ghost"
-		size="icon-sm"
-		onclick={() => insertHorizontalRule(editor!)}
-		onmousedown={preventSelectionLoss}
-		aria-label="分割线"
-		title="分割线"
-	>
-		<IconSeparator data-icon="inline-start" />
-	</Button>
+		<Button variant={toolbarState.alignment === 'left' ? 'secondary' : 'ghost'} size="icon-sm" onclick={() => setAlignment('left')} onmousedown={preventSelectionLoss} aria-pressed={toolbarState.alignment === 'left'} aria-label="左对齐" title="左对齐">
+			<IconAlignLeft data-icon="inline-start" />
+		</Button>
+		<Button variant={toolbarState.alignment === 'center' ? 'secondary' : 'ghost'} size="icon-sm" onclick={() => setAlignment('center')} onmousedown={preventSelectionLoss} aria-pressed={toolbarState.alignment === 'center'} aria-label="居中" title="居中">
+			<IconAlignCenter data-icon="inline-start" />
+		</Button>
+		<Button variant={toolbarState.alignment === 'right' ? 'secondary' : 'ghost'} size="icon-sm" onclick={() => setAlignment('right')} onmousedown={preventSelectionLoss} aria-pressed={toolbarState.alignment === 'right'} aria-label="右对齐" title="右对齐">
+			<IconAlignRight data-icon="inline-start" />
+		</Button>
+		<Button variant={toolbarState.alignment === 'justify' ? 'secondary' : 'ghost'} size="icon-sm" onclick={() => setAlignment('justify')} onmousedown={preventSelectionLoss} aria-pressed={toolbarState.alignment === 'justify'} aria-label="两端对齐" title="两端对齐">
+			<IconAlignJustified data-icon="inline-start" />
+		</Button>
+	{/if}
 
-	<!-- ── 溢出菜单：低频功能 ── -->
-	<DropdownMenu.Root>
-		<DropdownMenu.Trigger>
-			{#snippet child({ props })}
-				<Button variant="ghost" size="icon-sm" {...props} onmousedown={preventSelectionLoss} aria-label="更多" title="更多">
-					<IconDots data-icon="inline-start" />
-				</Button>
-			{/snippet}
-		</DropdownMenu.Trigger>
-		<DropdownMenu.Content align="end" class="w-56">
-			<DropdownMenu.Group>
-				<DropdownMenu.GroupHeading>格式</DropdownMenu.GroupHeading>
-				<DropdownMenu.Item onclick={() => formatText('underline')}>
-					<IconUnderline data-icon="inline-start" />
-					下划线
-					<span class="ml-auto text-xs text-muted-foreground">⌘U</span>
-				</DropdownMenu.Item>
-				<DropdownMenu.Item onclick={() => formatText('strikethrough')}>
-					<IconStrikethrough data-icon="inline-start" />
-					删除线
-				</DropdownMenu.Item>
-				<DropdownMenu.Item onclick={() => formatText('highlight')}>
-					<IconHighlight data-icon="inline-start" />
-					高亮
-				</DropdownMenu.Item>
-			</DropdownMenu.Group>
-			<DropdownMenu.Separator />
-			<DropdownMenu.Group>
-				<DropdownMenu.GroupHeading>列表</DropdownMenu.GroupHeading>
-				<DropdownMenu.Item onclick={() => dispatchCmd(INSERT_UNORDERED_LIST_COMMAND)}>
-					<IconListCheck data-icon="inline-start" />
-					待办列表
-				</DropdownMenu.Item>
-			</DropdownMenu.Group>
-			<DropdownMenu.Separator />
-			<DropdownMenu.Group>
-				<DropdownMenu.GroupHeading>插入</DropdownMenu.GroupHeading>
+	<!-- ═══════════ 引用 / 分割线 / 表格 (Tier 2: md+) ═══════════ -->
+	{#if bp >= 2}
+		<Separator orientation="vertical" decorative class={sepClass} />
+
+		<Button variant={toolbarState.blockType === 'quote' ? 'secondary' : 'ghost'} size="icon-sm" onclick={() => applyBlockType('quote')} onmousedown={preventSelectionLoss} aria-label="引用" title="引用">
+			<IconBlockquote data-icon="inline-start" />
+		</Button>
+		<Button variant="ghost" size="icon-sm" onclick={() => insertHorizontalRule(editor!)} onmousedown={preventSelectionLoss} aria-label="分割线" title="分割线">
+			<IconSeparator data-icon="inline-start" />
+		</Button>
+		<Button variant="ghost" size="icon-sm" onclick={handleInsertTable} onmousedown={preventSelectionLoss} aria-label="插入表格" title="插入表格">
+			<IconTable data-icon="inline-start" />
+		</Button>
+	{/if}
+
+	<!-- ═══════════ 代码块 / Callout / Tag (Tier 3: lg+) ═══════════ -->
+	{#if bp >= 3}
+		<Button variant="ghost" size="icon-sm" onclick={() => insertCodeBlock(editor!)} onmousedown={preventSelectionLoss} aria-label="代码块" title="代码块">
+			<IconCodeDots data-icon="inline-start" />
+		</Button>
+
+		<DropdownMenu.Root>
+			<DropdownMenu.Trigger>
+				{#snippet child({ props })}
+					<Button variant="ghost" size="icon-sm" {...props} onmousedown={preventSelectionLoss} aria-label="Callout" title="Callout">
+						<IconInfoCircle data-icon="inline-start" />
+					</Button>
+				{/snippet}
+			</DropdownMenu.Trigger>
+			<DropdownMenu.Content align="start" class="w-36">
 				<DropdownMenu.Item onclick={() => onInsertCallout('info')}>
-					<IconInfoCircle data-icon="inline-start" />
-					Callout
+					<IconInfoCircle data-icon="inline-start" />信息
 				</DropdownMenu.Item>
 				<DropdownMenu.Item onclick={() => onInsertCallout('tip')}>
-					<IconBulb data-icon="inline-start" />
-					Tip
+					<IconBulb data-icon="inline-start" />提示
 				</DropdownMenu.Item>
 				<DropdownMenu.Item onclick={() => onInsertCallout('warning')}>
-					<IconAlertTriangle data-icon="inline-start" />
-					Warning
+					<IconAlertTriangle data-icon="inline-start" />警告
 				</DropdownMenu.Item>
-				<DropdownMenu.Item onclick={() => formatText('code')}>
-					<IconCodeDots data-icon="inline-start" />
-					代码块
-				</DropdownMenu.Item>
-				<DropdownMenu.Item>
-					<IconPhoto data-icon="inline-start" />
-					插入图片
-				</DropdownMenu.Item>
-				<DropdownMenu.Item>
-					<IconMath data-icon="inline-start" />
-					插入公式
-				</DropdownMenu.Item>
-			</DropdownMenu.Group>
-		</DropdownMenu.Content>
-	</DropdownMenu.Root>
+			</DropdownMenu.Content>
+		</DropdownMenu.Root>
+
+		<Button variant="ghost" size="icon-sm" onclick={() => insertTag(editor!)} onmousedown={preventSelectionLoss} aria-label="插入标签" title="插入标签">
+			<IconTag data-icon="inline-start" />
+		</Button>
+	{/if}
 
 	<div class="flex-1"></div>
 
-	<!-- 调试：导出 Editor State JSON -->
-	<Tooltip.Root>
-		<Tooltip.Trigger>
-			{#snippet child({ props })}
-				<Button
-					variant="ghost"
-					size="icon-sm"
-					{...props}
-					onmousedown={preventSelectionLoss}
-					onclick={openDebug}
-					aria-label="调试 · 导出 Editor State"
-					title="调试 · 导出 Editor State"
-				>
-					<IconBug data-icon="inline-start" />
-				</Button>
-			{/snippet}
-		</Tooltip.Trigger>
-		<Tooltip.Content>调试 · 导出 Editor State</Tooltip.Content>
-	</Tooltip.Root>
+	<!-- ═══════════ 溢出菜单（动态内容）═══════════ -->
+	{#if overflowNotEmpty}
+		<DropdownMenu.Root>
+			<DropdownMenu.Trigger>
+				{#snippet child({ props })}
+					<Button variant="ghost" size="icon-sm" {...props} onmousedown={preventSelectionLoss} aria-label="更多" title="更多">
+						<IconDots data-icon="inline-start" />
+					</Button>
+				{/snippet}
+			</DropdownMenu.Trigger>
+			<DropdownMenu.Content align="end" class="w-56">
+				{#each overflowGroups as group, gi (group.heading)}
+					{#if gi > 0}
+						<DropdownMenu.Separator />
+					{/if}
+					<DropdownMenu.Group>
+						<DropdownMenu.GroupHeading>{group.heading}</DropdownMenu.GroupHeading>
+						{#each group.items as item (item.id)}
+							<DropdownMenu.Item onclick={item.action}>
+								<item.icon data-icon="inline-start" />
+								{item.label}
+								{#if item.shortcut}
+									<span class="ml-auto text-xs text-muted-foreground">{item.shortcut}</span>
+								{/if}
+							</DropdownMenu.Item>
+						{/each}
+					</DropdownMenu.Group>
+				{/each}
+			</DropdownMenu.Content>
+		</DropdownMenu.Root>
+	{/if}
 
-	<!-- 预览切换 -->
+	<!-- ═══════════ 预览切换 (Tier 0) ═══════════ -->
 	<Button
 		variant="ghost"
 		size="icon-sm"
@@ -410,6 +501,18 @@
 		{:else}
 			<IconEye data-icon="inline-start" />
 		{/if}
+	</Button>
+
+	<!-- ═══════════ 调试（始终最右）═══════════ -->
+	<Button
+		variant="ghost"
+		size="icon-sm"
+		onclick={openDebug}
+		onmousedown={preventSelectionLoss}
+		aria-label="调试 · 导出 Editor State"
+		title="调试 · 导出 Editor State"
+	>
+		<IconBug data-icon="inline-start" />
 	</Button>
 </div>
 
