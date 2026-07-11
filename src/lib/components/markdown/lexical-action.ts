@@ -31,6 +31,7 @@ import {
 	$createParagraphNode,
 	$createTextNode,
 	$getSelection,
+	$isRangeSelection,
 	FORMAT_TEXT_COMMAND,
 	CLEAR_EDITOR_COMMAND,
 	UNDO_COMMAND,
@@ -292,4 +293,72 @@ export function toggleOrderedList(editor: LexicalEditor) {
 /** 插入水平分割线 */
 export function insertHorizontalRule(editor: LexicalEditor) {
 	editor.dispatchCommand(INSERT_HORIZONTAL_RULE_COMMAND, undefined);
+}
+
+// ── 工具栏状态读取（封装 $ 前缀函数，避免 .svelte 文件直接导入）──
+
+/** 工具栏需要追踪的格式状态 */
+export interface ToolbarState {
+	isBold: boolean;
+	isItalic: boolean;
+	isUnderline: boolean;
+	isStrikethrough: boolean;
+	isCode: boolean;
+	isHighlight: boolean;
+	blockType: 'paragraph' | 'h1' | 'h2' | 'h3' | 'bullet' | 'number' | 'quote';
+}
+
+/**
+ * 在 editorState.read() 上下文中读取当前选区的格式状态。
+ *
+ * 封装 Lexical 的 $ 前缀函数，使 .svelte 文件无需直接导入它们
+ * （Svelte 5 编译器会误将 $ 前缀解析为 store 自动订阅）。
+ */
+export function readToolbarState(): ToolbarState {
+	const selection = $getSelection();
+	const state: ToolbarState = {
+		isBold: false,
+		isItalic: false,
+		isUnderline: false,
+		isStrikethrough: false,
+		isCode: false,
+		isHighlight: false,
+		blockType: 'paragraph'
+	};
+
+	if ($isRangeSelection(selection)) {
+		state.isBold = selection.hasFormat('bold');
+		state.isItalic = selection.hasFormat('italic');
+		state.isUnderline = selection.hasFormat('underline');
+		state.isStrikethrough = selection.hasFormat('strikethrough');
+		state.isCode = selection.hasFormat('code');
+		state.isHighlight = selection.hasFormat('highlight');
+	}
+
+	const root = $getRoot();
+	const firstChild = root.getChildren()[0];
+	const type = firstChild?.getType?.() ?? 'paragraph';
+	if (type === 'heading') {
+		const tag = (firstChild as { getTag?: () => string }).getTag?.() ?? 'h1';
+		state.blockType = tag as ToolbarState['blockType'];
+	} else if (type === 'list') {
+		const listType = (firstChild as { getListType?: () => string }).getListType?.() ?? 'bullet';
+		state.blockType = listType === 'number' ? 'number' : 'bullet';
+	} else if (type === 'quote') {
+		state.blockType = 'quote';
+	}
+
+	return state;
+}
+
+/** 将当前块转换为段落（用于 BlockMenu 的"正文"选项） */
+export function applyParagraph(editor: LexicalEditor) {
+	editor.update(() => {
+		const root = $getRoot();
+		const children = root.getChildren();
+		if (children[0]?.getType?.() !== 'paragraph') {
+			root.clear();
+			root.append($createParagraphNode());
+		}
+	});
 }

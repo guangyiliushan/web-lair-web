@@ -7,6 +7,9 @@
 
 export { default as MarkdownRenderer } from './MarkdownRenderer.svelte';
 export { default as MarkdownEditor } from './MarkdownEditor.svelte';
+export { default as EditorToolbar } from './EditorToolbar.svelte';
+export { default as EditorDebugDialog } from './EditorDebugDialog.svelte';
+export { default as CodeModeToggle } from './CodeModeToggle.svelte';
 
 export {
 	renderMarkdownToHtmlSync,
