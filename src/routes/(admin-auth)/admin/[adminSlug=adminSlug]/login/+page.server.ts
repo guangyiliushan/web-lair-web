@@ -6,11 +6,7 @@ import { auth } from '$lib/server/auth';
 import { db } from '$lib/server/db';
 import { adminAccounts } from '$lib/server/db/account/admin-account.schema';
 import { session as authSession } from '$lib/server/db/auth.schema';
-import {
-	ADMIN_BASE_PATH,
-	getAdminConfig,
-	isAllowedAdminEmail
-} from '$lib/server/config/admin';
+import { ADMIN_BASE_PATH, getAdminConfig, isAllowedAdminEmail } from '$lib/server/config/admin';
 import { issueAdminSessionCookie } from '$lib/server/security/admin-cookie';
 import { safeRedirect } from '$lib/server/safe-redirect';
 import type { Session, User } from 'better-auth';

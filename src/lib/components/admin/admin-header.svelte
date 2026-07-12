@@ -36,14 +36,10 @@
 	let { title, actions, class: className }: Props = $props();
 
 	// ── 路由感知：页面标题 ──
-	const pageTitle = $derived(
-		title ?? resolveTitle(page.url.pathname)
-	);
+	const pageTitle = $derived(title ?? resolveTitle(page.url.pathname));
 
 	// ── 路由感知：操作按钮 ──
-	const pageActions = $derived(
-		actions ?? resolveActions(page.url.pathname)
-	);
+	const pageActions = $derived(actions ?? resolveActions(page.url.pathname));
 
 	// ── 工具函数 ──
 
@@ -72,90 +68,224 @@
 
 	function resolveActions(pathname: string): HeaderAction[] {
 		// 博文相关
-		if (pathname.startsWith('/admin/posts/new') || pathname.match(/^\/admin\/posts\/[^/]+\/edit$/)) {
+		if (
+			pathname.startsWith('/admin/posts/new') ||
+			pathname.match(/^\/admin\/posts\/[^/]+\/edit$/)
+		) {
 			return [
-				{ label: '返回列表', icon: IconArrowLeft, variant: 'outline', size: 'sm', href: '/admin/posts' },
-				{ label: '访问站点', icon: IconExternalLink, variant: 'ghost', size: 'sm', onclick: () => window.open('/', '_blank') }
+				{
+					label: '返回列表',
+					icon: IconArrowLeft,
+					variant: 'outline',
+					size: 'sm',
+					href: '/admin/posts'
+				},
+				{
+					label: '访问站点',
+					icon: IconExternalLink,
+					variant: 'ghost',
+					size: 'sm',
+					onclick: () => window.open('/', '_blank')
+				}
 			];
 		}
 		if (pathname.startsWith('/admin/posts')) {
 			return [
-				{ label: '新建博文', icon: IconPlus, variant: 'default', size: 'sm', href: '/admin/posts/edit' },
-				{ label: '访问站点', icon: IconExternalLink, variant: 'ghost', size: 'sm', onclick: () => window.open('/', '_blank') }
+				{
+					label: '新建博文',
+					icon: IconPlus,
+					variant: 'default',
+					size: 'sm',
+					href: '/admin/posts/edit'
+				},
+				{
+					label: '访问站点',
+					icon: IconExternalLink,
+					variant: 'ghost',
+					size: 'sm',
+					onclick: () => window.open('/', '_blank')
+				}
 			];
 		}
 
 		// 手记相关
-		if (pathname.startsWith('/admin/notes/new') || pathname.match(/^\/admin\/notes\/[^/]+\/edit$/)) {
+		if (
+			pathname.startsWith('/admin/notes/new') ||
+			pathname.match(/^\/admin\/notes\/[^/]+\/edit$/)
+		) {
 			return [
-				{ label: '返回列表', icon: IconArrowLeft, variant: 'outline', size: 'sm', href: '/admin/notes' },
-				{ label: '访问站点', icon: IconExternalLink, variant: 'ghost', size: 'sm', onclick: () => window.open('/', '_blank') }
+				{
+					label: '返回列表',
+					icon: IconArrowLeft,
+					variant: 'outline',
+					size: 'sm',
+					href: '/admin/notes'
+				},
+				{
+					label: '访问站点',
+					icon: IconExternalLink,
+					variant: 'ghost',
+					size: 'sm',
+					onclick: () => window.open('/', '_blank')
+				}
 			];
 		}
 		if (pathname.startsWith('/admin/notes')) {
 			return [
-				{ label: '新建手记', icon: IconPlus, variant: 'default', size: 'sm', href: '/admin/notes/new' },
-				{ label: '访问站点', icon: IconExternalLink, variant: 'ghost', size: 'sm', onclick: () => window.open('/', '_blank') }
+				{
+					label: '新建手记',
+					icon: IconPlus,
+					variant: 'default',
+					size: 'sm',
+					href: '/admin/notes/new'
+				},
+				{
+					label: '访问站点',
+					icon: IconExternalLink,
+					variant: 'ghost',
+					size: 'sm',
+					onclick: () => window.open('/', '_blank')
+				}
 			];
 		}
 
 		// 说说相关
 		if (pathname.startsWith('/admin/says/new') || pathname.match(/^\/admin\/says\/[^/]+\/edit$/)) {
 			return [
-				{ label: '返回列表', icon: IconArrowLeft, variant: 'outline', size: 'sm', href: '/admin/says' },
-				{ label: '访问站点', icon: IconExternalLink, variant: 'ghost', size: 'sm', onclick: () => window.open('/', '_blank') }
+				{
+					label: '返回列表',
+					icon: IconArrowLeft,
+					variant: 'outline',
+					size: 'sm',
+					href: '/admin/says'
+				},
+				{
+					label: '访问站点',
+					icon: IconExternalLink,
+					variant: 'ghost',
+					size: 'sm',
+					onclick: () => window.open('/', '_blank')
+				}
 			];
 		}
 		if (pathname.startsWith('/admin/says')) {
 			return [
-				{ label: '新建说说', icon: IconPlus, variant: 'default', size: 'sm', href: '/admin/says/new' },
-				{ label: '访问站点', icon: IconExternalLink, variant: 'ghost', size: 'sm', onclick: () => window.open('/', '_blank') }
+				{
+					label: '新建说说',
+					icon: IconPlus,
+					variant: 'default',
+					size: 'sm',
+					href: '/admin/says/new'
+				},
+				{
+					label: '访问站点',
+					icon: IconExternalLink,
+					variant: 'ghost',
+					size: 'sm',
+					onclick: () => window.open('/', '_blank')
+				}
 			];
 		}
 
 		// 页面管理
 		if (pathname.startsWith('/admin/pages')) {
 			return [
-				{ label: '新建页面', icon: IconPlus, variant: 'default', size: 'sm', href: '/admin/pages/new' },
-				{ label: '访问站点', icon: IconExternalLink, variant: 'ghost', size: 'sm', onclick: () => window.open('/', '_blank') }
+				{
+					label: '新建页面',
+					icon: IconPlus,
+					variant: 'default',
+					size: 'sm',
+					href: '/admin/pages/new'
+				},
+				{
+					label: '访问站点',
+					icon: IconExternalLink,
+					variant: 'ghost',
+					size: 'sm',
+					onclick: () => window.open('/', '_blank')
+				}
 			];
 		}
 
 		// 文件管理
 		if (pathname.startsWith('/admin/files')) {
 			return [
-				{ label: '上传文件', icon: IconUpload, variant: 'default', size: 'sm', href: '/admin/files/upload' },
-				{ label: '访问站点', icon: IconExternalLink, variant: 'ghost', size: 'sm', onclick: () => window.open('/', '_blank') }
+				{
+					label: '上传文件',
+					icon: IconUpload,
+					variant: 'default',
+					size: 'sm',
+					href: '/admin/files/upload'
+				},
+				{
+					label: '访问站点',
+					icon: IconExternalLink,
+					variant: 'ghost',
+					size: 'sm',
+					onclick: () => window.open('/', '_blank')
+				}
 			];
 		}
 
 		// 友链管理
 		if (pathname.startsWith('/admin/friends')) {
 			return [
-				{ label: '添加友链', icon: IconUserPlus, variant: 'default', size: 'sm', href: '/admin/friends/new' },
-				{ label: '访问站点', icon: IconExternalLink, variant: 'ghost', size: 'sm', onclick: () => window.open('/', '_blank') }
+				{
+					label: '添加友链',
+					icon: IconUserPlus,
+					variant: 'default',
+					size: 'sm',
+					href: '/admin/friends/new'
+				},
+				{
+					label: '访问站点',
+					icon: IconExternalLink,
+					variant: 'ghost',
+					size: 'sm',
+					onclick: () => window.open('/', '_blank')
+				}
 			];
 		}
 
 		// 草稿箱 / 读者管理
 		if (pathname.startsWith('/admin/drafts')) {
 			return [
-				{ label: '预览站点', icon: IconEye, variant: 'ghost', size: 'sm', onclick: () => window.open('/', '_blank') },
-				{ label: '访问站点', icon: IconExternalLink, variant: 'ghost', size: 'sm', onclick: () => window.open('/', '_blank') }
+				{
+					label: '预览站点',
+					icon: IconEye,
+					variant: 'ghost',
+					size: 'sm',
+					onclick: () => window.open('/', '_blank')
+				},
+				{
+					label: '访问站点',
+					icon: IconExternalLink,
+					variant: 'ghost',
+					size: 'sm',
+					onclick: () => window.open('/', '_blank')
+				}
 			];
 		}
 
 		// 默认：仅访问站点
 		return [
-			{ label: '访问站点', icon: IconExternalLink, variant: 'ghost', size: 'sm', onclick: () => window.open('/', '_blank') }
+			{
+				label: '访问站点',
+				icon: IconExternalLink,
+				variant: 'ghost',
+				size: 'sm',
+				onclick: () => window.open('/', '_blank')
+			}
 		];
 	}
 </script>
 
-<header class={cn(
-	'sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background/95 px-4 backdrop-blur sm:px-6',
-	className
-)}>
+<header
+	class={cn(
+		'sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background/95 px-4 backdrop-blur sm:px-6',
+		className
+	)}
+>
 	<Sidebar.Trigger class="-ml-1" />
 	<Separator orientation="vertical" class="h-6" />
 	<div class="flex flex-1 items-center justify-between">

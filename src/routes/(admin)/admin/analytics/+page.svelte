@@ -18,7 +18,7 @@
 
 	<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 		<div class="rounded-lg border bg-card p-4">
-			<p class="text-xs text-muted-foreground uppercase tracking-wide">Today Views</p>
+			<p class="text-xs tracking-wide text-muted-foreground uppercase">Today Views</p>
 			<p class="mt-1 text-2xl font-bold">{data.overview.todayPv}</p>
 		</div>
 	</div>

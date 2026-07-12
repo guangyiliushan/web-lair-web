@@ -1,16 +1,9 @@
-import {
-	index,
-	integer,
-	jsonb,
-	pgTable,
-	text,
-	timestamp,
-} from 'drizzle-orm/pg-core'
-import { enrichmentCache } from './enrichment-cache.schema'
+import { index, integer, jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
+import { enrichmentCache } from './enrichment-cache.schema';
 
 export interface EnrichmentImagePalette {
-	dominant: string
-	swatches?: string[]
+	dominant: string;
+	swatches?: string[];
 }
 
 export const enrichmentCaptures = pgTable(
@@ -27,11 +20,7 @@ export const enrichmentCaptures = pgTable(
 		thumbhash: text('thumbhash'),
 		palette: jsonb('palette').$type<EnrichmentImagePalette>(),
 		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-		lastAccessedAt: timestamp('last_accessed_at', { withTimezone: true })
-			.notNull()
-			.defaultNow()
+		lastAccessedAt: timestamp('last_accessed_at', { withTimezone: true }).notNull().defaultNow()
 	},
-	(table) => [
-		index('enrichment_captures_lru_idx').on(table.lastAccessedAt.asc())
-	]
-)
+	(table) => [index('enrichment_captures_lru_idx').on(table.lastAccessedAt.asc())]
+);

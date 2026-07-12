@@ -1,11 +1,5 @@
-import { sql } from 'drizzle-orm'
-import {
-	index,
-	jsonb,
-	pgTable,
-	text,
-	timestamp,
-} from 'drizzle-orm/pg-core'
+import { sql } from 'drizzle-orm';
+import { index, jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
 export const aiAgentConversations = pgTable(
 	'ai_agent_conversations',
@@ -20,7 +14,7 @@ export const aiAgentConversations = pgTable(
 			.notNull()
 			.default(sql`'[]'::jsonb`),
 		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-		updatedAt: timestamp('updated_at', { withTimezone: true }),
+		updatedAt: timestamp('updated_at', { withTimezone: true })
 	},
-	(table) => [index('ai_agent_conversations_session_idx').on(table.sessionId)],
-)
+	(table) => [index('ai_agent_conversations_session_idx').on(table.sessionId)]
+);

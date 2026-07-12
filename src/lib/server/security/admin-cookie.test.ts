@@ -1,7 +1,11 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { Cookies } from '@sveltejs/kit';
 import type { Session, User } from 'better-auth';
-import { clearAdminSessionCookie, getAdminSessionContext, issueAdminSessionCookie } from './admin-cookie';
+import {
+	clearAdminSessionCookie,
+	getAdminSessionContext,
+	issueAdminSessionCookie
+} from './admin-cookie';
 
 class MockCookies implements Pick<Cookies, 'get' | 'set' | 'delete'> {
 	private jar = new Map<string, string>();
@@ -57,12 +61,7 @@ describe('admin-cookie', () => {
 		const session = testSession('session-1', 'user-1');
 
 		issueAdminSessionCookie(cookies as unknown as Cookies, user, session, 'secret');
-		const context = getAdminSessionContext(
-			cookies as unknown as Cookies,
-			user,
-			session,
-			'secret'
-		);
+		const context = getAdminSessionContext(cookies as unknown as Cookies, user, session, 'secret');
 
 		expect(context).toMatchObject({
 			userId: 'user-1',

@@ -1,10 +1,4 @@
-import {
-	integer,
-	pgTable,
-	text,
-	timestamp,
-	uniqueIndex,
-} from 'drizzle-orm/pg-core'
+import { integer, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 
 export const links = pgTable(
 	'links',
@@ -23,4 +17,4 @@ export const links = pgTable(
 		uniqueIndex('links_name_uniq').on(table.name),
 		uniqueIndex('links_url_uniq').on(table.url)
 	]
-)
+);

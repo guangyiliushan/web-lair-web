@@ -1,10 +1,4 @@
-import {
-	index,
-	jsonb,
-	pgTable,
-	text,
-	timestamp,
-} from 'drizzle-orm/pg-core'
+import { index, jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
 export const analytics = pgTable(
 	'analytics',
@@ -23,4 +17,4 @@ export const analytics = pgTable(
 		index('analytics_visited_at_referrer_idx').on(table.visitedAt, table.referrer),
 		index('analytics_visited_at_ip_idx').on(table.visitedAt, table.ip)
 	]
-)
+);

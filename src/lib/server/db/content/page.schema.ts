@@ -1,12 +1,4 @@
-import {
-	index,
-	integer,
-	jsonb,
-	pgTable,
-	text,
-	timestamp,
-	uniqueIndex,
-} from 'drizzle-orm/pg-core'
+import { index, integer, jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 
 export const pages = pgTable(
 	'pages',
@@ -22,10 +14,10 @@ export const pages = pgTable(
 		images: jsonb('images').$type<unknown[]>(),
 		meta: jsonb('meta').$type<Record<string, unknown>>(),
 		sortOrder: integer('sort_order').notNull().default(1),
-		modifiedAt: timestamp('modified_at', { withTimezone: true }),
+		modifiedAt: timestamp('modified_at', { withTimezone: true })
 	},
 	(table) => [
 		uniqueIndex('pages_slug_uniq').on(table.slug),
-		index('pages_sort_order_idx').on(table.sortOrder),
-	],
-)
+		index('pages_sort_order_idx').on(table.sortOrder)
+	]
+);

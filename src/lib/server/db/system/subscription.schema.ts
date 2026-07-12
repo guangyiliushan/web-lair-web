@@ -1,11 +1,4 @@
-import {
-	boolean,
-	integer,
-	pgTable,
-	text,
-	timestamp,
-	uniqueIndex,
-} from 'drizzle-orm/pg-core'
+import { boolean, integer, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 
 export const subscriptions = pgTable(
 	'subscriptions',
@@ -21,4 +14,4 @@ export const subscriptions = pgTable(
 		uniqueIndex('subscriptions_email_uniq').on(table.email),
 		uniqueIndex('subscriptions_cancel_token_uniq').on(table.cancelToken)
 	]
-)
+);

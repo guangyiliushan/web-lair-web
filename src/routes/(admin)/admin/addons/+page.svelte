@@ -8,6 +8,8 @@
 		<p class="text-sm text-muted-foreground">Additional site features and toggles.</p>
 	</div>
 	<div class="rounded-xl border bg-background p-6">
-		<p class="text-sm text-muted-foreground">Extra Features module — planned for a future release.</p>
+		<p class="text-sm text-muted-foreground">
+			Extra Features module — planned for a future release.
+		</p>
 	</div>
 </div>

@@ -6,8 +6,8 @@ import {
 	text,
 	timestamp,
 	uniqueIndex,
-	varchar,
-} from 'drizzle-orm/pg-core'
+	varchar
+} from 'drizzle-orm/pg-core';
 
 export const enrichmentCache = pgTable(
 	'enrichment_cache',
@@ -33,4 +33,4 @@ export const enrichmentCache = pgTable(
 		),
 		index('enrichment_cache_expires_at_idx').on(table.expiresAt)
 	]
-)
+);

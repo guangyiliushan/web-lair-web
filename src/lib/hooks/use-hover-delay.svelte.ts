@@ -12,14 +12,16 @@
  * // hover.close() → closes after delay
  * ```
  */
-export function useHoverDelay(options: {
-	/** Close delay in ms (default: 150) */
-	delay?: number;
-	/** Callback when opened */
-	onOpen?: () => void;
-	/** Callback when closed */
-	onClose?: () => void;
-} = {}) {
+export function useHoverDelay(
+	options: {
+		/** Close delay in ms (default: 150) */
+		delay?: number;
+		/** Callback when opened */
+		onOpen?: () => void;
+		/** Callback when closed */
+		onClose?: () => void;
+	} = {}
+) {
 	const { delay = 150, onOpen, onClose } = options;
 
 	let closeTimer = $state<ReturnType<typeof setTimeout> | null>(null);

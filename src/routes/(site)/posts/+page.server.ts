@@ -22,7 +22,8 @@ export const load: PageServerLoad = async () => {
 	const posts: PostItem[] = [
 		{
 			slug: 'ai-era-efficiency-paradox',
-			title: 'The Efficiency Paradox of the AI Era: When Increased Productivity Brings Fatigue Instead',
+			title:
+				'The Efficiency Paradox of the AI Era: When Increased Productivity Brings Fatigue Instead',
 			excerpt:
 				'Yesterday I saw an article about whether AI makes us feel fatigued. The more powerful our tools become, the more we seem to struggle with burnout.',
 			date: 'March 1, 2026',

@@ -11,14 +11,7 @@
 		children?: import('svelte').Snippet;
 	}
 
-	let {
-		icon: Icon,
-		label,
-		value,
-		description,
-		class: className,
-		children
-	}: Props = $props();
+	let { icon: Icon, label, value, description, class: className, children }: Props = $props();
 </script>
 
 <div class={cn('bg-card p-4', className)}>

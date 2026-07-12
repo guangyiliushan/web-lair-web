@@ -1,9 +1,4 @@
-import {
-	index,
-	pgTable,
-	text,
-	timestamp,
-} from 'drizzle-orm/pg-core'
+import { index, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
 export const quotes = pgTable(
 	'quotes',
@@ -15,4 +10,4 @@ export const quotes = pgTable(
 		author: text('author')
 	},
 	(table) => [index('quotes_created_at_idx').on(table.createdAt)]
-)
+);

@@ -7,7 +7,7 @@
 		html: htmlProp,
 		class: className,
 		prose = false,
-		children,
+		children
 	}: MarkdownRendererProps = $props();
 
 	// 优先使用预渲染 HTML（SSR 场景由 +page.server.ts 传入）

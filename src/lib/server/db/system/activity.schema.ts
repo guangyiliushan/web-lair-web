@@ -1,11 +1,4 @@
-import {
-	index,
-	integer,
-	jsonb,
-	pgTable,
-	text,
-	timestamp,
-} from 'drizzle-orm/pg-core'
+import { index, integer, jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
 export const activities = pgTable(
 	'activities',
@@ -16,4 +9,4 @@ export const activities = pgTable(
 		payload: jsonb('payload').$type<Record<string, unknown> | null>()
 	},
 	(table) => [index('activities_created_at_idx').on(table.createdAt)]
-)
+);

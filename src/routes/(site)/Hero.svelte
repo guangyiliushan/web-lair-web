@@ -130,7 +130,7 @@
 
 	<!-- 底部欢迎 + 可点击滚动指示器：多断点响应式，shrink-0 固定于首屏底 -->
 	<div
-		class="z-10 flex shrink-0 flex-col items-center gap-2 pb-4 pt-2 sm:gap-2.5 sm:pb-6 sm:pt-3 md:gap-3 md:pb-8 md:pt-4 lg:pb-10 lg:pt-6"
+		class="z-10 flex shrink-0 flex-col items-center gap-2 pt-2 pb-4 sm:gap-2.5 sm:pt-3 sm:pb-6 md:gap-3 md:pt-4 md:pb-8 lg:pt-6 lg:pb-10"
 	>
 		<p
 			class="max-w-[18rem] text-center text-xs leading-relaxed text-muted-foreground sm:max-w-xs sm:text-sm md:max-w-sm md:text-base"

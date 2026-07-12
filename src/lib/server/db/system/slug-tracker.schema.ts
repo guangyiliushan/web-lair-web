@@ -1,8 +1,4 @@
-import {
-	index,
-	pgTable,
-	text,
-} from 'drizzle-orm/pg-core'
+import { index, pgTable, text } from 'drizzle-orm/pg-core';
 
 export const slugTrackers = pgTable(
 	'slug_trackers',
@@ -16,4 +12,4 @@ export const slugTrackers = pgTable(
 		index('slug_trackers_type_target_idx').on(table.type, table.targetId),
 		index('slug_trackers_slug_type_idx').on(table.slug, table.type)
 	]
-)
+);

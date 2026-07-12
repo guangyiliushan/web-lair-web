@@ -16,10 +16,7 @@ export async function tryTailscaleAutoLogin(): Promise<{
 	if (!isTailscaleRequest()) return null;
 
 	// 查找唯一的 admin 用户
-	const adminRow = await db
-		.select({ userId: adminAccounts.userId })
-		.from(adminAccounts)
-		.limit(1);
+	const adminRow = await db.select({ userId: adminAccounts.userId }).from(adminAccounts).limit(1);
 
 	if (adminRow.length === 0) return null;
 

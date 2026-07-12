@@ -30,7 +30,7 @@
 			views: 1651,
 			comments: 10,
 			likes: 89,
-			updatedAt: '1个月前',
+			updatedAt: '1个月前'
 		},
 		{
 			id: '2',
@@ -42,7 +42,7 @@
 			views: 1402,
 			comments: 19,
 			likes: 156,
-			updatedAt: '29天前',
+			updatedAt: '29天前'
 		},
 		{
 			id: '3',
@@ -54,7 +54,7 @@
 			views: 3193,
 			comments: 30,
 			likes: 234,
-			updatedAt: '3个月前',
+			updatedAt: '3个月前'
 		},
 		{
 			id: '4',
@@ -66,7 +66,7 @@
 			views: 1972,
 			comments: 15,
 			likes: 178,
-			updatedAt: '3个月前',
+			updatedAt: '3个月前'
 		},
 		{
 			id: '5',
@@ -78,7 +78,7 @@
 			views: 1383,
 			comments: 16,
 			likes: 145,
-			updatedAt: '4个月前',
+			updatedAt: '4个月前'
 		},
 		{
 			id: '6',
@@ -90,7 +90,7 @@
 			views: 685,
 			comments: 9,
 			likes: 67,
-			updatedAt: '4个月前',
+			updatedAt: '4个月前'
 		},
 		{
 			id: '7',
@@ -102,7 +102,7 @@
 			views: 10155,
 			comments: 117,
 			likes: 892,
-			updatedAt: '4个月前',
+			updatedAt: '4个月前'
 		},
 		{
 			id: '8',
@@ -114,15 +114,15 @@
 			views: 3180,
 			comments: 28,
 			likes: 267,
-			updatedAt: '8个月前',
-		},
+			updatedAt: '8个月前'
+		}
 	];
 
 	let searchQuery = $state('');
 	let selectedStatus = $state('all');
 
 	const filteredPosts = $derived(
-		posts.filter(post => {
+		posts.filter((post) => {
 			const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase());
 			const matchesStatus = selectedStatus === 'all' || post.status === selectedStatus;
 			return matchesSearch && matchesStatus;
@@ -162,13 +162,8 @@
 	<Card.Root>
 		<Card.Content class="flex flex-col gap-4 p-4 sm:flex-row sm:items-center">
 			<div class="relative flex-1">
-				<IconSearch class="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-				<Input
-					type="search"
-					placeholder="搜索标题..."
-					class="pl-9"
-					bind:value={searchQuery}
-				/>
+				<IconSearch class="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+				<Input type="search" placeholder="搜索标题..." class="pl-9" bind:value={searchQuery} />
 			</div>
 			<div class="flex gap-2">
 				<Button variant="outline" size="sm">
@@ -223,9 +218,9 @@
 									</Table.Cell>
 									<Table.Cell>
 										<div class="flex flex-col gap-1">
-											<a 
-												href="/admin/posts/{post.id}/edit" 
-												class="font-medium hover:text-primary line-clamp-1"
+											<a
+												href="/admin/posts/{post.id}/edit"
+												class="line-clamp-1 font-medium hover:text-primary"
 											>
 												{post.title}
 											</a>
@@ -254,23 +249,23 @@
 											</span>
 										</div>
 									</Table.Cell>
-									<Table.Cell class="hidden sm:table-cell text-muted-foreground">
+									<Table.Cell class="hidden text-muted-foreground sm:table-cell">
 										{post.updatedAt}
 									</Table.Cell>
 									<Table.Cell class="text-right">
 										<div class="flex items-center justify-end gap-1">
-											<Button 
-												variant="ghost" 
-												size="icon" 
-												class="size-8 opacity-0 group-hover:opacity-100 transition-opacity"
+											<Button
+												variant="ghost"
+												size="icon"
+												class="size-8 opacity-0 transition-opacity group-hover:opacity-100"
 												onclick={() => window.open(`/${post.slug}`, '_blank')}
 											>
 												<IconExternalLink class="size-4" />
 											</Button>
-											<Button 
-												variant="ghost" 
-												size="icon" 
-												class="size-8 opacity-0 group-hover:opacity-100 transition-opacity"
+											<Button
+												variant="ghost"
+												size="icon"
+												class="size-8 opacity-0 transition-opacity group-hover:opacity-100"
 												href="/admin/posts/{post.id}/edit"
 											>
 												<IconPencil class="size-4" />
@@ -285,7 +280,9 @@
 												</DropdownMenu.Trigger>
 												<DropdownMenu.Content align="end">
 													<DropdownMenu.Group>
-														<DropdownMenu.Item onclick={() => window.open(`/${post.slug}`, '_blank')}>
+														<DropdownMenu.Item
+															onclick={() => window.open(`/${post.slug}`, '_blank')}
+														>
 															<IconExternalLink data-icon="inline-start" />
 															查看
 														</DropdownMenu.Item>

@@ -44,7 +44,7 @@
 		{ title: '数据', href: '/admin/analytics', icon: IconChartBar },
 		{ title: '设定', href: '/admin/settings', icon: IconSettings },
 		{ title: '附加功能', href: '/admin/addons', icon: IconPuzzle },
-		{ title: '维护', href: '/admin/maintenance', icon: IconTool },
+		{ title: '维护', href: '/admin/maintenance', icon: IconTool }
 	];
 
 	const user = $derived(data.auth?.user);
@@ -67,7 +67,9 @@
 									<span class="flex size-8 shrink-0 items-center justify-center">
 										<Avatar.Root class="size-6 rounded-md">
 											<Avatar.Image src={avatarSrc} alt={displayName} />
-											<Avatar.Fallback class="rounded-md bg-primary text-primary-foreground text-xs">
+											<Avatar.Fallback
+												class="rounded-md bg-primary text-xs text-primary-foreground"
+											>
 												{avatarFallback}
 											</Avatar.Fallback>
 										</Avatar.Root>
@@ -76,7 +78,9 @@
 										<span class="truncate font-semibold">{displayName}</span>
 										<span class="truncate text-xs text-muted-foreground">{email}</span>
 									</div>
-									<IconChevronRight class="ml-auto transition-transform group-data-[state=open]/menu-button:rotate-90" />
+									<IconChevronRight
+										class="ml-auto transition-transform group-data-[state=open]/menu-button:rotate-90"
+									/>
 								</Sidebar.MenuButton>
 							{/snippet}
 						</DropdownMenu.Trigger>
@@ -95,7 +99,12 @@
 							</DropdownMenu.Group>
 							<DropdownMenu.Separator />
 							<form method="post" action="/auth/sign-out">
-								<DropdownMenu.Item class="text-destructive focus:text-destructive" onclick={(e) => { e.currentTarget.closest('form')?.submit(); }}>
+								<DropdownMenu.Item
+									class="text-destructive focus:text-destructive"
+									onclick={(e) => {
+										e.currentTarget.closest('form')?.submit();
+									}}
+								>
 									<IconLogout data-icon="inline-start" />
 									退出登录
 								</DropdownMenu.Item>
@@ -107,14 +116,17 @@
 		</Sidebar.Header>
 
 		<Sidebar.Content class="px-2">
-				<Sidebar.Menu class="gap-1">
+			<Sidebar.Menu class="gap-1">
 				{#each navItems as item (item.href)}
-					{@const isActive = page.url.pathname === item.href || page.url.pathname.startsWith(`${item.href}/`)}
-				<Sidebar.MenuItem>
+					{@const isActive =
+						page.url.pathname === item.href || page.url.pathname.startsWith(`${item.href}/`)}
+					<Sidebar.MenuItem>
 						<Sidebar.MenuButton {isActive} tooltipContent={item.title}>
-						{#snippet child({ props })}
-							<a href={item.href} {...props}>
-								<span class="flex size-8 shrink-0 items-center justify-center group-data-[collapsible=icon]:size-4">
+							{#snippet child({ props })}
+								<a href={item.href} {...props}>
+									<span
+										class="flex size-8 shrink-0 items-center justify-center group-data-[collapsible=icon]:size-4"
+									>
 										<item.icon />
 									</span>
 									<span>{item.title}</span>

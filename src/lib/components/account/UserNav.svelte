@@ -26,12 +26,8 @@
 	let { auth }: { auth?: AuthData } = $props();
 
 	// Avatar source priority: profile.avatarUrl user.image akkarin.png
-	const avatarSrc = $derived(
-		auth?.profile?.avatarUrl ?? auth?.user?.image ?? akkarinPng
-	);
-	const displayName = $derived(
-		auth?.profile?.displayName ?? auth?.user?.name ?? ''
-	);
+	const avatarSrc = $derived(auth?.profile?.avatarUrl ?? auth?.user?.image ?? akkarinPng);
+	const displayName = $derived(auth?.profile?.displayName ?? auth?.user?.name ?? '');
 	const userEmail = $derived(auth?.user?.email ?? '');
 	const loginHref = $derived(
 		`/login?redirectTo=${encodeURIComponent(page.url.pathname + page.url.search)}`
@@ -41,7 +37,7 @@
 {#if auth?.user}
 	<DropdownMenu.Root>
 		<DropdownMenu.Trigger
-			class="inline-flex size-10 cursor-pointer items-center justify-center rounded-full transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+			class="inline-flex size-10 cursor-pointer items-center justify-center rounded-full transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
 			aria-label={m.nav_open_user_menu()}
 		>
 			<Avatar.Root size="lg">
@@ -54,7 +50,7 @@
 
 		<DropdownMenu.Content sideOffset={8} align="end" class="w-56">
 			<div class="px-2 py-1.5">
-				<p class="truncate text-sm font-medium leading-none">{displayName}</p>
+				<p class="truncate text-sm leading-none font-medium">{displayName}</p>
 				{#if userEmail}
 					<p class="mt-1.5 truncate text-xs leading-none text-muted-foreground">
 						{userEmail}
@@ -83,7 +79,11 @@
 
 			<DropdownMenu.Group>
 				<DropdownMenu.Item variant="destructive">
-					<button type="submit" form="user-nav-sign-out" class="flex w-full items-center gap-1.5 text-left">
+					<button
+						type="submit"
+						form="user-nav-sign-out"
+						class="flex w-full items-center gap-1.5 text-left"
+					>
 						<IconLogout />
 						{m.nav_sign_out()}
 					</button>
@@ -94,7 +94,7 @@
 {:else}
 	<a
 		href={loginHref}
-		class="inline-flex size-10 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+		class="inline-flex size-10 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
 		aria-label={m.nav_sign_in()}
 	>
 		<IconUser />

@@ -1,4 +1,4 @@
-import { jsonb, pgTable, text, uniqueIndex } from 'drizzle-orm/pg-core'
+import { jsonb, pgTable, text, uniqueIndex } from 'drizzle-orm/pg-core';
 
 export const options = pgTable(
 	'options',
@@ -8,4 +8,4 @@ export const options = pgTable(
 		value: jsonb('value').$type<unknown>()
 	},
 	(table) => [uniqueIndex('options_name_uniq').on(table.name)]
-)
+);

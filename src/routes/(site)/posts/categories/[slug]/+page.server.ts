@@ -58,9 +58,7 @@ export const load: PageServerLoad = async ({ params }) => {
 	const byYear = new Map<number, CategoryPostItem[]>();
 	for (const p of assembled) {
 		// Extract year from the post date (first 4 chars of date string, or current year as fallback)
-		const year = p.date
-			? new Date(p.date).getFullYear()
-			: new Date().getFullYear();
+		const year = p.date ? new Date(p.date).getFullYear() : new Date().getFullYear();
 		if (!byYear.has(year)) byYear.set(year, []);
 		byYear.get(year)!.push(p);
 	}
@@ -90,13 +88,10 @@ export const load: PageServerLoad = async ({ params }) => {
 	// ── Earliest year for display ──
 	const earliestYear =
 		postRows.length > 0
-			? postRows.reduce(
-					(earliest: number, p) => {
-						const y = p.createdAt ? new Date(p.createdAt).getFullYear() : new Date().getFullYear();
-						return y < earliest ? y : earliest;
-					},
-					new Date().getFullYear()
-				)
+			? postRows.reduce((earliest: number, p) => {
+					const y = p.createdAt ? new Date(p.createdAt).getFullYear() : new Date().getFullYear();
+					return y < earliest ? y : earliest;
+				}, new Date().getFullYear())
 			: new Date().getFullYear();
 
 	return {

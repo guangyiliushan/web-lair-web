@@ -6,9 +6,9 @@ import {
 	pgTable,
 	text,
 	timestamp,
-	uniqueIndex,
-} from 'drizzle-orm/pg-core'
-import { user } from '../auth.schema'
+	uniqueIndex
+} from 'drizzle-orm/pg-core';
+import { user } from '../auth.schema';
 
 export const apiKeys = pgTable(
 	'api_keys',
@@ -41,4 +41,4 @@ export const apiKeys = pgTable(
 		uniqueIndex('api_keys_key_uniq').on(table.key),
 		index('api_keys_user_id_idx').on(table.userId)
 	]
-)
+);

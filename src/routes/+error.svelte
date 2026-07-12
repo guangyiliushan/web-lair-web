@@ -11,7 +11,15 @@
 	const isServerError = $derived(status >= 500);
 
 	const heading = $derived(
-		isNotFound ? 'Page not found' : isForbidden ? 'Access denied' : isUnauthorized ? 'Login required' : isServerError ? 'Server error' : 'Something went wrong'
+		isNotFound
+			? 'Page not found'
+			: isForbidden
+				? 'Access denied'
+				: isUnauthorized
+					? 'Login required'
+					: isServerError
+						? 'Server error'
+						: 'Something went wrong'
 	);
 
 	const description = $derived(
@@ -72,7 +80,11 @@
 		{#if import.meta.env.DEV && page.error}
 			<details class="mt-8 rounded-md border p-4 text-left text-xs">
 				<summary class="cursor-pointer font-medium">Error details (dev only)</summary>
-				<pre class="mt-2 overflow-x-auto text-muted-foreground">{JSON.stringify(page.error, null, 2)}</pre>
+				<pre class="mt-2 overflow-x-auto text-muted-foreground">{JSON.stringify(
+						page.error,
+						null,
+						2
+					)}</pre>
 			</details>
 		{/if}
 	</div>

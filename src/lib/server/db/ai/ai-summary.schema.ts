@@ -1,4 +1,4 @@
-import { index, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import { index, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
 export const aiSummaries = pgTable(
 	'ai_summaries',
@@ -8,7 +8,7 @@ export const aiSummaries = pgTable(
 		hash: text('hash').notNull(),
 		summary: text('summary').notNull(),
 		refId: text('ref_id').notNull(),
-		lang: text('lang'),
+		lang: text('lang')
 	},
-	(table) => [index('ai_summaries_ref_id_idx').on(table.refId)],
-)
+	(table) => [index('ai_summaries_ref_id_idx').on(table.refId)]
+);

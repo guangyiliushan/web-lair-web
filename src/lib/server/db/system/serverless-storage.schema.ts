@@ -1,9 +1,4 @@
-import {
-	jsonb,
-	pgTable,
-	text,
-	uniqueIndex,
-} from 'drizzle-orm/pg-core'
+import { jsonb, pgTable, text, uniqueIndex } from 'drizzle-orm/pg-core';
 
 export const serverlessStorages = pgTable(
 	'serverless_storages',
@@ -13,10 +8,5 @@ export const serverlessStorages = pgTable(
 		key: text('key').notNull(),
 		value: jsonb('value').$type<unknown>().notNull()
 	},
-	(table) => [
-		uniqueIndex('serverless_storages_ns_key_uniq').on(
-			table.namespace,
-			table.key
-		)
-	]
-)
+	(table) => [uniqueIndex('serverless_storages_ns_key_uniq').on(table.namespace, table.key)]
+);

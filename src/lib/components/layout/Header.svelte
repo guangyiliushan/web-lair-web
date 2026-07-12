@@ -50,7 +50,7 @@
 		return currentPath.startsWith(path);
 	}
 
-	function getMobileChildren(item: typeof navigationConfig[number]): NavChild[] {
+	function getMobileChildren(item: (typeof navigationConfig)[number]): NavChild[] {
 		if (item.key === 'nav_posts') {
 			const cats = postsData?.leftItems || [];
 			return [...cats, { labelKey: 'nav_posts_view_all' as const, href: '/posts' }];
@@ -91,7 +91,9 @@
 
 <header class="pointer-events-none fixed top-6 right-0 left-0 z-50 flex justify-center px-4">
 	<!-- Single cohesive card: fixed rounded-3xl to prevent morphing artifacts during height transition -->
-	<div class="pointer-events-auto w-full max-w-5xl overflow-hidden rounded-3xl border bg-background/70 shadow-sm backdrop-blur-md">
+	<div
+		class="pointer-events-auto w-full max-w-5xl overflow-hidden rounded-3xl border bg-background/70 shadow-sm backdrop-blur-md"
+	>
 		<!-- ══Top bar (always visible) ══-->
 		<div class="flex items-center justify-between px-4 py-2">
 			<!-- Logo -->
@@ -190,139 +192,139 @@
 				<Separator class="mx-4" />
 
 				<div class="px-5 pt-6 pb-5">
-						<nav class="max-h-[70svh] overflow-y-auto" aria-label="Mobile navigation">
-							<div class="flex flex-col">
-								{#each navigationConfig.filter(i => i.key !== 'nav_more') as item (item.key)}
-									{@const mobileChildren = getMobileChildren(item)}
-									<div>
-										<!-- Top-level: click to expand accordion (if has children), else direct link -->
-										{#if mobileChildren.length > 0}
-											<div class="flex items-center justify-between rounded-lg transition-colors hover:bg-muted/50">
-												<a
-													href={item.href}
-													onclick={closeMenu}
-													class={cn(
-														'flex-1 px-3 py-2.5 text-sm font-medium transition-colors hover:text-foreground',
-														isActive(item.href) ? 'text-primary' : 'text-muted-foreground'
-													)}
-												>
-													{tLabel(item.labelKey)}
-												</a>
-												<button
-													onclick={() => toggleExpanded(item.key)}
-													class="flex items-center justify-center px-4 py-2.5 text-muted-foreground transition-colors hover:text-foreground"
-													aria-label={expandedKey === item.key ? "Collapse" : "Expand"}
-												>
-													<span
-														class={cn(
-															"transition-transform duration-300",
-															expandedKey === item.key ? "rotate-180" : ""
-														)}
-													>
-														<IconChevronDown class="size-4" />
-													</span>
-												</button>
-											</div>
-												{#if expandedKey === item.key}
-													<div
-														transition:slide={{ duration: 300, easing: cubicInOut }}
-														class="ml-3 flex flex-col border-l pt-0.5 pb-1 pl-3"
-													>
-														{#each mobileChildren as child (child.href)}
-															<a
-																href={child.href}
-																onclick={closeMenu}
-																class="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
-															>
-													<span>{childLabel(child)}</span>
-													{#if child.badge}
-																	<span class="text-xs text-muted-foreground">{child.badge}</span>
-																{/if}
-															</a>
-														{/each}
-													</div>
-												{/if}
-										{:else}
+					<nav class="max-h-[70svh] overflow-y-auto" aria-label="Mobile navigation">
+						<div class="flex flex-col">
+							{#each navigationConfig.filter((i) => i.key !== 'nav_more') as item (item.key)}
+								{@const mobileChildren = getMobileChildren(item)}
+								<div>
+									<!-- Top-level: click to expand accordion (if has children), else direct link -->
+									{#if mobileChildren.length > 0}
+										<div
+											class="flex items-center justify-between rounded-lg transition-colors hover:bg-muted/50"
+										>
 											<a
 												href={item.href}
 												onclick={closeMenu}
 												class={cn(
-													'flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-colors hover:bg-muted/50 hover:text-foreground',
-													isActive(item.href)
-														? 'bg-primary/10 text-primary'
-														: 'text-muted-foreground'
+													'flex-1 px-3 py-2.5 text-sm font-medium transition-colors hover:text-foreground',
+													isActive(item.href) ? 'text-primary' : 'text-muted-foreground'
 												)}
 											>
 												{tLabel(item.labelKey)}
 											</a>
+											<button
+												onclick={() => toggleExpanded(item.key)}
+												class="flex items-center justify-center px-4 py-2.5 text-muted-foreground transition-colors hover:text-foreground"
+												aria-label={expandedKey === item.key ? 'Collapse' : 'Expand'}
+											>
+												<span
+													class={cn(
+														'transition-transform duration-300',
+														expandedKey === item.key ? 'rotate-180' : ''
+													)}
+												>
+													<IconChevronDown class="size-4" />
+												</span>
+											</button>
+										</div>
+										{#if expandedKey === item.key}
+											<div
+												transition:slide={{ duration: 300, easing: cubicInOut }}
+												class="ml-3 flex flex-col border-l pt-0.5 pb-1 pl-3"
+											>
+												{#each mobileChildren as child (child.href)}
+													<a
+														href={child.href}
+														onclick={closeMenu}
+														class="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+													>
+														<span>{childLabel(child)}</span>
+														{#if child.badge}
+															<span class="text-xs text-muted-foreground">{child.badge}</span>
+														{/if}
+													</a>
+												{/each}
+											</div>
 										{/if}
-									</div>
+									{:else}
+										<a
+											href={item.href}
+											onclick={closeMenu}
+											class={cn(
+												'flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-colors hover:bg-muted/50 hover:text-foreground',
+												isActive(item.href) ? 'bg-primary/10 text-primary' : 'text-muted-foreground'
+											)}
+										>
+											{tLabel(item.labelKey)}
+										</a>
+									{/if}
+								</div>
+							{/each}
+						</div>
+
+						<!-- Unrolled More Items -->
+						{#if navigationConfig.find((i) => i.key === 'nav_more')?.children}
+							<Separator class="my-2" />
+							<div class="flex flex-wrap justify-between gap-1 px-1">
+								{#each navigationConfig.find((i) => i.key === 'nav_more')!.children! as child (child.href)}
+									<a
+										href={child.href}
+										onclick={closeMenu}
+										class="rounded-lg px-2 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+									>
+										{tLabel(child.labelKey!)}
+									</a>
 								{/each}
 							</div>
+						{/if}
+					</nav>
 
-							<!-- Unrolled More Items -->
-							{#if navigationConfig.find(i => i.key === 'nav_more')?.children}
-								<Separator class="my-2" />
-								<div class="flex flex-wrap justify-between gap-1 px-1">
-									{#each navigationConfig.find(i => i.key === 'nav_more')!.children! as child (child.href)}
-										<a
-											href={child.href}
-											onclick={closeMenu}
-											class="rounded-lg px-2 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
-										>
-											{tLabel(child.labelKey!)}
-										</a>
-									{/each}
-								</div>
-							{/if}
-						</nav>
-
-						<!-- Bottom: user section -->
-						<Separator class="mt-4" />
-						<div class="pt-4">
-							{#if auth?.user}
-								<div class="flex items-center gap-3">
-									<div
-										class="flex size-9 items-center justify-center rounded-full bg-muted text-sm font-medium"
-									>
-										{auth.profile?.displayName?.charAt(0) ?? auth.user.name?.charAt(0) ?? '?'}
-									</div>
-									<div class="min-w-0 flex-1">
-										<p class="truncate text-sm font-medium">
-											{auth.profile?.displayName ?? auth.user.name}
-										</p>
-										<p class="truncate text-xs text-muted-foreground">
-											{auth.user.email}
-										</p>
-									</div>
-								</div>
-								<div class="mt-3 flex flex-col gap-0.5">
-									<a
-										href="/admin"
-										onclick={closeMenu}
-										class="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
-									>
-										{m.nav_dashboard()}
-									</a>
-									<a
-										href="/account"
-										onclick={closeMenu}
-										class="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
-									>
-										{m.nav_account()}
-									</a>
-								</div>
-							{:else}
-								<a
-									href="/login?redirectTo={encodeURIComponent(page.url.pathname + page.url.search)}"
-									onclick={closeMenu}
-									class="flex items-center justify-center rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted/50"
+					<!-- Bottom: user section -->
+					<Separator class="mt-4" />
+					<div class="pt-4">
+						{#if auth?.user}
+							<div class="flex items-center gap-3">
+								<div
+									class="flex size-9 items-center justify-center rounded-full bg-muted text-sm font-medium"
 								>
-									{m.nav_sign_in()}
+									{auth.profile?.displayName?.charAt(0) ?? auth.user.name?.charAt(0) ?? '?'}
+								</div>
+								<div class="min-w-0 flex-1">
+									<p class="truncate text-sm font-medium">
+										{auth.profile?.displayName ?? auth.user.name}
+									</p>
+									<p class="truncate text-xs text-muted-foreground">
+										{auth.user.email}
+									</p>
+								</div>
+							</div>
+							<div class="mt-3 flex flex-col gap-0.5">
+								<a
+									href="/admin"
+									onclick={closeMenu}
+									class="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+								>
+									{m.nav_dashboard()}
 								</a>
-							{/if}
-						</div>
+								<a
+									href="/account"
+									onclick={closeMenu}
+									class="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+								>
+									{m.nav_account()}
+								</a>
+							</div>
+						{:else}
+							<a
+								href="/login?redirectTo={encodeURIComponent(page.url.pathname + page.url.search)}"
+								onclick={closeMenu}
+								class="flex items-center justify-center rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted/50"
+							>
+								{m.nav_sign_in()}
+							</a>
+						{/if}
 					</div>
+				</div>
 			</div>
 		{/if}
 	</div>

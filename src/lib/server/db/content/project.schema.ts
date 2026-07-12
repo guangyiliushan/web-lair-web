@@ -1,9 +1,4 @@
-import {
-	pgTable,
-	text,
-	timestamp,
-	uniqueIndex,
-} from 'drizzle-orm/pg-core'
+import { pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 
 export const projects = pgTable(
 	'projects',
@@ -20,4 +15,4 @@ export const projects = pgTable(
 		text: text('text')
 	},
 	(table) => [uniqueIndex('projects_name_uniq').on(table.name)]
-)
+);

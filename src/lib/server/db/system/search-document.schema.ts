@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm'
+import { sql } from 'drizzle-orm';
 import {
 	boolean,
 	index,
@@ -7,8 +7,8 @@ import {
 	pgTable,
 	text,
 	timestamp,
-	uniqueIndex,
-} from 'drizzle-orm/pg-core'
+	uniqueIndex
+} from 'drizzle-orm/pg-core';
 
 export const searchDocuments = pgTable(
 	'search_documents',
@@ -20,7 +20,10 @@ export const searchDocuments = pgTable(
 		sourceHash: text('source_hash').notNull().default(''),
 		title: text('title').notNull(),
 		searchText: text('search_text').notNull(),
-		terms: text('terms').array().notNull().default(sql`'{}'::text[]`),
+		terms: text('terms')
+			.array()
+			.notNull()
+			.default(sql`'{}'::text[]`),
 		titleTermFreq: jsonb('title_term_freq')
 			.$type<Record<string, number>>()
 			.notNull()
@@ -40,15 +43,8 @@ export const searchDocuments = pgTable(
 		modifiedAt: timestamp('modified_at', { withTimezone: true })
 	},
 	(table) => [
-		uniqueIndex('search_documents_ref_lang_uniq').on(
-			table.refType,
-			table.refId,
-			table.lang
-		),
-		index('search_documents_published_idx').on(
-			table.isPublished,
-			table.publicAt
-		),
+		uniqueIndex('search_documents_ref_lang_uniq').on(table.refType, table.refId, table.lang),
+		index('search_documents_published_idx').on(table.isPublished, table.publicAt),
 		index('search_documents_lang_idx').on(table.lang)
 	]
-)
+);

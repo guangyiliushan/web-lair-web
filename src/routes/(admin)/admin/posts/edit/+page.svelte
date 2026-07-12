@@ -54,26 +54,26 @@
 				.replace(/^-|-$/g, '');
 		}
 	}
-
 </script>
 
 <svelte:head>
 	<title>{title ? `${title} - Lair Admin` : 'New Post - Lair Admin'}</title>
 </svelte:head>
 
-<form
-	method="POST"
-	use:enhance
-	class="flex h-full min-h-0 flex-col"
->
+<form method="POST" use:enhance class="flex h-full min-h-0 flex-col">
 	<!-- Main content area -->
 	<main class="flex min-h-full min-w-0 flex-col bg-background">
 		<!-- Header area: title + slug + separator -->
 		<div class="mx-auto w-full max-w-5xl shrink-0 px-3 pt-8">
 			<!-- Status bar -->
-			<div class="group mb-3 flex min-h-7 items-center justify-between opacity-60 transition-opacity duration-200 hover:opacity-100">
+			<div
+				class="group mb-3 flex min-h-7 items-center justify-between opacity-60 transition-opacity duration-200 hover:opacity-100"
+			>
 				<div class="flex min-w-0 items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400">
-					<span aria-hidden="true" class="inline-block size-1.5 shrink-0 rounded-full bg-emerald-500"></span>
+					<span
+						aria-hidden="true"
+						class="inline-block size-1.5 shrink-0 rounded-full bg-emerald-500"
+					></span>
 					<span class="truncate">草稿 · 新文章</span>
 				</div>
 				<div class="flex shrink-0 items-center gap-1">
@@ -89,11 +89,7 @@
 					</button>
 
 					<!-- Publish button -->
-					<Button
-						type="submit"
-						size="sm"
-						class="h-7 gap-1 px-2.5 text-xs"
-					>
+					<Button type="submit" size="sm" class="h-7 gap-1 px-2.5 text-xs">
 						<IconSend class="size-3" />
 						发布
 					</Button>
@@ -113,7 +109,7 @@
 				<!-- Slug button -->
 				<button
 					type="button"
-					class="-ml-1 mt-1 inline-flex items-center gap-1 rounded-sm px-1.5 py-0.5 font-mono text-xs text-muted-foreground transition-opacity duration-150 hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-accent/15 outline-none"
+					class="mt-1 -ml-1 inline-flex items-center gap-1 rounded-sm px-1.5 py-0.5 font-mono text-xs text-muted-foreground transition-opacity duration-150 outline-none hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-accent/15"
 					onclick={() => (slugDialogOpen = true)}
 					aria-label="添加 slug"
 				>
@@ -158,18 +154,12 @@
 		<Dialog.Content class="sm:max-w-md">
 			<Dialog.Header>
 				<Dialog.Title>设置 Slug</Dialog.Title>
-				<Dialog.Description>
-					URL 友好的标识符，用于文章链接。
-				</Dialog.Description>
+				<Dialog.Description>URL 友好的标识符，用于文章链接。</Dialog.Description>
 			</Dialog.Header>
 			<div class="px-6 pb-2">
-				<Input
-					name="slug-input"
-					placeholder="my-post-slug"
-					bind:value={slug}
-				/>
+				<Input name="slug-input" placeholder="my-post-slug" bind:value={slug} />
 				{#if slug}
-					<p class="mt-1.5 text-xs text-muted-foreground font-mono">
+					<p class="mt-1.5 font-mono text-xs text-muted-foreground">
 						预览: /posts/{slug}
 					</p>
 				{/if}
@@ -192,10 +182,10 @@
 		<Sheet.Content side="right" class="w-full sm:max-w-sm">
 			<Sheet.Header>
 				<Sheet.Title>文章设置</Sheet.Title>
-				<Sheet.Description>
-					配置文章的元数据信息。
-				</Sheet.Description>
-				<Sheet.Close class="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+				<Sheet.Description>配置文章的元数据信息。</Sheet.Description>
+				<Sheet.Close
+					class="absolute top-4 right-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
+				>
 					<IconX class="size-4" />
 					<span class="sr-only">关闭</span>
 				</Sheet.Close>
@@ -210,7 +200,7 @@
 					<Select.Root type="single" bind:value={categoryId as never}>
 						<Select.Trigger id="settings-category" class="w-full">
 							{categoryId
-								? data.categories.find((c) => c.id === categoryId)?.name ?? '选择分类'
+								? (data.categories.find((c) => c.id === categoryId)?.name ?? '选择分类')
 								: '选择分类'}
 						</Select.Trigger>
 						<Select.Portal>
@@ -235,11 +225,7 @@
 						<IconTag class="size-4 text-muted-foreground" />
 						标签
 					</label>
-					<Input
-						id="settings-tags"
-						placeholder="svelte, typescript, tutorial"
-						bind:value={tags}
-					/>
+					<Input id="settings-tags" placeholder="svelte, typescript, tutorial" bind:value={tags} />
 					<p class="text-xs text-muted-foreground">逗号分隔。</p>
 				</div>
 
@@ -265,23 +251,21 @@
 						role="switch"
 						aria-checked={isPublished}
 						aria-labelledby="publish-status-label"
-						class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors {isPublished ? 'bg-primary' : 'bg-muted'}"
+						class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors {isPublished
+							? 'bg-primary'
+							: 'bg-muted'}"
 						onclick={() => (isPublished = !isPublished)}
 					>
 						<span
-							class="inline-block size-4 rounded-full bg-white shadow-sm transition-transform {isPublished ? 'translate-x-4.5' : 'translate-x-0.5'}"
+							class="inline-block size-4 rounded-full bg-white shadow-sm transition-transform {isPublished
+								? 'translate-x-4.5'
+								: 'translate-x-0.5'}"
 						></span>
 					</button>
 				</div>
 
 				<!-- Save as draft button -->
-				<Button
-					type="submit"
-					variant="outline"
-					class="w-full"
-					name="isPublished"
-					value="false"
-				>
+				<Button type="submit" variant="outline" class="w-full" name="isPublished" value="false">
 					<IconDeviceFloppy class="size-4" />
 					保存为草稿
 				</Button>

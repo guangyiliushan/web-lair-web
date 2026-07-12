@@ -7,7 +7,10 @@ export interface PageMeta {
 	canonical: string;
 }
 
-export function buildPageMeta(defaults: Partial<PageMeta>, overrides?: Partial<PageMeta>): PageMeta {
+export function buildPageMeta(
+	defaults: Partial<PageMeta>,
+	overrides?: Partial<PageMeta>
+): PageMeta {
 	return {
 		title: overrides?.title ?? defaults.title ?? 'Lair',
 		description: overrides?.description ?? defaults.description ?? '',

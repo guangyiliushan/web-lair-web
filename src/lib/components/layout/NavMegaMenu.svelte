@@ -10,7 +10,12 @@
 		IconMail,
 		IconBrandGithub
 	} from '@tabler/icons-svelte-runes';
-	import { tLabel, type MegaMenu, type MegaMenuDynamicData, type NavChild } from '$lib/config/navigation.config';
+	import {
+		tLabel,
+		type MegaMenu,
+		type MegaMenuDynamicData,
+		type NavChild
+	} from '$lib/config/navigation.config';
 	import type { Snippet } from 'svelte';
 	import { portal } from '$lib/actions/portal';
 
@@ -124,7 +129,7 @@
 
 		document.addEventListener('click', handleClick, true);
 		document.addEventListener('keydown', handleKeydown, true);
-		
+
 		return () => {
 			document.removeEventListener('click', handleClick, true);
 			document.removeEventListener('keydown', handleKeydown, true);
@@ -193,9 +198,7 @@
 	}
 
 	function handleMenuKeydown(e: KeyboardEvent) {
-		const items = Array.from(
-			menuEl?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? []
-		);
+		const items = Array.from(menuEl?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? []);
 		const idx = items.indexOf(document.activeElement as HTMLElement);
 
 		switch (e.key) {
@@ -246,7 +249,7 @@
 		aria-labelledby={triggerId}
 		tabindex="-1"
 		class={cn(
-			'fixed z-100 -translate-x-1/2 pt-2 transition-all duration-200 ease-out animate-in fade-in zoom-in-95',
+			'fixed z-100 -translate-x-1/2 animate-in pt-2 transition-all duration-200 ease-out zoom-in-95 fade-in',
 			menuWidth
 		)}
 		style:top={`${coords.top}px`}
@@ -263,7 +266,11 @@
 					<div class="flex w-40 flex-col gap-4">
 						<div class="flex items-center gap-3">
 							<div class="size-10 overflow-hidden rounded-full bg-muted">
-								<img src="https://github.com/guangyiliushan.png" alt="Avatar" class="h-full w-full object-cover" />
+								<img
+									src="https://github.com/guangyiliushan.png"
+									alt="Avatar"
+									class="h-full w-full object-cover"
+								/>
 							</div>
 							<div>
 								<div class="font-bold">Lair</div>
@@ -274,30 +281,56 @@
 							</div>
 						</div>
 						<div class="flex justify-between text-xs">
-							<div class="flex flex-col"><span class="font-bold text-foreground">369</span> <span class="text-muted-foreground uppercase">Posts</span></div>
-							<div class="flex flex-col"><span class="font-bold text-foreground">1419</span> <span class="text-muted-foreground uppercase">K Words</span></div>
-							<div class="flex flex-col"><span class="font-bold text-foreground">2849</span> <span class="text-muted-foreground uppercase">Days</span></div>
+							<div class="flex flex-col">
+								<span class="font-bold text-foreground">369</span>
+								<span class="text-muted-foreground uppercase">Posts</span>
+							</div>
+							<div class="flex flex-col">
+								<span class="font-bold text-foreground">1419</span>
+								<span class="text-muted-foreground uppercase">K Words</span>
+							</div>
+							<div class="flex flex-col">
+								<span class="font-bold text-foreground">2849</span>
+								<span class="text-muted-foreground uppercase">Days</span>
+							</div>
 						</div>
 						<Separator />
 						<div class="flex gap-3 text-muted-foreground">
-							<a href="https://twitter.com/guangyiliushan" class="hover:text-foreground" aria-label="Twitter"><IconBrandTwitter class="size-4" /></a>
-							<a href="/rss.xml" class="hover:text-foreground" aria-label="RSS"><IconRss class="size-4" /></a>
-							<a href="mailto:guangyiliushan@example.com" class="hover:text-foreground" aria-label="Email"><IconMail class="size-4" /></a>
-							<a href="https://github.com/guangyiliushan" class="hover:text-foreground" aria-label="GitHub"><IconBrandGithub class="size-4" /></a>
+							<a
+								href="https://twitter.com/guangyiliushan"
+								class="hover:text-foreground"
+								aria-label="Twitter"><IconBrandTwitter class="size-4" /></a
+							>
+							<a href="/rss.xml" class="hover:text-foreground" aria-label="RSS"
+								><IconRss class="size-4" /></a
+							>
+							<a
+								href="mailto:guangyiliushan@example.com"
+								class="hover:text-foreground"
+								aria-label="Email"><IconMail class="size-4" /></a
+							>
+							<a
+								href="https://github.com/guangyiliushan"
+								class="hover:text-foreground"
+								aria-label="GitHub"><IconBrandGithub class="size-4" /></a
+							>
 						</div>
 					</div>
 					<!-- Links Side -->
 					<div class="flex-1 border-l pl-6">
 						<div class="grid grid-cols-2 gap-x-4 gap-y-2">
 							{#each menu.columns[0].items as child (child.href)}
-								<a href={child.href} role="menuitem" class="rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-muted/50 focus:bg-muted/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/50">
-								{labelOf(child)}
+								<a
+									href={child.href}
+									role="menuitem"
+									class="rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-muted/50 focus:bg-muted/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+								>
+									{labelOf(child)}
 								</a>
 							{/each}
 						</div>
 					</div>
 				</div>
-
 			{:else if menu.type === 'two-column'}
 				<!-- Two Column Layout (Categories/Series + Recent Posts/Notes) -->
 				{#if showSkeleton}
@@ -335,15 +368,25 @@
 						<div class="w-40 flex-col gap-1">
 							{#each menu.columns as column, i (i)}
 								{#if column.titleKey}
-									<p class="mb-2 px-2 text-xs font-medium tracking-wider text-muted-foreground uppercase">
+									<p
+										class="mb-2 px-2 text-xs font-medium tracking-wider text-muted-foreground uppercase"
+									>
 										{tLabel(column.titleKey)}
 									</p>
 								{/if}
 								<div class="flex flex-col gap-0.5" role="group">
 									{#each leftItems as child (child.href)}
-										<a href={child.href} role="menuitem" class="flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm transition-colors hover:bg-muted/50 focus:bg-muted/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/50">
+										<a
+											href={child.href}
+											role="menuitem"
+											class="flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm transition-colors hover:bg-muted/50 focus:bg-muted/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+										>
 											{#if child.imageUrl}
-												<img src={child.imageUrl} alt="" class="size-4 shrink-0 rounded object-cover" />
+												<img
+													src={child.imageUrl}
+													alt=""
+													class="size-4 shrink-0 rounded object-cover"
+												/>
 											{:else if child.icon}
 												<child.icon class="size-4 shrink-0 text-muted-foreground" />
 											{/if}
@@ -359,16 +402,26 @@
 						<!-- Right Column (Recent Items) -->
 						<div class="min-w-0 flex-1 border-l pl-4">
 							{#if menu.rightColumn?.titleKey}
-								<p class="mb-2 px-2 text-xs font-medium tracking-wider text-muted-foreground uppercase">
+								<p
+									class="mb-2 px-2 text-xs font-medium tracking-wider text-muted-foreground uppercase"
+								>
 									{tLabel(menu.rightColumn.titleKey)}
 								</p>
 							{/if}
 							<div class="flex flex-col gap-2">
 								{#each rightItems as child (child.href)}
-									<a href={child.href} role="menuitem" class="block min-w-0 rounded-lg border border-transparent bg-muted/30 px-3 py-2.5 transition-colors hover:border-border hover:bg-muted/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/50">
-										<div class="min-w-0 truncate text-sm font-medium leading-snug">{labelOf(child)}</div>
+									<a
+										href={child.href}
+										role="menuitem"
+										class="block min-w-0 rounded-lg border border-transparent bg-muted/30 px-3 py-2.5 transition-colors hover:border-border hover:bg-muted/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+									>
+										<div class="min-w-0 truncate text-sm leading-snug font-medium">
+											{labelOf(child)}
+										</div>
 										{#if child.desc || child.descKey}
-											<div class="mt-0.5 text-xs text-muted-foreground">{child.desc ?? tLabel(child.descKey!)}</div>
+											<div class="mt-0.5 text-xs text-muted-foreground">
+												{child.desc ?? tLabel(child.descKey!)}
+											</div>
 										{/if}
 									</a>
 								{/each}
@@ -376,7 +429,6 @@
 						</div>
 					</div>
 				{/if}
-
 			{:else if menu.type === 'timeline'}
 				<!-- Timeline Layout (Filter tabs + Recent Activity) -->
 				{#if showTimelineSkeleton}
@@ -406,10 +458,13 @@
 							<a
 								href={child.href}
 								role="menuitem"
-								class="flex flex-1 items-center justify-center gap-2 whitespace-nowrap rounded px-3 py-2 text-sm transition-colors hover:bg-muted/50 focus:bg-muted/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+								class="flex flex-1 items-center justify-center gap-2 rounded px-3 py-2 text-sm whitespace-nowrap transition-colors hover:bg-muted/50 focus:bg-muted/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
 							>
 								{#if child.icon}
-									<span class="flex shrink-0 items-center justify-center opacity-70" aria-hidden="true">
+									<span
+										class="flex shrink-0 items-center justify-center opacity-70"
+										aria-hidden="true"
+									>
 										<child.icon class="size-4" />
 									</span>
 								{/if}
@@ -420,12 +475,19 @@
 					<!-- Recent Activity -->
 					{#if serverData?.timelineItems && serverData.timelineItems.length > 0}
 						<div class="mt-2 border-t pt-2">
-							<div class="mb-1.5 px-1 text-xs font-medium tracking-wider text-muted-foreground uppercase">
+							<div
+								class="mb-1.5 px-1 text-xs font-medium tracking-wider text-muted-foreground uppercase"
+							>
 								{tLabel('nav_timeline_recent')}
 							</div>
 							<div class="flex flex-col gap-1">
 								{#each serverData.timelineItems as item (item.href)}
-									{@const typeKey = item.type === 'posts' ? 'nav_timeline_posts' as const : item.type === 'notes' ? 'nav_timeline_notes' as const : 'nav_timeline_memories' as const}
+									{@const typeKey =
+										item.type === 'posts'
+											? ('nav_timeline_posts' as const)
+											: item.type === 'notes'
+												? ('nav_timeline_notes' as const)
+												: ('nav_timeline_memories' as const)}
 									<a
 										href={item.href}
 										role="menuitem"
@@ -433,7 +495,9 @@
 									>
 										<div class="flex items-center justify-between gap-2">
 											<div class="min-w-0 truncate text-sm leading-snug">{item.title}</div>
-											<span class="ml-2 shrink-0 text-xs text-muted-foreground">{tLabel(typeKey)}</span>
+											<span class="ml-2 shrink-0 text-xs text-muted-foreground"
+												>{tLabel(typeKey)}</span
+											>
 										</div>
 										<div class="mt-0.5 text-xs text-muted-foreground">{item.date}</div>
 									</a>
@@ -442,7 +506,6 @@
 						</div>
 					{/if}
 				{/if}
-
 			{:else}
 				<!-- Simple List Layout -->
 				{#each menu.columns as column, i (i)}
@@ -451,7 +514,11 @@
 							{tLabel(column.titleKey)}
 						</p>
 					{/if}
-					<div class="flex flex-col gap-0.5" role="group" aria-label={column.titleKey ? tLabel(column.titleKey) : undefined}>
+					<div
+						class="flex flex-col gap-0.5"
+						role="group"
+						aria-label={column.titleKey ? tLabel(column.titleKey) : undefined}
+					>
 						{#each column.items as child (child.href)}
 							<a
 								href={child.href}
@@ -459,7 +526,10 @@
 								class="flex items-start gap-3 rounded-lg px-2.5 py-2 text-sm transition-colors hover:bg-muted/50 focus:bg-muted/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
 							>
 								{#if child.icon}
-									<span class="mt-0.5 flex size-5 shrink-0 items-center justify-center text-muted-foreground" aria-hidden="true">
+									<span
+										class="mt-0.5 flex size-5 shrink-0 items-center justify-center text-muted-foreground"
+										aria-hidden="true"
+									>
 										<child.icon class="size-4" />
 									</span>
 								{/if}
@@ -471,7 +541,9 @@
 										{/if}
 									</div>
 									{#if child.desc || child.descKey}
-										<p class="mt-0.5 text-xs text-muted-foreground">{child.desc ?? tLabel(child.descKey!)}</p>
+										<p class="mt-0.5 text-xs text-muted-foreground">
+											{child.desc ?? tLabel(child.descKey!)}
+										</p>
 									{/if}
 								</div>
 							</a>

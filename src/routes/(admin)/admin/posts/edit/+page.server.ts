@@ -54,7 +54,10 @@ export const actions: Actions = {
 		const now = new Date();
 		const id = getSnowflake().nextId();
 		const tags = tagsRaw
-			? tagsRaw.split(',').map((t) => t.trim()).filter(Boolean)
+			? tagsRaw
+					.split(',')
+					.map((t) => t.trim())
+					.filter(Boolean)
 			: [];
 
 		await db.insert(posts).values({

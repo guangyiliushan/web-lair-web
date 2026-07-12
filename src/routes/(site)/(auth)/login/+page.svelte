@@ -102,7 +102,9 @@
 		<Card.Footer class="justify-center">
 			<p class="text-sm text-muted-foreground">
 				Don't have an account?
-				<a href="/register{redirectParam}" class="font-medium underline-offset-2 hover:underline"> Sign up </a>
+				<a href="/register{redirectParam}" class="font-medium underline-offset-2 hover:underline">
+					Sign up
+				</a>
 			</p>
 		</Card.Footer>
 	</Card.Root>

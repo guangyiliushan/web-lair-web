@@ -1,12 +1,5 @@
-import { sql } from 'drizzle-orm'
-import {
-	index,
-	integer,
-	jsonb,
-	pgTable,
-	text,
-	timestamp,
-} from 'drizzle-orm/pg-core'
+import { sql } from 'drizzle-orm';
+import { index, integer, jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
 export const drafts = pgTable(
 	'drafts',
@@ -22,18 +15,15 @@ export const drafts = pgTable(
 		contentFormat: text('content_format').notNull(),
 		images: jsonb('images').$type<unknown[]>(),
 		meta: jsonb('meta').$type<Record<string, unknown>>(),
-		typeSpecificData: jsonb('type_specific_data').$type<Record<
-			string,
-			unknown
-		> | null>(),
+		typeSpecificData: jsonb('type_specific_data').$type<Record<string, unknown> | null>(),
 		history: jsonb('history').$type<unknown[] | null>(),
 		version: integer('version').notNull().default(1),
-		publishedVersion: integer('published_version'),
+		publishedVersion: integer('published_version')
 	},
 	(table) => [
 		index('drafts_ref_idx')
 			.on(table.refType, table.refId)
 			.where(sql`${table.refId} is not null`),
-		index('drafts_updated_at_idx').on(table.updatedAt),
-	],
-)
+		index('drafts_updated_at_idx').on(table.updatedAt)
+	]
+);

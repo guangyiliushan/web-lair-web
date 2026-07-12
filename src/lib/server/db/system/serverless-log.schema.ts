@@ -1,11 +1,4 @@
-import {
-	index,
-	integer,
-	jsonb,
-	pgTable,
-	text,
-	timestamp,
-} from 'drizzle-orm/pg-core'
+import { index, integer, jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
 export const serverlessLogs = pgTable(
 	'serverless_logs',
@@ -25,10 +18,6 @@ export const serverlessLogs = pgTable(
 	(table) => [
 		index('serverless_logs_created_at_idx').on(table.createdAt),
 		index('serverless_logs_function_idx').on(table.functionId, table.createdAt),
-		index('serverless_logs_reference_idx').on(
-			table.reference,
-			table.name,
-			table.createdAt
-		)
+		index('serverless_logs_reference_idx').on(table.reference, table.name, table.createdAt)
 	]
-)
+);

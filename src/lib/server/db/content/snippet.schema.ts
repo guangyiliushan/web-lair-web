@@ -1,12 +1,5 @@
-import { sql } from 'drizzle-orm'
-import {
-	boolean,
-	index,
-	pgTable,
-	text,
-	timestamp,
-	uniqueIndex,
-} from 'drizzle-orm/pg-core'
+import { sql } from 'drizzle-orm';
+import { boolean, index, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 
 export const snippets = pgTable(
 	'snippets',
@@ -37,4 +30,4 @@ export const snippets = pgTable(
 			.on(table.path, table.method)
 			.where(sql`${table.method} is not null`)
 	]
-)
+);

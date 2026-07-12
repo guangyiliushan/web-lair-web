@@ -107,7 +107,7 @@ export interface DecodedSnowflake {
 function parseWorkerIdPart(value: number, label: string): number {
 	if (!Number.isInteger(value) || value < 0 || value > WORKER_ID_MAX_NUMBER) {
 		throw new Error(
-			`Snowflake worker ${label} must be an integer in [0, ${WORKER_ID_MAX_NUMBER}], got ${value}`,
+			`Snowflake worker ${label} must be an integer in [0, ${WORKER_ID_MAX_NUMBER}], got ${value}`
 		);
 	}
 	return value;
@@ -123,7 +123,7 @@ function parseWorkerOffset(raw: string | undefined, source: string): number {
 	const value = Number(raw);
 	if (!Number.isInteger(value) || value < 0) {
 		throw new Error(
-			`Snowflake worker offset from ${source} must be a non-negative integer, got "${raw}"`,
+			`Snowflake worker offset from ${source} must be a non-negative integer, got "${raw}"`
 		);
 	}
 	return value;
@@ -143,20 +143,17 @@ function parseWorkerOffset(raw: string | undefined, source: string): number {
  */
 export function resolveSnowflakeWorkerId(
 	baseWorkerId: number,
-	env: Record<string, string | undefined> = process.env,
+	env: Record<string, string | undefined> = process.env
 ): number {
 	const base = parseWorkerIdPart(baseWorkerId, 'base id');
 	const explicitOffset = env[SNOWFLAKE_WORKER_OFFSET_ENV];
 	const offsetSource =
 		explicitOffset === undefined ? PM2_INSTANCE_ID_ENV : SNOWFLAKE_WORKER_OFFSET_ENV;
-	const offset = parseWorkerOffset(
-		explicitOffset ?? env[PM2_INSTANCE_ID_ENV],
-		offsetSource,
-	);
+	const offset = parseWorkerOffset(explicitOffset ?? env[PM2_INSTANCE_ID_ENV], offsetSource);
 	const workerId = base + offset;
 	if (workerId > WORKER_ID_MAX_NUMBER) {
 		throw new Error(
-			`Snowflake worker id ${workerId} out of range [0, ${WORKER_ID_MAX_NUMBER}]; base ${base} + ${offsetSource} ${offset}`,
+			`Snowflake worker id ${workerId} out of range [0, ${WORKER_ID_MAX_NUMBER}]; base ${base} + ${offsetSource} ${offset}`
 		);
 	}
 	return workerId;
@@ -195,7 +192,7 @@ function encodeBase36(value: bigint): string {
 function decodeBase36(encoded: string): bigint {
 	if (encoded.length !== ENCODED_LENGTH) {
 		throw new Error(
-			`Invalid Snowflake ID length: expected ${ENCODED_LENGTH}, got ${encoded.length}`,
+			`Invalid Snowflake ID length: expected ${ENCODED_LENGTH}, got ${encoded.length}`
 		);
 	}
 	let result = 0n;
@@ -238,18 +235,13 @@ export class SnowflakeGenerator {
 	private sequence = 0n;
 
 	constructor(options: SnowflakeOptions) {
-		if (
-			typeof options.workerId !== 'number' ||
-			!Number.isInteger(options.workerId)
-		) {
-			throw new Error(
-				`SnowflakeGenerator: workerId must be an integer, got ${options.workerId}`,
-			);
+		if (typeof options.workerId !== 'number' || !Number.isInteger(options.workerId)) {
+			throw new Error(`SnowflakeGenerator: workerId must be an integer, got ${options.workerId}`);
 		}
 		const workerIdBig = BigInt(options.workerId);
 		if (workerIdBig < 0n || workerIdBig > WORKER_ID_MAX) {
 			throw new Error(
-				`SnowflakeGenerator: workerId ${options.workerId} out of range [0, ${WORKER_ID_MAX}]`,
+				`SnowflakeGenerator: workerId ${options.workerId} out of range [0, ${WORKER_ID_MAX}]`
 			);
 		}
 		this.workerIdBig = workerIdBig;
@@ -295,7 +287,7 @@ export class SnowflakeGenerator {
 				}
 			} else {
 				throw new Error(
-					`SnowflakeGenerator: clock moved backwards by ${drift}ms; refusing to generate ID (tolerance: ${this.toleratesBackwardsClockMs}ms)`,
+					`SnowflakeGenerator: clock moved backwards by ${drift}ms; refusing to generate ID (tolerance: ${this.toleratesBackwardsClockMs}ms)`
 				);
 			}
 		}
@@ -317,20 +309,18 @@ export class SnowflakeGenerator {
 		const elapsed = timestamp - this.epochMs;
 		if (elapsed < 0n) {
 			throw new Error(
-				`SnowflakeGenerator: current timestamp ${timestamp} is before epoch ${this.epochMs}`,
+				`SnowflakeGenerator: current timestamp ${timestamp} is before epoch ${this.epochMs}`
 			);
 		}
 		if (elapsed > TIMESTAMP_MAX) {
 			throw new Error(
 				`SnowflakeGenerator: timestamp overflow — epoch must be advanced. ` +
-					`Elapsed: ${elapsed}, max: ${TIMESTAMP_MAX}`,
+					`Elapsed: ${elapsed}, max: ${TIMESTAMP_MAX}`
 			);
 		}
 
 		return (
-			(elapsed << TIMESTAMP_LEFT_SHIFT) |
-			(this.workerIdBig << WORKER_ID_LEFT_SHIFT) |
-			this.sequence
+			(elapsed << TIMESTAMP_LEFT_SHIFT) | (this.workerIdBig << WORKER_ID_LEFT_SHIFT) | this.sequence
 		);
 	}
 
@@ -387,7 +377,7 @@ let _defaultGenerator: SnowflakeGenerator | null = null;
 export function getSnowflake(workerId = 0): SnowflakeGenerator {
 	if (!_defaultGenerator) {
 		_defaultGenerator = new SnowflakeGenerator({
-			workerId: resolveSnowflakeWorkerId(workerId),
+			workerId: resolveSnowflakeWorkerId(workerId)
 		});
 	}
 	return _defaultGenerator;

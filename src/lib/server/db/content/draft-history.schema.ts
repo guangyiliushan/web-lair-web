@@ -5,9 +5,9 @@ import {
 	pgTable,
 	text,
 	timestamp,
-	uniqueIndex,
-} from 'drizzle-orm/pg-core'
-import { drafts } from './draft.schema'
+	uniqueIndex
+} from 'drizzle-orm/pg-core';
+import { drafts } from './draft.schema';
 
 /**
  * Optional separate-table form for draft history. Only populated when
@@ -25,19 +25,11 @@ export const draftHistories = pgTable(
 		text: text('text'),
 		content: text('content'),
 		contentFormat: text('content_format').notNull(),
-		typeSpecificData: jsonb('type_specific_data').$type<Record<
-			string,
-			unknown
-		> | null>(),
+		typeSpecificData: jsonb('type_specific_data').$type<Record<string, unknown> | null>(),
 		savedAt: timestamp('saved_at', { withTimezone: true }).notNull(),
 		isFullSnapshot: boolean('is_full_snapshot').notNull(),
 		refVersion: integer('ref_version'),
-		baseVersion: integer('base_version'),
+		baseVersion: integer('base_version')
 	},
-	(table) => [
-		uniqueIndex('draft_histories_draft_version_uniq').on(
-			table.draftId,
-			table.version,
-		),
-	],
-)
+	(table) => [uniqueIndex('draft_histories_draft_version_uniq').on(table.draftId, table.version)]
+);

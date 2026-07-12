@@ -1,12 +1,5 @@
-import {
-	index,
-	integer,
-	pgTable,
-	text,
-	timestamp,
-	uniqueIndex,
-} from 'drizzle-orm/pg-core'
-import { user } from '../auth.schema'
+import { index, integer, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
+import { user } from '../auth.schema';
 
 export const deviceCodes = pgTable(
 	'device_codes',
@@ -29,4 +22,4 @@ export const deviceCodes = pgTable(
 		uniqueIndex('device_codes_user_code_uniq').on(table.userCode),
 		index('device_codes_expires_at_idx').on(table.expiresAt)
 	]
-)
+);

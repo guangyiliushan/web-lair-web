@@ -1,11 +1,4 @@
-import {
-	boolean,
-	index,
-	integer,
-	pgTable,
-	text,
-	timestamp,
-} from 'drizzle-orm/pg-core'
+import { boolean, index, integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
 export const webhooks = pgTable(
 	'webhooks',
@@ -19,4 +12,4 @@ export const webhooks = pgTable(
 		scope: integer('scope')
 	},
 	(table) => [index('webhooks_is_enabled_idx').on(table.isEnabled)]
-)
+);

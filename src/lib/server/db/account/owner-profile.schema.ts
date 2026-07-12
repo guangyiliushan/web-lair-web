@@ -1,5 +1,5 @@
-import { jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core'
-import { user } from '../auth.schema'
+import { jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
+import { user } from '../auth.schema';
 
 export const ownerProfiles = pgTable(
 	'owner_profiles',
@@ -17,4 +17,4 @@ export const ownerProfiles = pgTable(
 		socialIds: jsonb('social_ids').$type<Record<string, unknown> | null>()
 	},
 	(table) => [uniqueIndex('owner_profiles_user_id_uniq').on(table.userId)]
-)
+);

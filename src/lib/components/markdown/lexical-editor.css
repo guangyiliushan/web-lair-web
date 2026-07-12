@@ -9,70 +9,70 @@
 
 /* ── 标题 ── */
 .rich-editor-h1 {
-	@apply text-3xl font-bold leading-tight mt-8 mb-4;
+	@apply mt-8 mb-4 text-3xl leading-tight font-bold;
 }
 .rich-editor-h2 {
-	@apply text-2xl font-semibold leading-tight mt-6 mb-3;
+	@apply mt-6 mb-3 text-2xl leading-tight font-semibold;
 }
 .rich-editor-h3 {
-	@apply text-xl font-semibold leading-snug mt-5 mb-2;
+	@apply mt-5 mb-2 text-xl leading-snug font-semibold;
 }
 .rich-editor-h4 {
-	@apply text-lg font-medium leading-snug mt-4 mb-2;
+	@apply mt-4 mb-2 text-lg leading-snug font-medium;
 }
 .rich-editor-h5 {
-	@apply text-base font-medium leading-snug mt-3 mb-1;
+	@apply mt-3 mb-1 text-base leading-snug font-medium;
 }
 .rich-editor-h6 {
-	@apply text-sm font-medium leading-snug mt-3 mb-1 text-muted-foreground;
+	@apply mt-3 mb-1 text-sm leading-snug font-medium text-muted-foreground;
 }
 
 /* ── 编辑态 H1/H2/H3 标签（::before 伪元素）──
  * 参考 @haklex/rich-editor：仅在 contenteditable=true 时在标题左侧显示
  * "H1"/"H2"/"H3" 标签，方便写作时识别标题层级。只读渲染模式下不显示。
  */
-[contenteditable="true"] .rich-editor-h1,
-[contenteditable="true"] .rich-editor-h2,
-[contenteditable="true"] .rich-editor-h3 {
+[contenteditable='true'] .rich-editor-h1,
+[contenteditable='true'] .rich-editor-h2,
+[contenteditable='true'] .rich-editor-h3 {
 	position: relative;
 }
 
-[contenteditable="true"] .rich-editor-h1::before,
-[contenteditable="true"] .rich-editor-h2::before,
-[contenteditable="true"] .rich-editor-h3::before {
+[contenteditable='true'] .rich-editor-h1::before,
+[contenteditable='true'] .rich-editor-h2::before,
+[contenteditable='true'] .rich-editor-h3::before {
 	color: hsl(var(--muted-foreground));
 	opacity: 0.5;
 	pointer-events: none;
 	font-size: 0.625rem;
 	font-weight: 600;
-	font-family: var(--font-mono, "JetBrains Mono Variable", monospace);
+	font-family: var(--font-mono, 'JetBrains Mono Variable', monospace);
 	position: absolute;
 	left: -1.25rem;
 	display: flex;
 	align-items: flex-end;
 }
 
-[contenteditable="true"] .rich-editor-h1::before {
-	content: "H1";
+[contenteditable='true'] .rich-editor-h1::before {
+	content: 'H1';
 	bottom: 0.5em;
 }
 
-[contenteditable="true"] .rich-editor-h2::before {
-	content: "H2";
+[contenteditable='true'] .rich-editor-h2::before {
+	content: 'H2';
 	bottom: 0.4em;
 }
 
-[contenteditable="true"] .rich-editor-h3::before {
-	content: "H3";
+[contenteditable='true'] .rich-editor-h3::before {
+	content: 'H3';
 	bottom: 0.3em;
 }
 
 /* ── 列表 ── */
 .rich-editor-ul {
-	@apply list-disc pl-6 my-2;
+	@apply my-2 list-disc pl-6;
 }
 .rich-editor-ol {
-	@apply list-decimal pl-6 my-2;
+	@apply my-2 list-decimal pl-6;
 }
 .rich-editor-li {
 	@apply my-0.5;
@@ -80,7 +80,7 @@
 
 /* ── 引用块 ── */
 .rich-editor-quote {
-	@apply border-l-2 border-border pl-4 my-3 text-muted-foreground italic;
+	@apply my-3 border-l-2 border-border pl-4 text-muted-foreground italic;
 }
 
 /* ── 行内格式 ── */
@@ -100,7 +100,7 @@
 	@apply rounded bg-muted/50 px-1 py-0.5 font-mono text-sm;
 }
 .rich-editor-highlight {
-	@apply bg-yellow-200/40 dark:bg-yellow-600/30 rounded-sm;
+	@apply rounded-sm bg-yellow-200/40 dark:bg-yellow-600/30;
 }
 
 /* ── 内联 Tag ── */
@@ -119,4 +119,184 @@
 	content: attr(data-placeholder);
 	color: hsl(var(--muted-foreground) / 0.5);
 	pointer-events: none;
+}
+
+/* ── Alert/Callout 块 ──
+   参考 Mx Space rich-alert 设计：
+   - 左侧 4px 强调条（::before 伪元素）
+   - 仅右侧圆角
+   - 紧凑 padding，左侧额外留白给强调条
+   - 标题栏：大写、紧凑、彩色文字
+   - 内容区：极小内边距，与标题紧贴
+*/
+
+.rich-editor-alert {
+	position: relative;
+	margin: 16px 0;
+	padding: 16px 16px 16px 20px; /* 右侧 16px，左侧 20px = 16px + 4px 强调条宽度 */
+	border-radius: 0 4px 4px 0;
+	background-color: hsl(var(--muted) / 0.4);
+}
+
+/* 左侧强调条 */
+.rich-editor-alert::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	width: 4px;
+	border-radius: 4px;
+}
+
+/* 强调条颜色（按类型） */
+.rich-editor-alert-info::before    { background-color: hsl(207 65% 65%); }
+.rich-editor-alert-tip::before     { background-color: hsl(120 50% 55%); }
+.rich-editor-alert-warning::before { background-color: hsl(25 65% 55%); }
+
+/* Dark 模式背景 */
+.dark .rich-editor-alert-info    { background-color: hsl(210 60% 18% / 0.55); }
+.dark .rich-editor-alert-tip     { background-color: hsl(120 40% 15% / 0.45); }
+.dark .rich-editor-alert-warning { background-color: hsl(30 50% 16% / 0.45); }
+
+.rich-editor-alert-host {
+	display: block;
+}
+
+/* ── Header（匹配参考设计的紧凑标题栏）── */
+.rich-editor-alert-header {
+	position: relative; /* 为下拉菜单提供定位上下文 */
+	margin-bottom: 6px;
+	line-height: 1;
+}
+
+/* 类型切换触发按钮 */
+.rich-editor-alert-type-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-inline: -6px;
+	padding: 2px 6px;
+	border: none;
+	border-radius: 4px;
+	background: none;
+	cursor: pointer;
+	/* 文字样式：大写、紧凑、加粗 */
+	font-family: inherit;
+	font-size: 0.875em;       /* ~12.25px，匹配参考 0.875em */
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.02em;
+	line-height: 1;
+	color: inherit;
+	transition: background-color 0.15s;
+}
+
+.rich-editor-alert-type-btn:hover {
+	background-color: hsl(var(--foreground) / 0.05);
+}
+
+/* Header 类型颜色 */
+.rich-editor-alert-header-info .rich-editor-alert-type-btn    { color: hsl(207 65% 65%); }
+.rich-editor-alert-header-tip .rich-editor-alert-type-btn     { color: hsl(120 50% 55%); }
+.rich-editor-alert-header-warning .rich-editor-alert-type-btn { color: hsl(25 65% 55%); }
+
+/* 图标 */
+.rich-editor-alert-icon {
+	width: 16px;
+	height: 16px;
+	flex-shrink: 0;
+}
+
+/* 标签文字 */
+.rich-editor-alert-label {
+	white-space: nowrap;
+}
+
+/* Chevron */
+.rich-editor-alert-chevron {
+	width: 14px;
+	height: 14px;
+	flex-shrink: 0;
+	opacity: 0.6;
+}
+
+/* ── 下拉菜单 ── */
+.rich-editor-alert-dropdown {
+	position: absolute;
+	top: calc(100% + 4px);
+	left: -6px;
+	z-index: 50;
+	min-width: 8rem;
+	padding: 4px;
+	border-radius: 12px;
+	background-color: hsl(0 0% 4%); /* dark surface, ≈ #0a0a0a */
+	color: hsl(0 0% 96%);
+	box-shadow:
+		0 0 0 1px hsl(0 0% 96% / 0.1),
+		0 1px 4px rgba(0, 0, 0, 0.25),
+		0 4px 16px rgba(0, 0, 0, 0.4);
+	font-size: 0.875rem;
+	overflow: hidden auto;
+	max-height: 300px;
+	outline: none;
+}
+
+.rich-editor-alert-dropdown-item {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	width: 100%;
+	padding: 6px 8px;
+	border: none;
+	border-radius: 6px;
+	background: none;
+	cursor: pointer;
+	font-family: inherit;
+	font-size: inherit;
+	color: hsl(0 0% 96%);
+	text-align: start;
+	line-height: 1.4;
+	transition: background-color 0.1s;
+}
+
+.rich-editor-alert-dropdown-item:hover,
+.rich-editor-alert-dropdown-item.active {
+	background-color: hsl(0 0% 96% / 0.08);
+}
+
+/* 下拉菜单图标颜色（按类型） */
+.rich-editor-alert-option-icon-info    { color: hsl(207 65% 65%); }
+.rich-editor-alert-option-icon-tip     { color: hsl(120 50% 55%); }
+.rich-editor-alert-option-icon-warning { color: hsl(25 65% 55%); }
+
+.rich-editor-alert-option-icon {
+	width: 16px;
+	height: 16px;
+	flex-shrink: 0;
+}
+
+/* ── 内容区 ── */
+.rich-editor-alert-content {
+	border-radius: 4px;
+}
+
+.rich-editor-alert-editor {
+	min-height: 20px;
+	padding: 0;
+	font-size: var(--text-sm, 0.875rem);
+	line-height: 1.6;
+	outline: none;
+}
+
+/* 错误降级 */
+.rich-editor-alert-error {
+	border-left: 4px solid hsl(0 70% 55%);
+	border-radius: 0 4px 4px 0;
+	padding: 16px;
+	background-color: hsl(0 50% 20% / 0.3);
+	color: hsl(0 60% 70%);
+}
+.rich-editor-alert-error::before {
+	content: none;
 }

@@ -2,9 +2,7 @@
 	import { cn } from '$lib/utils';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import type { LexicalEditor } from 'lexical';
-	import {
-		lexicalEditor
-	} from './lexical-action';
+	import { lexicalEditor, EDITOR_THEME } from './lexical-action';
 	import {
 		renderMarkdownToHtmlSync,
 		type MarkdownEditorProps,
@@ -13,6 +11,7 @@
 	import EditorToolbar from './EditorToolbar.svelte';
 	import FloatingFormatToolbar from './FloatingFormatToolbar.svelte';
 	import CodeModeToggle from './CodeModeToggle.svelte';
+	import { setEditorContext } from './editor-context';
 
 	// Lexical 编辑器全局样式（由 PostCSS 处理 @apply / Tailwind 指令）
 	import './lexical-editor.css';
@@ -51,6 +50,14 @@
 		borderless?: boolean;
 	} = $props();
 
+	// ── Editor Context ──
+	const editorRuntime = {
+		editor: null as LexicalEditor | null,
+		theme: EDITOR_THEME,
+		onError: (error: Error) => console.error('Lexical editor error:', error)
+	};
+	setEditorContext(editorRuntime);
+
 	let editor: LexicalEditor | null = $state(null);
 	let previewHtml = $state('');
 	let previewVisible = $state(false);
@@ -68,6 +75,7 @@
 
 	function handleEditorReady(e: LexicalEditor) {
 		editor = e;
+		editorRuntime.editor = e;
 	}
 
 	function handleChange(detail: {
@@ -80,20 +88,6 @@
 		const html = renderMarkdownToHtmlSync(detail.markdown);
 		previewHtml = html;
 		onChange?.({ ...detail, htmlPreview: html });
-	}
-
-	function insertCallout(type: 'info' | 'tip' | 'warning') {
-		const calloutMd =
-			type === 'info' ? '\n> **ℹ️ 注意**\n> \n'
-			: type === 'tip' ? '\n> **💡 提示**\n> \n'
-			: type === 'warning' ? '\n> **⚠️ 警告**\n> \n'
-			: '';
-		editor?.update(() => {
-			const root = getLexicalRoot();
-			const p = createLexicalParagraph();
-			p.append(createLexicalText(calloutMd));
-			root.append(p);
-		});
 	}
 
 	// 代码模式 → 切换回富文本时，将编辑后的 markdown 同步回 Lexical
@@ -147,9 +141,8 @@
 			<EditorToolbar
 				{editor}
 				{previewVisible}
-				stickyToolbar={stickyToolbar}
+				{stickyToolbar}
 				onTogglePreview={() => (previewVisible = !previewVisible)}
-				onInsertCallout={insertCallout}
 				class="flex-1"
 			/>
 			<CodeModeToggle {codeMode} onToggle={toggleCodeMode} />
@@ -166,7 +159,7 @@
 			<Textarea
 				bind:value={codeModeText}
 				oninput={onCodeModeInput}
-				placeholder={placeholder}
+				{placeholder}
 				class={cn(
 					'h-full min-h-48 w-full resize-none font-mono text-sm leading-6',
 					!borderless && 'rounded-lg border border-border bg-background'
@@ -202,10 +195,11 @@
 
 	<!-- Preview area -->
 	{#if previewVisible && previewHtml}
-		<div class="prose prose-neutral max-w-none overflow-y-auto rounded-lg border border-border bg-background p-4 dark:prose-invert">
+		<div
+			class="prose max-w-none overflow-y-auto rounded-lg border border-border bg-background p-4 prose-neutral dark:prose-invert"
+		>
 			<!-- eslint-disable-next-line svelte/no-at-html-tags -- Safe: HTML is sanitized by rehype-sanitize -->
 			{@html previewHtml}
 		</div>
 	{/if}
 </div>
-

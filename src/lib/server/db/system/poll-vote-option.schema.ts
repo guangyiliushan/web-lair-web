@@ -1,10 +1,5 @@
-import {
-	index,
-	pgTable,
-	text,
-	uniqueIndex,
-} from 'drizzle-orm/pg-core'
-import { pollVotes } from './poll-vote.schema'
+import { index, pgTable, text, uniqueIndex } from 'drizzle-orm/pg-core';
+import { pollVotes } from './poll-vote.schema';
 
 export const pollVoteOptions = pgTable(
 	'poll_vote_options',
@@ -18,4 +13,4 @@ export const pollVoteOptions = pgTable(
 		uniqueIndex('poll_vote_options_pk').on(table.voteId, table.optionId),
 		index('poll_vote_options_option_idx').on(table.optionId)
 	]
-)
+);

@@ -1,4 +1,10 @@
-import { TextNode, type DOMConversionMap, type EditorConfig, type NodeKey, type SerializedTextNode } from 'lexical';
+import {
+	TextNode,
+	type DOMConversionMap,
+	type EditorConfig,
+	type NodeKey,
+	type SerializedTextNode
+} from 'lexical';
 
 /** 为 tag 文本生成稳定的背景色 */
 function tagBgColor(text: string): string {
@@ -12,7 +18,7 @@ function tagBgColor(text: string): string {
 		[158, 190, 214], // 蓝
 		[214, 158, 200], // 粉紫
 		[214, 200, 158], // 金
-		[158, 214, 200], // 青
+		[158, 214, 200] // 青
 	];
 	const [r, g, b] = palettes[Math.abs(hash) % palettes.length];
 	return `rgba(${r},${g},${b},0.7)`;
@@ -37,12 +43,10 @@ export class TagNode extends TextNode {
 		const dom = super.createDOM(config);
 		dom.className = 'rich-editor-tag';
 		dom.style.backgroundColor = tagBgColor(this.__text);
-		// 去掉 TextNode 默认的可能干扰的样式
-		dom.style.cssText = dom.style.cssText;
 		return dom;
 	}
 
-	updateDOM(prev: TagNode, dom: HTMLElement, config: EditorConfig): boolean {
+	updateDOM(prev: TagNode, dom: HTMLElement): boolean {
 		// TagNode 文本可变，颜色随文本更新
 		dom.style.backgroundColor = tagBgColor(this.__text);
 		return false; // false = Lexical 不替我们更新 DOM，我们已处理

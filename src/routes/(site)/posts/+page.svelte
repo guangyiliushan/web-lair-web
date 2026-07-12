@@ -40,13 +40,13 @@
 		<!-- ══ Main content ══ -->
 		<div class="min-w-0">
 			<!-- Page header -->
-			<div class="text-xs font-medium uppercase tracking-[4px] text-muted-foreground">Blog</div>
+			<div class="text-xs font-medium tracking-[4px] text-muted-foreground uppercase">Blog</div>
 			<h1 class="mt-2.5 text-3xl font-normal">Posts</h1>
 
 			<!-- Pinned post -->
 			{#if pinnedPost}
 				<Card.Root
-					class="mt-5 rounded-lg border bg-card/50 p-5 transition-all duration-200 hover:bg-card/70 hover:shadow-[0_2px_16px_rgba(0,0,0,0.05)] hover:-translate-y-px dark:border-white/5 dark:bg-white/4 dark:hover:bg-white/6"
+					class="mt-5 rounded-lg border bg-card/50 p-5 transition-all duration-200 hover:-translate-y-px hover:bg-card/70 hover:shadow-[0_2px_16px_rgba(0,0,0,0.05)] dark:border-white/5 dark:bg-white/4 dark:hover:bg-white/6"
 				>
 					<a href={`/posts/${pinnedPost.slug}`} class="block">
 						<Card.Header class="p-0">
@@ -68,7 +68,7 @@
 							{/each}
 							{#if pinnedPost.translated}
 								<span
-									class="ml-auto inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary/80"
+									class="ml-auto inline-flex shrink-0 items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium whitespace-nowrap text-primary/80"
 								>
 									{translateLabel(pinnedPost.translated.from, pinnedPost.translated.to)}
 								</span>
@@ -112,19 +112,13 @@
 			</div>
 
 			<!-- Mobile: Search + Tags buttons -->
-			<div class="mb-5 mt-2 border-b border-border/50 pb-3 lg:hidden">
+			<div class="mt-2 mb-5 border-b border-border/50 pb-3 lg:hidden">
 				<div class="grid grid-cols-2 gap-2">
-					<Button
-						variant="ghost"
-						class="justify-center rounded-lg bg-muted/40 py-2 text-xs"
-					>
+					<Button variant="ghost" class="justify-center rounded-lg bg-muted/40 py-2 text-xs">
 						<IconSearch data-icon="inline-start" class="opacity-70" />
 						Search
 					</Button>
-					<Button
-						variant="ghost"
-						class="justify-center rounded-lg bg-muted/40 py-2 text-xs"
-					>
+					<Button variant="ghost" class="justify-center rounded-lg bg-muted/40 py-2 text-xs">
 						<IconHash data-icon="inline-start" class="opacity-70" />
 						All tags
 					</Button>
@@ -136,7 +130,7 @@
 				{#each posts as post (post.slug)}
 					<a
 						href={`/posts/${post.slug}`}
-						class="block rounded-lg px-4 py-3.5 -mx-4 my-1 transition-all duration-200 hover:bg-card/70 hover:shadow-[0_2px_12px_rgba(0,0,0,0.04),0_0_0_1px_rgba(0,0,0,0.03)] hover:-translate-y-px dark:hover:bg-white/5"
+						class="-mx-4 my-1 block rounded-lg px-4 py-3.5 transition-all duration-200 hover:-translate-y-px hover:bg-card/70 hover:shadow-[0_2px_12px_rgba(0,0,0,0.04),0_0_0_1px_rgba(0,0,0,0.03)] dark:hover:bg-white/5"
 					>
 						<div class="flex items-baseline gap-2">
 							<h3 class="text-base font-medium">{post.title}</h3>
@@ -153,13 +147,13 @@
 								<span class="text-primary">{tag}</span>
 							{/each}
 							{#if post.tags.length > 3}
-								<span class="tabular-nums text-muted-foreground hover:text-primary"
+								<span class="text-muted-foreground tabular-nums hover:text-primary"
 									>+{post.tags.length - 3}</span
 								>
 							{/if}
 							{#if post.translated}
 								<span
-									class="ml-auto inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary/80"
+									class="ml-auto inline-flex shrink-0 items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium whitespace-nowrap text-primary/80"
 								>
 									{translateLabel(post.translated.from, post.translated.to)}
 								</span>
@@ -190,13 +184,13 @@
 							<Button
 								variant="ghost"
 								disabled
-								class="inline-flex cursor-default items-center gap-1.5 text-xs font-medium uppercase tracking-[2.5px] text-muted-foreground/60"
+								class="inline-flex cursor-default items-center gap-1.5 text-xs font-medium tracking-[2.5px] text-muted-foreground/60 uppercase"
 							>
 								<IconArrowLeft data-icon="inline-start" class="shrink-0" />
 								<span>Previous page</span>
 							</Button>
 						</Pagination.Item>
-						
+
 						<Pagination.Item class="list-none text-center">
 							<span aria-hidden="true" class="text-muted-foreground/40">·</span>
 						</Pagination.Item>
@@ -205,14 +199,16 @@
 							<Button
 								variant="ghost"
 								href="/posts?page=2"
-								class="inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-[2.5px] text-muted-foreground transition-colors hover:text-primary"
+								class="inline-flex items-center gap-1.5 text-xs font-medium tracking-[2.5px] text-muted-foreground uppercase transition-colors hover:text-primary"
 							>
 								<span>Next page</span>
 								<IconArrowRight data-icon="inline-end" class="shrink-0" />
 							</Button>
 						</Pagination.Item>
-						
-						<div class="col-span-full mt-2 text-center text-xs uppercase tracking-[3px] text-muted-foreground tabular-nums">
+
+						<div
+							class="col-span-full mt-2 text-center text-xs tracking-[3px] text-muted-foreground uppercase tabular-nums"
+						>
 							Page 1 of 18
 						</div>
 					</Pagination.Content>
@@ -253,7 +249,7 @@
 					<Button
 						variant="link"
 						size="sm"
-						class="mt-3 text-xs text-muted-foreground underline underline-offset-4 decoration-border/40 hover:text-foreground"
+						class="mt-3 text-xs text-muted-foreground underline decoration-border/40 underline-offset-4 hover:text-foreground"
 					>
 						All tags
 					</Button>

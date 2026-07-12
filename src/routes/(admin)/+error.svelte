@@ -12,7 +12,13 @@
 	const isServerError = $derived(status >= 500);
 
 	const heading = $derived(
-		isNotFound ? '页面未找到' : isForbidden ? '访问被拒绝' : isServerError ? '服务器错误' : '发生了一些错误'
+		isNotFound
+			? '页面未找到'
+			: isForbidden
+				? '访问被拒绝'
+				: isServerError
+					? '服务器错误'
+					: '发生了一些错误'
 	);
 
 	const description = $derived(

@@ -1,4 +1,9 @@
-import { createEditor, type LexicalEditor, type LexicalCommand, type EditorThemeClasses } from 'lexical';
+import {
+	createEditor,
+	type LexicalEditor,
+	type LexicalCommand,
+	type EditorThemeClasses
+} from 'lexical';
 import { registerRichText } from '@lexical/rich-text';
 import { registerHistory, createEmptyHistoryState } from '@lexical/history';
 import {
@@ -27,6 +32,9 @@ import { CodeNode, CodeHighlightNode, $createCodeNode } from '@lexical/code';
 import { HorizontalRuleNode, INSERT_HORIZONTAL_RULE_COMMAND } from '@lexical/extension';
 import { $setBlocksType } from '@lexical/selection';
 import { TagNode, $createTagNode } from './tag-node';
+import { AlertNode, $createAlertNode, $isAlertNode } from './alert-node';
+import { DEFAULT_ALERT_TYPE, createDefaultAlertContent } from './alert-types';
+import type { AlertType } from './alert-types';
 import {
 	$getRoot,
 	$createParagraphNode,
@@ -34,7 +42,6 @@ import {
 	$getSelection,
 	$isRangeSelection,
 	$isElementNode,
-	$insertNodes,
 	FORMAT_TEXT_COMMAND,
 	FORMAT_ELEMENT_COMMAND,
 	SELECTION_CHANGE_COMMAND,
@@ -77,7 +84,20 @@ const EDITOR_NODES = [
 	CodeHighlightNode,
 	LinkNode,
 	HorizontalRuleNode,
-	TagNode
+	TagNode,
+	AlertNode
+];
+
+/** 嵌套编辑器节点子集（不含 AlertNode 和 TagNode，防止无限嵌套） */
+export const NESTED_EDITOR_NODES = [
+	HeadingNode,
+	ListNode,
+	ListItemNode,
+	QuoteNode,
+	CodeNode,
+	CodeHighlightNode,
+	LinkNode,
+	HorizontalRuleNode
 ];
 
 /**
@@ -89,7 +109,7 @@ const EDITOR_NODES = [
  * 注意：类名通过 `:global()` 定义在 MarkdownEditor.svelte 的 scoped style 中，
  * 支持 Tailwind `@apply` 以确保与设计系统一致。
  */
-const EDITOR_THEME: EditorThemeClasses = {
+export const EDITOR_THEME: EditorThemeClasses = {
 	heading: {
 		h1: 'rich-editor-h1',
 		h2: 'rich-editor-h2',
@@ -317,7 +337,10 @@ export function toggleBulletList(editor: LexicalEditor) {
 	editor.update(() => {
 		const children = $getRoot().getChildren();
 		const firstChild = children[0];
-		if (firstChild?.getType?.() === 'list' && (firstChild as { getListType?: () => string })?.getListType?.() === 'bullet') {
+		if (
+			firstChild?.getType?.() === 'list' &&
+			(firstChild as { getListType?: () => string })?.getListType?.() === 'bullet'
+		) {
 			editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
 		} else {
 			editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined);
@@ -330,7 +353,10 @@ export function toggleOrderedList(editor: LexicalEditor) {
 	editor.update(() => {
 		const children = $getRoot().getChildren();
 		const firstChild = children[0];
-		if (firstChild?.getType?.() === 'list' && (firstChild as { getListType?: () => string })?.getListType?.() === 'number') {
+		if (
+			firstChild?.getType?.() === 'list' &&
+			(firstChild as { getListType?: () => string })?.getListType?.() === 'number'
+		) {
 			editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
 		} else {
 			editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined);
@@ -377,7 +403,8 @@ export function insertImage(editor: LexicalEditor, url: string, alt: string = ''
  * 编辑器内显示为文本，渲染管线会转为 <table>。
  */
 export function insertTable(editor: LexicalEditor) {
-	const tableMd = '\n| 列 1 | 列 2 | 列 3 |\n| --- | --- | --- |\n|     |     |     |\n|     |     |     |\n';
+	const tableMd =
+		'\n| 列 1 | 列 2 | 列 3 |\n| --- | --- | --- |\n|     |     |     |\n|     |     |     |\n';
 	editor.update(() => {
 		const selection = $getSelection();
 		if (!$isRangeSelection(selection)) return;
@@ -423,6 +450,21 @@ export function insertTag(editor: LexicalEditor) {
 		const text = selection.isCollapsed() ? 'tag' : selection.getTextContent();
 		const tagNode = $createTagNode(text);
 		selection.insertNodes([tagNode]);
+	});
+}
+
+export { $createAlertNode, $isAlertNode };
+
+/**
+ * 插入 Alert/Callout 结构化块（DecoratorNode）。
+ * 替代原来的 markdown 文本 Callout 插入方式。
+ */
+export function insertAlert(editor: LexicalEditor, type: AlertType = DEFAULT_ALERT_TYPE) {
+	editor.update(() => {
+		const selection = $getSelection();
+		if (!$isRangeSelection(selection)) return;
+		const alertNode = $createAlertNode(type, createDefaultAlertContent());
+		selection.insertNodes([alertNode]);
 	});
 }
 
@@ -526,3 +568,17 @@ export function getSelectionRect(): DOMRect | null {
 	if (editorRoot && !editorRoot.contains(range.commonAncestorContainer)) return null;
 	return range.getBoundingClientRect();
 }
+
+// ── 重导出 $ 前缀函数（供嵌套编辑器 .svelte 文件使用）──
+// Svelte 5 不允许 .svelte 文件中直接 import $ 前缀的函数
+// 通过别名重导出，使嵌套编辑器组件可以安全引用
+export {
+	$getRoot as getLexicalRoot,
+	$createParagraphNode as createLexicalParagraph,
+	$getSelection as getLexicalSelection,
+	$isRangeSelection as isLexicalRangeSelection,
+	$getNodeByKey as getLexicalNodeByKey
+} from 'lexical';
+
+// 来自 alert-node.ts 的 $ 前缀函数也需要别名
+export { $isAlertNode as isAlertNode };

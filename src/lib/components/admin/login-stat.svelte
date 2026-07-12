@@ -12,7 +12,12 @@
 	let { lastLoginTime, lastLoginIp, class: className }: Props = $props();
 </script>
 
-<div class={cn('grid gap-2 border-t border-border py-4 text-sm text-muted-foreground sm:grid-cols-2', className)}>
+<div
+	class={cn(
+		'grid gap-2 border-t border-border py-4 text-sm text-muted-foreground sm:grid-cols-2',
+		className
+	)}
+>
 	<div class="inline-flex min-w-0 items-center gap-2">
 		<IconShield class="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
 		<span class="shrink-0">上次登录时间:</span>

@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm'
+import { sql } from 'drizzle-orm';
 import {
 	boolean,
 	index,
@@ -7,9 +7,9 @@ import {
 	pgTable,
 	text,
 	timestamp,
-	uniqueIndex,
-} from 'drizzle-orm/pg-core'
-import { topics } from './topic.schema'
+	uniqueIndex
+} from 'drizzle-orm/pg-core';
+import { topics } from './topic.schema';
 
 export const notes = pgTable(
 	'notes',
@@ -31,16 +31,16 @@ export const notes = pgTable(
 		weather: text('weather'),
 		bookmark: boolean('bookmark').notNull().default(false),
 		coordinates: jsonb('coordinates').$type<{
-			latitude: number
-			longitude: number
+			latitude: number;
+			longitude: number;
 		} | null>(),
 		location: text('location'),
 		readCount: integer('read_count').notNull().default(0),
 		likeCount: integer('like_count').notNull().default(0),
 		topicId: text('topic_id').references(() => topics.id, {
-			onDelete: 'set null',
+			onDelete: 'set null'
 		}),
-		modifiedAt: timestamp('modified_at', { withTimezone: true }),
+		modifiedAt: timestamp('modified_at', { withTimezone: true })
 	},
 	(table) => [
 		uniqueIndex('notes_nid_uniq').on(table.nid),
@@ -53,6 +53,6 @@ export const notes = pgTable(
 		index('notes_topic_id_idx').on(table.topicId),
 		index('notes_published_public_created_idx')
 			.on(table.isPublished, table.createdAt.desc(), table.publicAt)
-			.concurrently(),
-	],
-)
+			.concurrently()
+	]
+);

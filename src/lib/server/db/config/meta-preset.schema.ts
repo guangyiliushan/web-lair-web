@@ -1,5 +1,5 @@
-import { sql } from 'drizzle-orm'
-import { jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core'
+import { sql } from 'drizzle-orm';
+import { jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 
 export const metaPresets = pgTable(
 	'meta_presets',
@@ -16,4 +16,4 @@ export const metaPresets = pgTable(
 			.default(sql`'[]'::jsonb`)
 	},
 	(table) => [uniqueIndex('meta_presets_name_uniq').on(table.name)]
-)
+);

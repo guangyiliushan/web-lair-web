@@ -18,7 +18,7 @@
 			mood: '',
 			weather: '',
 			location: '',
-			reads: 332,
+			reads: 332
 		},
 		{
 			id: 210,
@@ -27,7 +27,7 @@
 			mood: '',
 			weather: '',
 			location: '',
-			reads: 739,
+			reads: 739
 		},
 		{
 			id: 208,
@@ -36,7 +36,7 @@
 			mood: '',
 			weather: '',
 			location: '',
-			reads: '1.3K',
+			reads: '1.3K'
 		},
 		{
 			id: 207,
@@ -45,7 +45,7 @@
 			mood: '',
 			weather: 'Overcast',
 			location: '',
-			reads: 887,
+			reads: 887
 		},
 		{
 			id: 206,
@@ -54,7 +54,7 @@
 			mood: 'Mixed Emotions',
 			weather: '',
 			location: '',
-			reads: '2.3K',
+			reads: '2.3K'
 		},
 		{
 			id: 205,
@@ -63,7 +63,7 @@
 			mood: '',
 			weather: '',
 			location: '',
-			reads: '2.3K',
+			reads: '2.3K'
 		},
 		{
 			id: 204,
@@ -72,7 +72,7 @@
 			mood: '',
 			weather: '',
 			location: '',
-			reads: '2.7K',
+			reads: '2.7K'
 		},
 		{
 			id: 200,
@@ -81,7 +81,7 @@
 			mood: 'Anxious',
 			weather: '',
 			location: '',
-			reads: '2.5K',
+			reads: '2.5K'
 		},
 		{
 			id: 199,
@@ -90,7 +90,7 @@
 			mood: 'Happy',
 			weather: 'Sunny',
 			location: '',
-			reads: '1.6K',
+			reads: '1.6K'
 		},
 		{
 			id: 198,
@@ -99,16 +99,17 @@
 			mood: '',
 			weather: '',
 			location: '',
-			reads: '1.0K',
-		},
+			reads: '1.0K'
+		}
 	];
 
 	let searchQuery = $state('');
 
 	const filteredNotes = $derived(
-		notes.filter(note => 
-			note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-			note.slug.toLowerCase().includes(searchQuery.toLowerCase())
+		notes.filter(
+			(note) =>
+				note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+				note.slug.toLowerCase().includes(searchQuery.toLowerCase())
 		)
 	);
 </script>
@@ -134,13 +135,8 @@
 	<Card.Root>
 		<Card.Content class="p-4">
 			<div class="relative w-full max-w-sm">
-				<IconSearch class="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-				<Input
-					type="search"
-					placeholder="搜索标题..."
-					class="pl-9"
-					bind:value={searchQuery}
-				/>
+				<IconSearch class="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+				<Input type="search" placeholder="搜索标题..." class="pl-9" bind:value={searchQuery} />
 			</div>
 		</Card.Content>
 	</Card.Root>
@@ -194,17 +190,19 @@
 									</Table.Cell>
 									<Table.Cell>
 										<div class="flex items-center gap-2">
-											<a 
-												href="/admin/notes/{note.id}/edit" 
-												class="font-medium hover:text-primary line-clamp-1"
+											<a
+												href="/admin/notes/{note.id}/edit"
+												class="line-clamp-1 font-medium hover:text-primary"
 											>
 												{note.title}
 											</a>
-											<div class="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-												<a 
-													href="/notes/{note.slug}" 
+											<div
+												class="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100"
+											>
+												<a
+													href="/notes/{note.slug}"
 													target="_blank"
-													class="flex size-6 items-center justify-center rounded-md hover:bg-muted text-muted-foreground"
+													class="flex size-6 items-center justify-center rounded-md text-muted-foreground hover:bg-muted"
 												>
 													<IconExternalLink class="size-3.5" />
 												</a>
@@ -218,7 +216,7 @@
 											<span class="text-sm text-muted-foreground">—</span>
 										{/if}
 									</Table.Cell>
-									<Table.Cell class="hidden lg:table-cell text-muted-foreground text-sm font-mono">
+									<Table.Cell class="hidden font-mono text-sm text-muted-foreground lg:table-cell">
 										{note.slug}
 									</Table.Cell>
 									<Table.Cell class="hidden xl:table-cell">
@@ -235,14 +233,14 @@
 											<span class="text-sm text-muted-foreground">—</span>
 										{/if}
 									</Table.Cell>
-									<Table.Cell class="text-center text-muted-foreground text-sm">
+									<Table.Cell class="text-center text-sm text-muted-foreground">
 										{note.reads}
 									</Table.Cell>
 									<Table.Cell class="text-right">
-										<Button 
-											variant="ghost" 
-											size="sm" 
-											class="text-destructive hover:text-destructive hover:bg-destructive/10"
+										<Button
+											variant="ghost"
+											size="sm"
+											class="text-destructive hover:bg-destructive/10 hover:text-destructive"
 										>
 											移除
 										</Button>

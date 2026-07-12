@@ -1,10 +1,4 @@
-import {
-	index,
-	pgTable,
-	text,
-	timestamp,
-	uniqueIndex,
-} from 'drizzle-orm/pg-core'
+import { index, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 
 export const translationEntries = pgTable(
 	'translation_entries',
@@ -17,16 +11,16 @@ export const translationEntries = pgTable(
 		lookupKey: text('lookup_key').notNull(),
 		sourceText: text('source_text').notNull(),
 		translatedText: text('translated_text').notNull(),
-		sourceUpdatedAt: timestamp('source_updated_at', { withTimezone: true }),
+		sourceUpdatedAt: timestamp('source_updated_at', { withTimezone: true })
 	},
 	(table) => [
 		uniqueIndex('translation_entries_key_uniq').on(
 			table.keyPath,
 			table.lang,
 			table.keyType,
-			table.lookupKey,
+			table.lookupKey
 		),
 		index('translation_entries_path_lang_idx').on(table.keyPath, table.lang),
-		index('translation_entries_lookup_key_idx').on(table.lookupKey),
-	],
-)
+		index('translation_entries_lookup_key_idx').on(table.lookupKey)
+	]
+);

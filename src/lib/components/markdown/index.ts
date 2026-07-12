@@ -26,6 +26,10 @@ export type {
 	MarkdownRendererProps
 } from './markdown-config';
 
+export { $createAlertNode, $isAlertNode, insertAlert } from './lexical-action';
+export type { AlertType } from './alert-types';
+export type { SerializedAlertNode } from './alert-node';
+
 // 服务端渲染（仅在 server context 可用）
 // 注：不要在这里 re-export src/lib/server/markdown.ts，
 // 由调用方直接 import '$lib/server/markdown' 以确保 server-only 边界。

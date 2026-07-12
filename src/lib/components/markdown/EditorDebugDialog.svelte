@@ -42,13 +42,12 @@
 					<IconBug class="size-4" />
 					调试 · Editor State
 				</Dialog.Title>
-				<Dialog.Description>
-					当前 Lexical 编辑器状态的 JSON 序列化输出。
-				</Dialog.Description>
+				<Dialog.Description>当前 Lexical 编辑器状态的 JSON 序列化输出。</Dialog.Description>
 			</Dialog.Header>
 
 			<div class="max-h-[60vh] overflow-auto rounded-lg bg-muted/50 p-4">
-				<pre class="whitespace-pre font-mono text-xs leading-relaxed text-foreground">{editorStateJson}</pre>
+				<pre
+					class="font-mono text-xs leading-relaxed whitespace-pre text-foreground">{editorStateJson}</pre>
 			</div>
 
 			<Dialog.Footer>

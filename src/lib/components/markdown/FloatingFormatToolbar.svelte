@@ -105,7 +105,6 @@
 </script>
 
 {#if visible}
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
 		class="fixed z-50 flex items-center gap-0.5 rounded-xl border border-border bg-background/95 p-1 shadow-lg backdrop-blur"
 		style="top: {top}px; left: {left}px; transform: translateX(-50%);"

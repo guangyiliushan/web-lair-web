@@ -1,4 +1,5 @@
 ﻿<script lang="ts">
+	import { MediaQuery } from 'svelte/reactivity';
 	import { cn } from '$lib/utils';
 	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
@@ -19,6 +20,7 @@
 		insertTable,
 		insertCodeBlock,
 		insertTag,
+		insertAlert,
 		insertCheckList,
 		applyParagraph,
 		readToolbarState,
@@ -87,7 +89,6 @@
 		editor: LexicalEditor | null;
 		previewVisible: boolean;
 		onTogglePreview: () => void;
-		onInsertCallout: (type: 'info' | 'tip' | 'warning') => void;
 		stickyToolbar?: boolean;
 		class?: string;
 	};
@@ -96,36 +97,19 @@
 		editor,
 		previewVisible,
 		onTogglePreview,
-		onInsertCallout,
 		stickyToolbar = false,
 		class: className
 	}: Props = $props();
 
 	// ── 响应式断点检测 ──
-	let bp = $state<BpLevel>(0);
+	const xlQuery = new MediaQuery('(min-width: 1280px)', false);
+	const lgQuery = new MediaQuery('(min-width: 1024px)', false);
+	const mdQuery = new MediaQuery('(min-width: 768px)', false);
+	const smQuery = new MediaQuery('(min-width: 640px)', false);
 
-	$effect(() => {
-		const queries = [
-			window.matchMedia('(min-width: 1280px)'),
-			window.matchMedia('(min-width: 1024px)'),
-			window.matchMedia('(min-width: 768px)'),
-			window.matchMedia('(min-width: 640px)')
-		];
-
-		function update() {
-			if (queries[0].matches) bp = 4;
-			else if (queries[1].matches) bp = 3;
-			else if (queries[2].matches) bp = 2;
-			else if (queries[3].matches) bp = 1;
-			else bp = 0;
-		}
-
-		update();
-		for (const q of queries) q.addEventListener('change', update);
-		return () => {
-			for (const q of queries) q.removeEventListener('change', update);
-		};
-	});
+	let bp: BpLevel = $derived(
+		xlQuery.current ? 4 : lgQuery.current ? 3 : mdQuery.current ? 2 : smQuery.current ? 1 : 0
+	);
 
 	// ── 工具栏状态 ──
 	let toolbarState = $state<ToolbarState>({
@@ -171,14 +155,30 @@
 	function applyBlockType(type: BlockType) {
 		if (!editor) return;
 		switch (type) {
-			case 'paragraph': applyParagraph(editor); break;
-			case 'h1': toggleHeading(editor, 'h1'); break;
-			case 'h2': toggleHeading(editor, 'h2'); break;
-			case 'h3': toggleHeading(editor, 'h3'); break;
-			case 'bullet': toggleBulletList(editor); break;
-			case 'number': toggleOrderedList(editor); break;
-			case 'check': insertCheckList(editor); break;
-			case 'quote': toggleBlockquote(editor); break;
+			case 'paragraph':
+				applyParagraph(editor);
+				break;
+			case 'h1':
+				toggleHeading(editor, 'h1');
+				break;
+			case 'h2':
+				toggleHeading(editor, 'h2');
+				break;
+			case 'h3':
+				toggleHeading(editor, 'h3');
+				break;
+			case 'bullet':
+				toggleBulletList(editor);
+				break;
+			case 'number':
+				toggleOrderedList(editor);
+				break;
+			case 'check':
+				insertCheckList(editor);
+				break;
+			case 'quote':
+				toggleBlockquote(editor);
+				break;
 		}
 	}
 
@@ -233,27 +233,96 @@
 		{
 			heading: '文本格式',
 			items: [
-				{ id: 'underline', label: '下划线', icon: IconUnderline, shortcut: '⌘U', action: () => formatText('underline'), minBp: 2 },
-				{ id: 'strikethrough', label: '删除线', icon: IconStrikethrough, action: () => formatText('strikethrough'), minBp: 2 },
-				{ id: 'highlight', label: '高亮', icon: IconHighlight, action: () => formatText('highlight'), minBp: 3 },
-				{ id: 'inlineCode', label: '行内代码', icon: IconCode, action: () => formatText('code'), minBp: 1 }
+				{
+					id: 'underline',
+					label: '下划线',
+					icon: IconUnderline,
+					shortcut: '⌘U',
+					action: () => formatText('underline'),
+					minBp: 2
+				},
+				{
+					id: 'strikethrough',
+					label: '删除线',
+					icon: IconStrikethrough,
+					action: () => formatText('strikethrough'),
+					minBp: 2
+				},
+				{
+					id: 'highlight',
+					label: '高亮',
+					icon: IconHighlight,
+					action: () => formatText('highlight'),
+					minBp: 3
+				},
+				{
+					id: 'inlineCode',
+					label: '行内代码',
+					icon: IconCode,
+					action: () => formatText('code'),
+					minBp: 1
+				}
 			]
 		},
 		{
 			heading: '编辑',
 			items: [
-				{ id: 'undo', label: '撤销', icon: IconArrowBackUp, shortcut: '⌘Z', action: () => dispatchCmd(UNDO_COMMAND), minBp: 1 },
-				{ id: 'redo', label: '重做', icon: IconArrowForwardUp, shortcut: '⌘⇧Z', action: () => dispatchCmd(REDO_COMMAND), minBp: 1 }
+				{
+					id: 'undo',
+					label: '撤销',
+					icon: IconArrowBackUp,
+					shortcut: '⌘Z',
+					action: () => dispatchCmd(UNDO_COMMAND),
+					minBp: 1
+				},
+				{
+					id: 'redo',
+					label: '重做',
+					icon: IconArrowForwardUp,
+					shortcut: '⌘⇧Z',
+					action: () => dispatchCmd(REDO_COMMAND),
+					minBp: 1
+				}
 			]
 		},
 		{
 			heading: '列表与排版',
 			items: [
-				{ id: 'bulletList', label: '无序列表', icon: IconList, action: () => toggleBulletList(editor!), minBp: 1 },
-				{ id: 'orderedList', label: '有序列表', icon: IconListNumbers, action: () => toggleOrderedList(editor!), minBp: 1 },
-				{ id: 'checkList', label: '待办列表', icon: IconListCheck, action: () => applyBlockType('check'), minBp: 1 },
-				{ id: 'quote', label: '引用', icon: IconBlockquote, action: () => applyBlockType('quote'), minBp: 2 },
-				{ id: 'horizontalRule', label: '分割线', icon: IconSeparator, action: () => insertHorizontalRule(editor!), minBp: 2 },
+				{
+					id: 'bulletList',
+					label: '无序列表',
+					icon: IconList,
+					action: () => toggleBulletList(editor!),
+					minBp: 1
+				},
+				{
+					id: 'orderedList',
+					label: '有序列表',
+					icon: IconListNumbers,
+					action: () => toggleOrderedList(editor!),
+					minBp: 1
+				},
+				{
+					id: 'checkList',
+					label: '待办列表',
+					icon: IconListCheck,
+					action: () => applyBlockType('check'),
+					minBp: 1
+				},
+				{
+					id: 'quote',
+					label: '引用',
+					icon: IconBlockquote,
+					action: () => applyBlockType('quote'),
+					minBp: 2
+				},
+				{
+					id: 'horizontalRule',
+					label: '分割线',
+					icon: IconSeparator,
+					action: () => insertHorizontalRule(editor!),
+					minBp: 2
+				},
 				{ id: 'table', label: '插入表格', icon: IconTable, action: handleInsertTable, minBp: 2 }
 			]
 		},
@@ -262,27 +331,52 @@
 			items: [
 				{ id: 'link', label: '链接', icon: IconLink, action: handleInsertLink, minBp: 0 },
 				{ id: 'image', label: '图片', icon: IconPhoto, action: handleInsertImage, minBp: 0 },
-				{ id: 'codeBlock', label: '代码块', icon: IconCodeDots, action: () => insertCodeBlock(editor!), minBp: 3 },
-				{ id: 'calloutInfo', label: 'Callout · 信息', icon: IconInfoCircle, action: () => onInsertCallout('info'), minBp: 3 },
-				{ id: 'calloutTip', label: 'Callout · 提示', icon: IconBulb, action: () => onInsertCallout('tip'), minBp: 3 },
-				{ id: 'calloutWarning', label: 'Callout · 警告', icon: IconAlertTriangle, action: () => onInsertCallout('warning'), minBp: 3 },			{ id: 'tag', label: '标签', icon: IconTag, action: () => insertTag(editor!), minBp: 3 },				{ id: 'formula', label: '公式', icon: IconMath, action: () => {}, minBp: 4 }
+				{
+					id: 'codeBlock',
+					label: '代码块',
+					icon: IconCodeDots,
+					action: () => insertCodeBlock(editor!),
+					minBp: 3
+				},
+				{
+					id: 'calloutInfo',
+					label: 'Callout · 信息',
+					icon: IconInfoCircle,
+					action: () => insertAlert(editor!, 'info'),
+					minBp: 3
+				},
+				{
+					id: 'calloutTip',
+					label: 'Callout · 提示',
+					icon: IconBulb,
+					action: () => insertAlert(editor!, 'tip'),
+					minBp: 3
+				},
+				{
+					id: 'calloutWarning',
+					label: 'Callout · 警告',
+					icon: IconAlertTriangle,
+					action: () => insertAlert(editor!, 'warning'),
+					minBp: 3
+				},
+				{ id: 'tag', label: '标签', icon: IconTag, action: () => insertTag(editor!), minBp: 3 },
+				{ id: 'formula', label: '公式', icon: IconMath, action: () => {}, minBp: 4 }
 			]
 		}
 	];
 
 	let overflowGroups = $derived(
-		ALL_OVERFLOW_GROUPS
-			.map((g) => ({
-				heading: g.heading,
-				items: g.items.filter((it) => bp < (it.minBp as number))
-			}))
-			.filter((g) => g.items.length > 0)
+		ALL_OVERFLOW_GROUPS.map((g) => ({
+			heading: g.heading,
+			items: g.items.filter((it) => bp < (it.minBp as number))
+		})).filter((g) => g.items.length > 0)
 	);
 
 	let overflowNotEmpty = $derived(overflowGroups.length > 0);
 
 	// 移动端隐藏分隔符
 	let sepClass = $derived(cn(bp < 1 && 'hidden'));
+	let ActiveBlockIcon = $derived(activeBlock.icon);
 </script>
 
 <div
@@ -300,8 +394,13 @@
 	<DropdownMenu.Root>
 		<DropdownMenu.Trigger>
 			{#snippet child({ props })}
-				<Button variant="ghost" size={bp >= 1 ? 'sm' : 'icon-sm'} {...props} class="gap-1 text-xs font-medium">
-					<activeBlock.icon data-icon="inline-start" />
+				<Button
+					variant="ghost"
+					size={bp >= 1 ? 'sm' : 'icon-sm'}
+					{...props}
+					class="gap-1 text-xs font-medium"
+				>
+					<ActiveBlockIcon data-icon="inline-start" />
 					<span class={cn('truncate', bp < 1 && 'hidden')}>{activeBlock.label}</span>
 					<IconChevronDown class="size-3 opacity-60" />
 				</Button>
@@ -311,8 +410,9 @@
 			<DropdownMenu.Group>
 				<DropdownMenu.GroupHeading>块类型</DropdownMenu.GroupHeading>
 				{#each BLOCK_OPTIONS as option (option.type)}
+					{@const OptionIcon = option.icon}
 					<DropdownMenu.Item onclick={() => applyBlockType(option.type)}>
-						<option.icon data-icon="inline-start" />
+						<OptionIcon data-icon="inline-start" />
 						{option.label}
 					</DropdownMenu.Item>
 				{/each}
@@ -323,10 +423,24 @@
 	<!-- ═══════════ 撤销/重做 (Tier 1: sm+) ═══════════ -->
 	{#if bp >= 1}
 		<Separator orientation="vertical" decorative class={sepClass} />
-		<Button variant="ghost" size="icon-sm" onclick={() => dispatchCmd(UNDO_COMMAND)} onmousedown={preventSelectionLoss} aria-label="撤销" title="撤销 (⌘Z)">
+		<Button
+			variant="ghost"
+			size="icon-sm"
+			onclick={() => dispatchCmd(UNDO_COMMAND)}
+			onmousedown={preventSelectionLoss}
+			aria-label="撤销"
+			title="撤销 (⌘Z)"
+		>
 			<IconArrowBackUp data-icon="inline-start" />
 		</Button>
-		<Button variant="ghost" size="icon-sm" onclick={() => dispatchCmd(REDO_COMMAND)} onmousedown={preventSelectionLoss} aria-label="重做" title="重做 (⌘⇧Z)">
+		<Button
+			variant="ghost"
+			size="icon-sm"
+			onclick={() => dispatchCmd(REDO_COMMAND)}
+			onmousedown={preventSelectionLoss}
+			aria-label="重做"
+			title="重做 (⌘⇧Z)"
+		>
 			<IconArrowForwardUp data-icon="inline-start" />
 		</Button>
 	{/if}
@@ -334,31 +448,79 @@
 	<!-- ═══════════ 文本格式：B / I / U / S / Code (Tier 0/1/2) ═══════════ -->
 	<Separator orientation="vertical" decorative class={sepClass} />
 
-	<Button variant={toolbarState.isBold ? 'secondary' : 'ghost'} size="icon-sm" onclick={() => formatText('bold')} onmousedown={preventSelectionLoss} aria-pressed={toolbarState.isBold} aria-label="粗体" title="粗体 (⌘B)">
+	<Button
+		variant={toolbarState.isBold ? 'secondary' : 'ghost'}
+		size="icon-sm"
+		onclick={() => formatText('bold')}
+		onmousedown={preventSelectionLoss}
+		aria-pressed={toolbarState.isBold}
+		aria-label="粗体"
+		title="粗体 (⌘B)"
+	>
 		<IconBold data-icon="inline-start" />
 	</Button>
-	<Button variant={toolbarState.isItalic ? 'secondary' : 'ghost'} size="icon-sm" onclick={() => formatText('italic')} onmousedown={preventSelectionLoss} aria-pressed={toolbarState.isItalic} aria-label="斜体" title="斜体 (⌘I)">
+	<Button
+		variant={toolbarState.isItalic ? 'secondary' : 'ghost'}
+		size="icon-sm"
+		onclick={() => formatText('italic')}
+		onmousedown={preventSelectionLoss}
+		aria-pressed={toolbarState.isItalic}
+		aria-label="斜体"
+		title="斜体 (⌘I)"
+	>
 		<IconItalic data-icon="inline-start" />
 	</Button>
 
 	{#if bp >= 2}
-		<Button variant={toolbarState.isUnderline ? 'secondary' : 'ghost'} size="icon-sm" onclick={() => formatText('underline')} onmousedown={preventSelectionLoss} aria-pressed={toolbarState.isUnderline} aria-label="下划线" title="下划线 (⌘U)">
+		<Button
+			variant={toolbarState.isUnderline ? 'secondary' : 'ghost'}
+			size="icon-sm"
+			onclick={() => formatText('underline')}
+			onmousedown={preventSelectionLoss}
+			aria-pressed={toolbarState.isUnderline}
+			aria-label="下划线"
+			title="下划线 (⌘U)"
+		>
 			<IconUnderline data-icon="inline-start" />
 		</Button>
-		<Button variant={toolbarState.isStrikethrough ? 'secondary' : 'ghost'} size="icon-sm" onclick={() => formatText('strikethrough')} onmousedown={preventSelectionLoss} aria-pressed={toolbarState.isStrikethrough} aria-label="删除线" title="删除线">
+		<Button
+			variant={toolbarState.isStrikethrough ? 'secondary' : 'ghost'}
+			size="icon-sm"
+			onclick={() => formatText('strikethrough')}
+			onmousedown={preventSelectionLoss}
+			aria-pressed={toolbarState.isStrikethrough}
+			aria-label="删除线"
+			title="删除线"
+		>
 			<IconStrikethrough data-icon="inline-start" />
 		</Button>
 	{/if}
 
 	{#if bp >= 1}
-		<Button variant={toolbarState.isCode ? 'secondary' : 'ghost'} size="icon-sm" onclick={() => formatText('code')} onmousedown={preventSelectionLoss} aria-pressed={toolbarState.isCode} aria-label="行内代码" title="行内代码">
+		<Button
+			variant={toolbarState.isCode ? 'secondary' : 'ghost'}
+			size="icon-sm"
+			onclick={() => formatText('code')}
+			onmousedown={preventSelectionLoss}
+			aria-pressed={toolbarState.isCode}
+			aria-label="行内代码"
+			title="行内代码"
+		>
 			<IconCode data-icon="inline-start" />
 		</Button>
 	{/if}
 
 	<!-- ═══════════ 高亮 (Tier 3: lg+) ═══════════ -->
 	{#if bp >= 3}
-		<Button variant={toolbarState.isHighlight ? 'secondary' : 'ghost'} size="icon-sm" onclick={() => formatText('highlight')} onmousedown={preventSelectionLoss} aria-pressed={toolbarState.isHighlight} aria-label="高亮" title="高亮">
+		<Button
+			variant={toolbarState.isHighlight ? 'secondary' : 'ghost'}
+			size="icon-sm"
+			onclick={() => formatText('highlight')}
+			onmousedown={preventSelectionLoss}
+			aria-pressed={toolbarState.isHighlight}
+			aria-label="高亮"
+			title="高亮"
+		>
 			<IconHighlight data-icon="inline-start" />
 		</Button>
 	{/if}
@@ -366,10 +528,24 @@
 	<!-- ═══════════ 链接 / 图片 (Tier 0) ═══════════ -->
 	<Separator orientation="vertical" decorative class={sepClass} />
 
-	<Button variant="ghost" size="icon-sm" onclick={handleInsertLink} onmousedown={preventSelectionLoss} aria-label="插入链接" title="插入链接 (⌘K)">
+	<Button
+		variant="ghost"
+		size="icon-sm"
+		onclick={handleInsertLink}
+		onmousedown={preventSelectionLoss}
+		aria-label="插入链接"
+		title="插入链接 (⌘K)"
+	>
 		<IconLink data-icon="inline-start" />
 	</Button>
-	<Button variant="ghost" size="icon-sm" onclick={handleInsertImage} onmousedown={preventSelectionLoss} aria-label="插入图片" title="插入图片">
+	<Button
+		variant="ghost"
+		size="icon-sm"
+		onclick={handleInsertImage}
+		onmousedown={preventSelectionLoss}
+		aria-label="插入图片"
+		title="插入图片"
+	>
 		<IconPhoto data-icon="inline-start" />
 	</Button>
 
@@ -377,13 +553,36 @@
 	{#if bp >= 1}
 		<Separator orientation="vertical" decorative class={sepClass} />
 
-		<Button variant={toolbarState.blockType === 'bullet' ? 'secondary' : 'ghost'} size="icon-sm" onclick={() => toggleBulletList(editor!)} onmousedown={preventSelectionLoss} aria-pressed={toolbarState.blockType === 'bullet'} aria-label="无序列表" title="无序列表">
+		<Button
+			variant={toolbarState.blockType === 'bullet' ? 'secondary' : 'ghost'}
+			size="icon-sm"
+			onclick={() => toggleBulletList(editor!)}
+			onmousedown={preventSelectionLoss}
+			aria-pressed={toolbarState.blockType === 'bullet'}
+			aria-label="无序列表"
+			title="无序列表"
+		>
 			<IconList data-icon="inline-start" />
 		</Button>
-		<Button variant={toolbarState.blockType === 'number' ? 'secondary' : 'ghost'} size="icon-sm" onclick={() => toggleOrderedList(editor!)} onmousedown={preventSelectionLoss} aria-pressed={toolbarState.blockType === 'number'} aria-label="有序列表" title="有序列表">
+		<Button
+			variant={toolbarState.blockType === 'number' ? 'secondary' : 'ghost'}
+			size="icon-sm"
+			onclick={() => toggleOrderedList(editor!)}
+			onmousedown={preventSelectionLoss}
+			aria-pressed={toolbarState.blockType === 'number'}
+			aria-label="有序列表"
+			title="有序列表"
+		>
 			<IconListNumbers data-icon="inline-start" />
 		</Button>
-		<Button variant={toolbarState.blockType === 'check' ? 'secondary' : 'ghost'} size="icon-sm" onclick={() => applyBlockType('check')} onmousedown={preventSelectionLoss} aria-label="待办列表" title="待办列表">
+		<Button
+			variant={toolbarState.blockType === 'check' ? 'secondary' : 'ghost'}
+			size="icon-sm"
+			onclick={() => applyBlockType('check')}
+			onmousedown={preventSelectionLoss}
+			aria-label="待办列表"
+			title="待办列表"
+		>
 			<IconListCheck data-icon="inline-start" />
 		</Button>
 	{/if}
@@ -392,16 +591,48 @@
 	{#if bp >= 3}
 		<Separator orientation="vertical" decorative class={sepClass} />
 
-		<Button variant={toolbarState.alignment === 'left' ? 'secondary' : 'ghost'} size="icon-sm" onclick={() => setAlignment('left')} onmousedown={preventSelectionLoss} aria-pressed={toolbarState.alignment === 'left'} aria-label="左对齐" title="左对齐">
+		<Button
+			variant={toolbarState.alignment === 'left' ? 'secondary' : 'ghost'}
+			size="icon-sm"
+			onclick={() => setAlignment('left')}
+			onmousedown={preventSelectionLoss}
+			aria-pressed={toolbarState.alignment === 'left'}
+			aria-label="左对齐"
+			title="左对齐"
+		>
 			<IconAlignLeft data-icon="inline-start" />
 		</Button>
-		<Button variant={toolbarState.alignment === 'center' ? 'secondary' : 'ghost'} size="icon-sm" onclick={() => setAlignment('center')} onmousedown={preventSelectionLoss} aria-pressed={toolbarState.alignment === 'center'} aria-label="居中" title="居中">
+		<Button
+			variant={toolbarState.alignment === 'center' ? 'secondary' : 'ghost'}
+			size="icon-sm"
+			onclick={() => setAlignment('center')}
+			onmousedown={preventSelectionLoss}
+			aria-pressed={toolbarState.alignment === 'center'}
+			aria-label="居中"
+			title="居中"
+		>
 			<IconAlignCenter data-icon="inline-start" />
 		</Button>
-		<Button variant={toolbarState.alignment === 'right' ? 'secondary' : 'ghost'} size="icon-sm" onclick={() => setAlignment('right')} onmousedown={preventSelectionLoss} aria-pressed={toolbarState.alignment === 'right'} aria-label="右对齐" title="右对齐">
+		<Button
+			variant={toolbarState.alignment === 'right' ? 'secondary' : 'ghost'}
+			size="icon-sm"
+			onclick={() => setAlignment('right')}
+			onmousedown={preventSelectionLoss}
+			aria-pressed={toolbarState.alignment === 'right'}
+			aria-label="右对齐"
+			title="右对齐"
+		>
 			<IconAlignRight data-icon="inline-start" />
 		</Button>
-		<Button variant={toolbarState.alignment === 'justify' ? 'secondary' : 'ghost'} size="icon-sm" onclick={() => setAlignment('justify')} onmousedown={preventSelectionLoss} aria-pressed={toolbarState.alignment === 'justify'} aria-label="两端对齐" title="两端对齐">
+		<Button
+			variant={toolbarState.alignment === 'justify' ? 'secondary' : 'ghost'}
+			size="icon-sm"
+			onclick={() => setAlignment('justify')}
+			onmousedown={preventSelectionLoss}
+			aria-pressed={toolbarState.alignment === 'justify'}
+			aria-label="两端对齐"
+			title="两端对齐"
+		>
 			<IconAlignJustified data-icon="inline-start" />
 		</Button>
 	{/if}
@@ -410,45 +641,87 @@
 	{#if bp >= 2}
 		<Separator orientation="vertical" decorative class={sepClass} />
 
-		<Button variant={toolbarState.blockType === 'quote' ? 'secondary' : 'ghost'} size="icon-sm" onclick={() => applyBlockType('quote')} onmousedown={preventSelectionLoss} aria-label="引用" title="引用">
+		<Button
+			variant={toolbarState.blockType === 'quote' ? 'secondary' : 'ghost'}
+			size="icon-sm"
+			onclick={() => applyBlockType('quote')}
+			onmousedown={preventSelectionLoss}
+			aria-label="引用"
+			title="引用"
+		>
 			<IconBlockquote data-icon="inline-start" />
 		</Button>
-		<Button variant="ghost" size="icon-sm" onclick={() => insertHorizontalRule(editor!)} onmousedown={preventSelectionLoss} aria-label="分割线" title="分割线">
+		<Button
+			variant="ghost"
+			size="icon-sm"
+			onclick={() => insertHorizontalRule(editor!)}
+			onmousedown={preventSelectionLoss}
+			aria-label="分割线"
+			title="分割线"
+		>
 			<IconSeparator data-icon="inline-start" />
 		</Button>
-		<Button variant="ghost" size="icon-sm" onclick={handleInsertTable} onmousedown={preventSelectionLoss} aria-label="插入表格" title="插入表格">
+		<Button
+			variant="ghost"
+			size="icon-sm"
+			onclick={handleInsertTable}
+			onmousedown={preventSelectionLoss}
+			aria-label="插入表格"
+			title="插入表格"
+		>
 			<IconTable data-icon="inline-start" />
 		</Button>
 	{/if}
 
 	<!-- ═══════════ 代码块 / Callout / Tag (Tier 3: lg+) ═══════════ -->
 	{#if bp >= 3}
-		<Button variant="ghost" size="icon-sm" onclick={() => insertCodeBlock(editor!)} onmousedown={preventSelectionLoss} aria-label="代码块" title="代码块">
+		<Button
+			variant="ghost"
+			size="icon-sm"
+			onclick={() => insertCodeBlock(editor!)}
+			onmousedown={preventSelectionLoss}
+			aria-label="代码块"
+			title="代码块"
+		>
 			<IconCodeDots data-icon="inline-start" />
 		</Button>
 
 		<DropdownMenu.Root>
 			<DropdownMenu.Trigger>
 				{#snippet child({ props })}
-					<Button variant="ghost" size="icon-sm" {...props} onmousedown={preventSelectionLoss} aria-label="Callout" title="Callout">
+					<Button
+						variant="ghost"
+						size="icon-sm"
+						{...props}
+						onmousedown={preventSelectionLoss}
+						aria-label="Callout"
+						title="Callout"
+					>
 						<IconInfoCircle data-icon="inline-start" />
 					</Button>
 				{/snippet}
 			</DropdownMenu.Trigger>
 			<DropdownMenu.Content align="start" class="w-36">
-				<DropdownMenu.Item onclick={() => onInsertCallout('info')}>
+				<DropdownMenu.Item onclick={() => insertAlert(editor!, 'info')}>
 					<IconInfoCircle data-icon="inline-start" />信息
 				</DropdownMenu.Item>
-				<DropdownMenu.Item onclick={() => onInsertCallout('tip')}>
+				<DropdownMenu.Item onclick={() => insertAlert(editor!, 'tip')}>
 					<IconBulb data-icon="inline-start" />提示
 				</DropdownMenu.Item>
-				<DropdownMenu.Item onclick={() => onInsertCallout('warning')}>
+				<DropdownMenu.Item onclick={() => insertAlert(editor!, 'warning')}>
 					<IconAlertTriangle data-icon="inline-start" />警告
 				</DropdownMenu.Item>
 			</DropdownMenu.Content>
 		</DropdownMenu.Root>
 
-		<Button variant="ghost" size="icon-sm" onclick={() => insertTag(editor!)} onmousedown={preventSelectionLoss} aria-label="插入标签" title="插入标签">
+		<Button
+			variant="ghost"
+			size="icon-sm"
+			onclick={() => insertTag(editor!)}
+			onmousedown={preventSelectionLoss}
+			aria-label="插入标签"
+			title="插入标签"
+		>
 			<IconTag data-icon="inline-start" />
 		</Button>
 	{/if}
@@ -460,7 +733,14 @@
 		<DropdownMenu.Root>
 			<DropdownMenu.Trigger>
 				{#snippet child({ props })}
-					<Button variant="ghost" size="icon-sm" {...props} onmousedown={preventSelectionLoss} aria-label="更多" title="更多">
+					<Button
+						variant="ghost"
+						size="icon-sm"
+						{...props}
+						onmousedown={preventSelectionLoss}
+						aria-label="更多"
+						title="更多"
+					>
 						<IconDots data-icon="inline-start" />
 					</Button>
 				{/snippet}
@@ -473,8 +753,9 @@
 					<DropdownMenu.Group>
 						<DropdownMenu.GroupHeading>{group.heading}</DropdownMenu.GroupHeading>
 						{#each group.items as item (item.id)}
+							{@const ItemIcon = item.icon}
 							<DropdownMenu.Item onclick={item.action}>
-								<item.icon data-icon="inline-start" />
+								<ItemIcon data-icon="inline-start" />
 								{item.label}
 								{#if item.shortcut}
 									<span class="ml-auto text-xs text-muted-foreground">{item.shortcut}</span>

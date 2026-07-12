@@ -1,10 +1,4 @@
-import {
-	integer,
-	pgTable,
-	text,
-	timestamp,
-	uniqueIndex,
-} from 'drizzle-orm/pg-core'
+import { integer, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 
 export const categories = pgTable(
 	'categories',
@@ -13,10 +7,10 @@ export const categories = pgTable(
 		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 		name: text('name').notNull(),
 		slug: text('slug').notNull(),
-		type: integer('type').notNull().default(0),
+		type: integer('type').notNull().default(0)
 	},
 	(table) => [
 		uniqueIndex('categories_name_uniq').on(table.name),
-		uniqueIndex('categories_slug_uniq').on(table.slug),
-	],
-)
+		uniqueIndex('categories_slug_uniq').on(table.slug)
+	]
+);
