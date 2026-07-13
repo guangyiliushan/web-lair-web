@@ -60,7 +60,7 @@
 	<title>{title ? `${title} - Lair Admin` : 'New Post - Lair Admin'}</title>
 </svelte:head>
 
-<form method="POST" use:enhance class="flex h-full min-h-0 flex-col">
+<form method="POST" use:enhance class="flex h-full min-h-0 min-w-0 flex-col">
 	<!-- Main content area -->
 	<main class="flex min-h-full min-w-0 flex-col bg-background">
 		<!-- Header area: title + slug + separator -->

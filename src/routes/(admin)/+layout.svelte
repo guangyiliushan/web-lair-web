@@ -141,10 +141,10 @@
 		<Sidebar.Rail />
 	</Sidebar.Root>
 
-	<Sidebar.Inset class="flex min-h-screen flex-col">
+	<Sidebar.Inset class="flex min-h-screen flex-col overflow-x-clip min-w-0">
 		<AdminHeader />
 
-		<main class="flex-1 p-4 sm:p-6 lg:p-8">
+		<main class="min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
 			{@render children()}
 		</main>
 	</Sidebar.Inset>

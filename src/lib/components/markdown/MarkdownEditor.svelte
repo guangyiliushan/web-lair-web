@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { cn } from '$lib/utils';
 	import { Textarea } from '$lib/components/ui/textarea';
+	import { mount, unmount } from 'svelte';
 	import type { LexicalEditor } from 'lexical';
 	import { lexicalEditor, EDITOR_THEME } from './lexical-action';
 	import {
@@ -10,6 +11,7 @@
 	} from './markdown-config';
 	import EditorToolbar from './EditorToolbar.svelte';
 	import FloatingFormatToolbar from './FloatingFormatToolbar.svelte';
+	import BlockHandleToolbar from './BlockHandleToolbar.svelte';
 	import CodeModeToggle from './CodeModeToggle.svelte';
 	import { setEditorContext } from './editor-context';
 
@@ -78,6 +80,26 @@
 		editorRuntime.editor = e;
 	}
 
+	// ── Block Handle Toolbar: portal to document.body ──
+	let blockHandleApp: Record<string, any> | null = null;
+
+	$effect(() => {
+		// 当 editor 就绪且 editable 时挂载 block handle
+		if (editor && editable) {
+			blockHandleApp = mount(BlockHandleToolbar, {
+				target: document.body,
+				props: { editor: editor as LexicalEditor }
+			});
+		}
+
+		return () => {
+			if (blockHandleApp) {
+				unmount(blockHandleApp);
+				blockHandleApp = null;
+			}
+		};
+	});
+
 	function handleChange(detail: {
 		editorStateJson: string;
 		markdown: string;
@@ -137,13 +159,12 @@
 <div class={cn('flex flex-col', className)}>
 	<!-- Toolbar -->
 	{#if showToolbar && editable}
-		<div class="flex items-center gap-0.5">
+		<div class={cn('flex min-w-0 items-center gap-0.5', stickyToolbar && 'sticky top-14 z-10 border-b border-border bg-background/80 backdrop-blur-sm')}>
 			<EditorToolbar
 				{editor}
 				{previewVisible}
-				{stickyToolbar}
 				onTogglePreview={() => (previewVisible = !previewVisible)}
-				class="flex-1"
+				class="min-w-0 flex-1"
 			/>
 			<CodeModeToggle {codeMode} onToggle={toggleCodeMode} />
 		</div>

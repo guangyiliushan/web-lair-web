@@ -1,5 +1,4 @@
 ﻿<script lang="ts">
-	import { MediaQuery } from 'svelte/reactivity';
 	import { cn } from '$lib/utils';
 	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
@@ -74,7 +73,7 @@
 		icon: typeof IconArticle;
 	}
 
-	/** 断点级别: 0=mobile, 1=sm(640px), 2=md(768px), 3=lg(1024px), 4=xl(1280px) */
+	/** 断点级别: 0=mobile, 1=sm(~420px), 2=md(~650px), 3=lg(~900px), 4=xl(~950px) */
 	type BpLevel = 0 | 1 | 2 | 3 | 4;
 
 	const BLOCK_OPTIONS: BlockOption[] = [
@@ -89,7 +88,6 @@
 		editor: LexicalEditor | null;
 		previewVisible: boolean;
 		onTogglePreview: () => void;
-		stickyToolbar?: boolean;
 		class?: string;
 	};
 
@@ -97,19 +95,39 @@
 		editor,
 		previewVisible,
 		onTogglePreview,
-		stickyToolbar = false,
 		class: className
 	}: Props = $props();
 
-	// ── 响应式断点检测 ──
-	const xlQuery = new MediaQuery('(min-width: 1280px)', false);
-	const lgQuery = new MediaQuery('(min-width: 1024px)', false);
-	const mdQuery = new MediaQuery('(min-width: 768px)', false);
-	const smQuery = new MediaQuery('(min-width: 640px)', false);
+	// ── 基于 toolbar wrapper 实际宽度的断点阈值（确保零内部溢出）──
+	const BP_THRESHOLDS = { xl: 950, lg: 900, md: 650, sm: 420 } as const;
 
-	let bp: BpLevel = $derived(
-		xlQuery.current ? 4 : lgQuery.current ? 3 : mdQuery.current ? 2 : smQuery.current ? 1 : 0
-	);
+	// SSR fallback：用视口宽度做初始估算，避免 hydration 闪烁
+	let viewportWidth = $state(typeof window !== 'undefined' ? window.innerWidth : 1024);
+
+	// ResizeObserver 测量 toolbar 自身根元素的实际渲染宽度
+	let wrapperEl = $state<HTMLElement | null>(null);
+	let wrapperWidth = $state(0);
+
+	$effect(() => {
+		if (!wrapperEl) return;
+		const ro = new ResizeObserver(([entry]) => {
+			if (entry) wrapperWidth = entry.contentRect.width;
+		});
+		ro.observe(wrapperEl);
+		return () => ro.disconnect();
+	});
+
+	// wrapperWidth > 0 表示已完成首次实测；未完成时用 viewportWidth fallback
+	const effectiveWidth = $derived(wrapperWidth > 0 ? wrapperWidth : viewportWidth);
+
+	let bp: BpLevel = $derived.by(() => {
+		const w = effectiveWidth;
+		if (w >= BP_THRESHOLDS.xl) return 4;
+		if (w >= BP_THRESHOLDS.lg) return 3;
+		if (w >= BP_THRESHOLDS.md) return 2;
+		if (w >= BP_THRESHOLDS.sm) return 1;
+		return 0;
+	});
 
 	// ── 工具栏状态 ──
 	let toolbarState = $state<ToolbarState>({
@@ -380,11 +398,9 @@
 </script>
 
 <div
+	bind:this={wrapperEl}
 	class={cn(
-		'flex w-full items-center gap-0.5 overflow-x-auto border-b px-1 py-1',
-		stickyToolbar
-			? 'sticky top-0 z-10 border-border bg-background/85 backdrop-blur'
-			: 'border-border bg-background',
+		'flex w-full min-w-0 shrink-0 items-center gap-0.5 overflow-x-auto border-b border-border bg-background px-1 py-1',
 		className
 	)}
 	role="toolbar"
