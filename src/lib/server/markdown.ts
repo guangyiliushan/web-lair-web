@@ -11,7 +11,7 @@ import rehypePrettyCode from 'rehype-pretty-code';
 import rehypeRaw from 'rehype-raw';
 import rehypeSanitize from 'rehype-sanitize';
 import rehypeStringify from 'rehype-stringify';
-import { remarkMxSpace } from '$lib/components/markdown/plugins/remark-mx-space';
+import { remarkContainerDirective } from '$lib/components/markdown/plugins/remark-directive ';
 import { remarkSpoilerInline } from '$lib/components/markdown/plugins/remark-spoiler-inline';
 import { remarkMention } from '$lib/components/markdown/plugins/remark-mention';
 import { rehypeMermaid } from '$lib/components/markdown/plugins/rehype-mermaid';
@@ -49,7 +49,7 @@ async function getProcessor(): Promise<MarkdownProcessor> {
 			.use(remarkGfm)
 			.use(remarkMath)
 			.use(remarkDirective)
-			.use(remarkMxSpace)
+			.use(remarkContainerDirective)
 			.use(remarkSpoilerInline)
 			.use(remarkMention)
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TS overload 限制

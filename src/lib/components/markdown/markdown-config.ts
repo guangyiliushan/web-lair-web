@@ -10,7 +10,7 @@ import rehypeKatex from 'rehype-katex';
 import rehypeRaw from 'rehype-raw';
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 import rehypeStringify from 'rehype-stringify';
-import { remarkMxSpace } from './plugins/remark-mx-space';
+import { remarkContainerDirective } from './plugins/remark-directive ';
 import { remarkSpoilerInline } from './plugins/remark-spoiler-inline';
 import { remarkMention } from './plugins/remark-mention';
 
@@ -190,7 +190,7 @@ function getLightProcessor(): MarkdownProcessor {
 		.use(remarkGfm)
 		.use(remarkMath)
 		.use(remarkDirective)
-		.use(remarkMxSpace)
+		.use(remarkContainerDirective)
 		.use(remarkSpoilerInline)
 		.use(remarkMention)
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TS overload 限制

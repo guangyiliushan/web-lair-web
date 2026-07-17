@@ -5,7 +5,7 @@ import type { ContainerDirective } from 'mdast-util-directive';
 import type { BlockContent } from 'mdast';
 
 /**
- * remark-mx-space：将 remark-directive 解析的容器指令转换为 HTML 节点。
+ * remark-directive：将 remark-directive 解析的容器指令转换为 HTML 节点。
  *
  * 支持的指令语法：
  * - :::spoiler\n隐藏内容\n:::          → <div class="spoiler-container">隐藏内容</div>
@@ -15,7 +15,7 @@ import type { BlockContent } from 'mdast';
  * remark-directive 将 :::name ... ::: 解析为 ContainerDirective 节点，
  * 此插件负责将其转为 mdast html 节点，后续由 rehype-raw 解析为 HAST。
  */
-export const remarkMxSpace: Plugin<[], Root> = () => {
+export const remarkContainerDirective: Plugin<[], Root> = () => {
 	return (tree) => {
 		visit(tree, (node, index, parent) => {
 			if (node.type !== 'containerDirective' || !parent || index == null) return;

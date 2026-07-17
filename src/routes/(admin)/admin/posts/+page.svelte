@@ -1,11 +1,11 @@
 <script lang="ts">
-	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Table from '$lib/components/ui/table';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { Empty } from '$lib/components/ui/empty';
+	import { RefreshButton } from '$lib/components/ui/refresh-button';
+	import { Separator } from '$lib/components/ui/separator';
 	import IconSearch from '@tabler/icons-svelte-runes/icons/search';
 	import IconPlus from '@tabler/icons-svelte-runes/icons/plus';
 	import IconExternalLink from '@tabler/icons-svelte-runes/icons/external-link';
@@ -15,8 +15,12 @@
 	import IconMessage from '@tabler/icons-svelte-runes/icons/message';
 	import IconThumbUp from '@tabler/icons-svelte-runes/icons/thumb-up';
 	import IconDots from '@tabler/icons-svelte-runes/icons/dots';
-	import IconFilter from '@tabler/icons-svelte-runes/icons/filter';
-	import IconSortAscending from '@tabler/icons-svelte-runes/icons/sort-ascending';
+	import IconChevronDown from '@tabler/icons-svelte-runes/icons/chevron-down';
+	import IconArrowUpDown from '@tabler/icons-svelte-runes/icons/arrows-up-down';
+	import IconArrowDown from '@tabler/icons-svelte-runes/icons/arrow-down';
+	import IconCopy from '@tabler/icons-svelte-runes/icons/copy';
+	import IconPin from '@tabler/icons-svelte-runes/icons/pin';
+	import IconHash from '@tabler/icons-svelte-runes/icons/hash';
 
 	// 模拟数据 - 实际应从 data.posts 获取
 	const posts = [
@@ -120,6 +124,7 @@
 
 	let searchQuery = $state('');
 	let selectedStatus = $state('all');
+	let selectedIds = $state<string[]>([]);
 
 	const filteredPosts = $derived(
 		posts.filter((post) => {
@@ -129,16 +134,26 @@
 		})
 	);
 
-	function getStatusBadge(status: string) {
-		switch (status) {
-			case 'published':
-				return { variant: 'default' as const, label: '已发布' };
-			case 'draft':
-				return { variant: 'secondary' as const, label: '草稿' };
-			default:
-				return { variant: 'outline' as const, label: status };
+	const allSelected = $derived(
+		filteredPosts.length > 0 && selectedIds.length === filteredPosts.length
+	);
+
+	function toggleSelectAll() {
+		if (allSelected) {
+			selectedIds = [];
+		} else {
+			selectedIds = filteredPosts.map((p) => p.id);
 		}
 	}
+
+	function toggleSelect(id: string) {
+		if (selectedIds.includes(id)) {
+			selectedIds = selectedIds.filter((i) => i !== id);
+		} else {
+			selectedIds = [...selectedIds, id];
+		}
+	}
+
 </script>
 
 <svelte:head>
@@ -146,130 +161,175 @@
 </svelte:head>
 
 <div class="flex flex-col gap-6">
-	<!-- 页面标题 -->
-	<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-		<div>
-			<h1 class="text-2xl font-bold tracking-tight">博文管理</h1>
-			<p class="text-sm text-muted-foreground">管理你的博文内容，包括发布、编辑和删除操作</p>
+	<!-- 搜索和筛选工具栏 -->
+	<div class="relative flex h-10 shrink-0 items-center border-b">
+		<label
+			class="hidden w-10 shrink-0 cursor-pointer items-center justify-center pl-2 text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
+			title="全选"
+			aria-label="全选"
+		>
+			<input
+				type="checkbox"
+				class="size-4 rounded border-border bg-transparent"
+				checked={allSelected}
+				onchange={toggleSelectAll}
+			/>
+		</label>
+		<form class="relative flex h-full min-w-0 flex-1 items-center self-stretch" onsubmit={(e) => e.preventDefault()}>
+			<IconSearch class="pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+			<input
+				type="text"
+				placeholder="搜索标题或正文"
+				class="h-7 w-full border-0 bg-transparent pl-8 pr-0 text-xs outline-none placeholder:text-muted-foreground focus:ring-0"
+				bind:value={searchQuery}
+			/>
+		</form>
+		<!-- 数据列占位 — 与表格 w-44 对齐 -->
+			<div class="hidden w-44 xl:block"></div>
+		<DropdownMenu.Root>
+			<DropdownMenu.Trigger>
+				{#snippet child({ props })}
+					<Button
+						{...props}
+						variant="ghost"
+						size="sm"
+						class="hidden w-24 justify-between text-xs font-normal text-muted-foreground hover:text-foreground sm:inline-flex"
+					>
+						<span class="truncate">全部分类</span>
+						<IconChevronDown class="size-3.5 shrink-0 text-muted-foreground" />
+					</Button>
+				{/snippet}
+			</DropdownMenu.Trigger>
+			<DropdownMenu.Content align="end">
+				<DropdownMenu.Group>
+					<DropdownMenu.Item>全部分类</DropdownMenu.Item>
+					<DropdownMenu.Item>Technology</DropdownMenu.Item>
+					<DropdownMenu.Item>Programming</DropdownMenu.Item>
+					<DropdownMenu.Item>Experience</DropdownMenu.Item>
+				</DropdownMenu.Group>
+			</DropdownMenu.Content>
+		</DropdownMenu.Root>
+		<DropdownMenu.Root>
+			<DropdownMenu.Trigger>
+				{#snippet child({ props })}
+					<Button
+						{...props}
+						variant="ghost"
+						size="sm"
+						class="hidden w-28 justify-center text-xs font-normal text-muted-foreground hover:text-foreground sm:inline-flex"
+					>
+						<IconArrowUpDown class="size-3.5" />
+						<span class="truncate">创建时间</span>
+						<IconArrowDown class="size-3" />
+					</Button>
+				{/snippet}
+			</DropdownMenu.Trigger>
+			<DropdownMenu.Content align="end">
+				<DropdownMenu.Group>
+					<DropdownMenu.Item>创建时间</DropdownMenu.Item>
+					<DropdownMenu.Item>更新时间</DropdownMenu.Item>
+					<DropdownMenu.Item>阅读量</DropdownMenu.Item>
+					<DropdownMenu.Item>点赞数</DropdownMenu.Item>
+				</DropdownMenu.Group>
+			</DropdownMenu.Content>
+		</DropdownMenu.Root>
+		<!-- 操作列占位 — 与表格 w-20 对齐 -->
+		<div class="w-20"></div>
+		<!-- 分隔符和刷新按钮：绝对定位，不参与 flex 布局 -->
+		<div class="absolute right-0 top-0 flex h-full items-center pr-2">
+			<Separator orientation="vertical" class="h-3.5" />
+			<RefreshButton onclick={() => { /* TODO: refresh data */ }} />
 		</div>
-		<Button href="/admin/posts/new">
-			<IconPlus data-icon="inline-start" />
-			新建博文
-		</Button>
 	</div>
 
-	<!-- 搜索和筛选 -->
-	<Card.Root>
-		<Card.Content class="flex flex-col gap-4 p-4 sm:flex-row sm:items-center">
-			<div class="relative flex-1">
-				<IconSearch class="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-				<Input type="search" placeholder="搜索标题..." class="pl-9" bind:value={searchQuery} />
-			</div>
-			<div class="flex gap-2">
-				<Button variant="outline" size="sm">
-					<IconFilter data-icon="inline-start" />
-					筛选
-				</Button>
-				<Button variant="outline" size="sm">
-					<IconSortAscending data-icon="inline-start" />
-					排序
-				</Button>
-			</div>
-		</Card.Content>
-	</Card.Root>
-
 	<!-- 博文列表 -->
-	<Card.Root>
-		<Card.Content class="p-0">
-			{#if filteredPosts.length === 0}
-				<Empty class="py-12">
-					<div class="flex flex-col items-center gap-1">
-						<h3 class="text-lg font-semibold tracking-tight">暂无博文</h3>
-						<p class="text-sm text-muted-foreground">还没有创建任何博文，点击上方按钮开始创作吧</p>
-					</div>
-					<div class="mt-4">
-						<Button href="/admin/posts/new">
-							<IconPlus data-icon="inline-start" />
-							新建博文
-						</Button>
-					</div>
-				</Empty>
-			{:else}
-				<div class="overflow-x-auto">
-					<Table.Root>
-						<Table.Header>
-							<Table.Row>
-								<Table.Head class="w-12.5">
-									<input type="checkbox" class="size-4 rounded border" />
-								</Table.Head>
-								<Table.Head>标题</Table.Head>
-								<Table.Head class="hidden md:table-cell">分类</Table.Head>
-								<Table.Head class="hidden lg:table-cell">数据</Table.Head>
-								<Table.Head class="hidden sm:table-cell">更新时间</Table.Head>
-								<Table.Head class="w-25 text-right">操作</Table.Head>
-							</Table.Row>
-						</Table.Header>
-						<Table.Body>
-							{#each filteredPosts as post (post.id)}
-								{@const status = getStatusBadge(post.status)}
-								<Table.Row class="group">
-									<Table.Cell>
-										<input type="checkbox" class="size-4 rounded border" />
-									</Table.Cell>
-									<Table.Cell>
-										<div class="flex flex-col gap-1">
-											<a
-												href="/admin/posts/{post.id}/edit"
-												class="line-clamp-1 font-medium hover:text-primary"
-											>
-												{post.title}
-											</a>
-											<div class="flex items-center gap-2">
-												<Badge variant={status.variant} class="text-xs">{status.label}</Badge>
-												<span class="text-xs text-muted-foreground md:hidden">{post.category}</span>
-											</div>
-										</div>
-									</Table.Cell>
-									<Table.Cell class="hidden md:table-cell">
-										<Badge variant="outline" class="text-xs">{post.category}</Badge>
-									</Table.Cell>
-									<Table.Cell class="hidden lg:table-cell">
-										<div class="flex items-center gap-3 text-sm text-muted-foreground">
-											<span class="flex items-center gap-1">
-												<IconEye class="size-3.5" />
-												{post.views}
-											</span>
-											<span class="flex items-center gap-1">
-												<IconMessage class="size-3.5" />
-												{post.comments}
-											</span>
-											<span class="flex items-center gap-1">
-												<IconThumbUp class="size-3.5" />
-												{post.likes}
-											</span>
-										</div>
-									</Table.Cell>
-									<Table.Cell class="hidden text-muted-foreground sm:table-cell">
-										{post.updatedAt}
-									</Table.Cell>
-									<Table.Cell class="text-right">
+	{#if filteredPosts.length === 0}
+		<Empty class="py-12">
+			<div class="flex flex-col items-center gap-1">
+				<h3 class="text-lg font-semibold tracking-tight">暂无博文</h3>
+				<p class="text-sm text-muted-foreground">还没有创建任何博文，点击上方按钮开始创作吧</p>
+			</div>
+			<div class="mt-4">
+				<Button href="/admin/posts/new">
+					<IconPlus data-icon="inline-start" />
+					新建博文
+				</Button>
+			</div>
+		</Empty>
+	{:else}
+		<div class="overflow-x-auto">
+			<Table.Root class="table-fixed">
+				<Table.Body>
+					{#each filteredPosts as post (post.id)}
+						<Table.Row class="group border-border">
+							<Table.Cell class="hidden w-10 sm:table-cell">
+								<input
+									type="checkbox"
+									class="size-4 rounded border-border bg-transparent"
+									checked={selectedIds.includes(post.id)}
+									onchange={() => toggleSelect(post.id)}
+								/>
+							</Table.Cell>
+							<Table.Cell class="max-w-0 whitespace-normal">
+								<div class="flex min-w-0 flex-col gap-1">
+									<a
+										href="/admin/posts/{post.id}/edit"
+										class="block max-w-lg font-medium hover:text-primary lg:truncate line-clamp-2 lg:line-clamp-none"
+									>
+										{post.title}
+									</a>
+									<!-- 紧凑模式元信息行：lg 以下显示，sm 以下含时间 -->
+									<div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground sm:gap-x-3 xl:hidden">
+										<span class="font-mono">{post.category}</span>
+										<span class="inline-flex items-center gap-1"><IconEye class="size-3" />{post.views}</span>
+										<span class="inline-flex items-center gap-1"><IconMessage class="size-3" />{post.comments}</span>
+										<span class="inline-flex items-center gap-1"><IconThumbUp class="size-3" />{post.likes}</span>
+										<span class="sm:hidden">{post.updatedAt}</span>
+									</div>
+								</div>
+							</Table.Cell>
+							<Table.Cell class="hidden w-44 xl:table-cell">
+								<div class="flex items-center gap-3 overflow-hidden text-sm text-muted-foreground">
+									<span class="flex items-center gap-1">
+										<IconEye class="size-3.5" />
+										{post.views}
+									</span>
+									<span class="flex items-center gap-1">
+										<IconMessage class="size-3.5" />
+										{post.comments}
+									</span>
+									<span class="flex items-center gap-1">
+										<IconThumbUp class="size-3.5" />
+										{post.likes}
+									</span>
+								</div>
+							</Table.Cell>
+							<Table.Cell class="hidden w-24 xl:table-cell">
+								<Badge variant="outline" class="text-xs">{post.category}</Badge>
+							</Table.Cell>
+							<Table.Cell class="hidden w-28 text-muted-foreground sm:table-cell">
+								{post.updatedAt}
+							</Table.Cell>
+							<Table.Cell class="w-20 text-right">
 										<div class="flex items-center justify-end gap-1">
 											<Button
 												variant="ghost"
 												size="icon"
-												class="size-8 opacity-0 transition-opacity group-hover:opacity-100"
-												onclick={() => window.open(`/${post.slug}`, '_blank')}
-											>
-												<IconExternalLink class="size-4" />
-											</Button>
-											<Button
-												variant="ghost"
-												size="icon"
-												class="size-8 opacity-0 transition-opacity group-hover:opacity-100"
-												href="/admin/posts/{post.id}/edit"
-											>
-												<IconPencil class="size-4" />
-											</Button>
+											class="size-8"
+											onclick={() => window.open(`/${post.slug}`, '_blank')}
+										>
+											<IconExternalLink class="size-4" />
+										</Button>
+										<Button
+											variant="ghost"
+											size="icon"
+											class="size-8"
+											href="/admin/posts/{post.id}/edit"
+										>
+											<IconPencil class="size-4" />
+										</Button>
+										<!-- 桌面/平板：三点菜单 -->
+										<span class="hidden sm:contents">
 											<DropdownMenu.Root>
 												<DropdownMenu.Trigger>
 													{#snippet child({ props })}
@@ -280,12 +340,6 @@
 												</DropdownMenu.Trigger>
 												<DropdownMenu.Content align="end">
 													<DropdownMenu.Group>
-														<DropdownMenu.Item
-															onclick={() => window.open(`/${post.slug}`, '_blank')}
-														>
-															<IconExternalLink data-icon="inline-start" />
-															查看
-														</DropdownMenu.Item>
 														<DropdownMenu.Item>
 															{#snippet child({ props })}
 																<a href="/admin/posts/{post.id}/edit" {...props}>
@@ -294,24 +348,67 @@
 																</a>
 															{/snippet}
 														</DropdownMenu.Item>
+														<DropdownMenu.Item
+															onclick={() => window.open(`/${post.slug}`, '_blank')}
+														>
+															<IconExternalLink data-icon="inline-start" />
+															在新窗口打开
+															<DropdownMenu.Shortcut>⌘↵</DropdownMenu.Shortcut>
+														</DropdownMenu.Item>
+													</DropdownMenu.Group>
+													<DropdownMenu.Separator />
+													<DropdownMenu.CheckboxItem checked={post.status === 'published'}>
+														已发布
+													</DropdownMenu.CheckboxItem>
+													<DropdownMenu.CheckboxItem checked={false}>
+														<IconPin data-icon="inline-start" />
+														置顶
+													</DropdownMenu.CheckboxItem>
+													<DropdownMenu.Sub>
+														<DropdownMenu.SubTrigger>
+															修改分类
+														</DropdownMenu.SubTrigger>
+														<DropdownMenu.SubContent>
+															<DropdownMenu.Item>Technology</DropdownMenu.Item>
+															<DropdownMenu.Item>Programming</DropdownMenu.Item>
+															<DropdownMenu.Item>Experience</DropdownMenu.Item>
+														</DropdownMenu.SubContent>
+													</DropdownMenu.Sub>
+													<DropdownMenu.Separator />
+													<DropdownMenu.Group>
+														<DropdownMenu.Item>
+															<IconCopy data-icon="inline-start" />
+															复制链接
+														</DropdownMenu.Item>
+														<DropdownMenu.Item>
+															<IconHash data-icon="inline-start" />
+															复制 ID
+														</DropdownMenu.Item>
+														<DropdownMenu.Item>
+															复制 slug
+														</DropdownMenu.Item>
 													</DropdownMenu.Group>
 													<DropdownMenu.Separator />
 													<DropdownMenu.Group>
-														<DropdownMenu.Item class="text-destructive focus:text-destructive">
+														<DropdownMenu.Item variant="destructive">
 															<IconTrash data-icon="inline-start" />
 															删除
+															<DropdownMenu.Shortcut>⌫</DropdownMenu.Shortcut>
 														</DropdownMenu.Item>
 													</DropdownMenu.Group>
 												</DropdownMenu.Content>
 											</DropdownMenu.Root>
-										</div>
-									</Table.Cell>
+										</span>
+										<!-- 移动端：删除按钮替代三点菜单 -->
+										<Button variant="ghost" size="icon" class="size-8 sm:hidden" aria-label="删除">
+											<IconTrash class="size-4" />
+										</Button>
+									</div>
+								</Table.Cell>
 								</Table.Row>
 							{/each}
 						</Table.Body>
 					</Table.Root>
 				</div>
 			{/if}
-		</Card.Content>
-	</Card.Root>
 </div>

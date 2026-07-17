@@ -11,6 +11,10 @@
 	import IconEye from '@tabler/icons-svelte-runes/icons/eye';
 	import IconUpload from '@tabler/icons-svelte-runes/icons/upload';
 	import IconUserPlus from '@tabler/icons-svelte-runes/icons/user-plus';
+	import IconCategory from '@tabler/icons-svelte-runes/icons/category';
+	import IconTag from '@tabler/icons-svelte-runes/icons/tag';
+	import IconTrash from '@tabler/icons-svelte-runes/icons/trash';
+	import IconPencil from '@tabler/icons-svelte-runes/icons/pencil';
 
 	/** 单个操作按钮的定义 */
 	interface HeaderAction {
@@ -45,6 +49,8 @@
 
 	function resolveTitle(pathname: string): string {
 		if (pathname === '/admin') return '仪表盘';
+		if (pathname.startsWith('/admin/posts/categories')) return '分类';
+		if (pathname.startsWith('/admin/posts/tags')) return '标签';
 		if (pathname.startsWith('/admin/posts')) return '博文';
 		if (pathname.startsWith('/admin/notes')) return '手记';
 		if (pathname.startsWith('/admin/says')) return '说说';
@@ -92,18 +98,25 @@
 		if (pathname.startsWith('/admin/posts')) {
 			return [
 				{
+					label: '分类',
+					icon: IconCategory,
+					variant: 'ghost',
+					size: 'sm',
+					href: '/admin/posts/categories'
+				},
+				{
+					label: '标签',
+					icon: IconTag,
+					variant: 'ghost',
+					size: 'sm',
+					href: '/admin/posts/tags'
+				},
+				{
 					label: '新建博文',
 					icon: IconPlus,
 					variant: 'default',
 					size: 'sm',
 					href: '/admin/posts/edit'
-				},
-				{
-					label: '访问站点',
-					icon: IconExternalLink,
-					variant: 'ghost',
-					size: 'sm',
-					onclick: () => window.open('/', '_blank')
 				}
 			];
 		}
