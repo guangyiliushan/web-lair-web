@@ -4,7 +4,7 @@
 	import * as Table from '$lib/components/ui/table';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { Empty } from '$lib/components/ui/empty';
-	import { RefreshButton } from '$lib/components/ui/refresh-button';
+	import { RefreshButton } from '$lib/components/admin/refresh-button';
 	import { Separator } from '$lib/components/ui/separator';
 	import IconSearch from '@tabler/icons-svelte-runes/icons/search';
 	import IconExternalLink from '@tabler/icons-svelte-runes/icons/external-link';

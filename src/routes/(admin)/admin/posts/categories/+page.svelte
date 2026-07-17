@@ -7,6 +7,7 @@
 	import { Separator } from '$lib/components/ui/separator';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { Empty } from '$lib/components/ui/empty';
+	import * as MasterDetail from '$lib/components/admin/master-detail';
 	import IconPlus from '@tabler/icons-svelte-runes/icons/plus';
 	import IconFolder from '@tabler/icons-svelte-runes/icons/folder';
 	import IconHash from '@tabler/icons-svelte-runes/icons/hash';
@@ -56,21 +57,16 @@
 	<title>分类管理 - Lair Admin</title>
 </svelte:head>
 
-<div class="flex h-[calc(100vh-10rem)] min-h-0">
+<MasterDetail.Root class="h-[calc(100vh-10rem)]">
 	<!-- 侧边栏：分类列表 -->
-	<aside class="flex w-80 shrink-0 flex-col border-r">
-		<div class="flex h-12 shrink-0 items-center justify-between border-b px-4">
-			<h2 class="inline-flex items-center gap-2 text-sm font-semibold">
-				<IconFolder class="size-4" />
-				分类与标签
-			</h2>
-			<span class="text-xs text-muted-foreground">{data.categories.length} 个</span>
+	<MasterDetail.Pane side="master" class="w-80 shrink-0">
+		<MasterDetail.Header icon={IconFolder} title="分类与标签" count={data.categories.length}>
 			<Button variant="outline" size="sm" onclick={openCreate}>
 				<IconPlus data-icon="inline-start" />
 				新建
 			</Button>
-		</div>
-		<div class="min-h-0 flex-1 overflow-y-auto">
+		</MasterDetail.Header>
+		<MasterDetail.List>
 			<div class="border-b px-4 py-2">
 				<h3 class="text-xs font-medium uppercase text-muted-foreground">分类</h3>
 			</div>
@@ -80,13 +76,7 @@
 				</Empty>
 			{:else}
 				{#each data.categories as cat (cat.id)}
-					<button
-						type="button"
-						class="flex w-full items-center gap-3 border-b px-4 py-3 text-left transition-colors {selectedId === cat.id
-							? 'bg-muted'
-							: 'hover:bg-muted/50'}"
-						onclick={() => (selectedId = cat.id)}
-					>
+					<MasterDetail.Item selected={selectedId === cat.id} onclick={() => (selectedId = cat.id)}>
 						<IconFolder class="size-4 shrink-0 text-muted-foreground" />
 						<div class="min-w-0 flex-1">
 							<h4 class="truncate text-sm font-medium">{cat.name}</h4>
@@ -96,33 +86,28 @@
 							</p>
 						</div>
 						<span class="text-xs tabular-nums text-muted-foreground">{data.postCounts[cat.id] ?? 0}</span>
-					</button>
+					</MasterDetail.Item>
 				{/each}
 			{/if}
-		</div>
-	</aside>
+		</MasterDetail.List>
+	</MasterDetail.Pane>
 
 	<!-- 主面板：分类详情 -->
-	<main class="flex min-w-0 flex-1 flex-col">
+	<MasterDetail.Pane side="detail">
 		{#if selectedCategory}
-			<div class="flex h-12 shrink-0 items-center justify-between border-b px-4">
-				<div class="flex min-w-0 items-center gap-2">
-					<h2 class="truncate text-sm font-semibold">分类详情</h2>
-				</div>
-				<div class="flex shrink-0 items-center gap-2">
-					<Button variant="outline" size="sm" onclick={openEdit}>
-						<IconPencil data-icon="inline-start" />
-						编辑
+			<MasterDetail.Header title="分类详情">
+				<Button variant="outline" size="sm" onclick={openEdit}>
+					<IconPencil data-icon="inline-start" />
+					编辑
+				</Button>
+				<form method="POST" action="?/delete" use:enhance>
+					<input type="hidden" name="id" value={selectedCategory.id} />
+					<Button variant="outline" size="sm" class="border-destructive/20 text-destructive hover:bg-destructive/10">
+						<IconTrash data-icon="inline-start" />
+						删除
 					</Button>
-					<form method="POST" action="?/delete" use:enhance>
-						<input type="hidden" name="id" value={selectedCategory.id} />
-						<Button variant="outline" size="sm" class="border-destructive/20 text-destructive hover:bg-destructive/10">
-							<IconTrash data-icon="inline-start" />
-							删除
-						</Button>
-					</form>
-				</div>
-			</div>
+				</form>
+			</MasterDetail.Header>
 			<div class="flex-1 overflow-y-auto p-5">
 				<section class="mb-6 flex items-start gap-4 rounded-lg border p-4">
 					<div class="flex size-12 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
@@ -161,8 +146,8 @@
 				</Empty>
 			</div>
 		{/if}
-	</main>
-</div>
+	</MasterDetail.Pane>
+</MasterDetail.Root>
 
 <!-- 新建/编辑分类对话框 -->
 <Dialog.Root bind:open={dialogOpen}>

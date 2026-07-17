@@ -2,6 +2,7 @@
 	import type { PageData } from './$types';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Empty } from '$lib/components/ui/empty';
+	import * as MasterDetail from '$lib/components/admin/master-detail';
 	import IconTag from '@tabler/icons-svelte-runes/icons/tag';
 	import IconHash from '@tabler/icons-svelte-runes/icons/hash';
 	import IconInfo from '@tabler/icons-svelte-runes/icons/info-circle';
@@ -19,17 +20,11 @@
 	<title>标签管理 - Lair Admin</title>
 </svelte:head>
 
-<div class="flex h-[calc(100vh-10rem)] min-h-0">
+<MasterDetail.Root class="h-[calc(100vh-10rem)]">
 	<!-- 侧边栏：标签列表 -->
-	<aside class="flex w-80 shrink-0 flex-col border-r">
-		<div class="flex h-12 shrink-0 items-center justify-between border-b px-4">
-			<h2 class="inline-flex items-center gap-2 text-sm font-semibold">
-				<IconTag class="size-4" />
-				分类与标签
-			</h2>
-			<span class="text-xs text-muted-foreground">{data.tags.length} 个</span>
-		</div>
-		<div class="min-h-0 flex-1 overflow-y-auto">
+	<MasterDetail.Pane side="master" class="w-80 shrink-0">
+		<MasterDetail.Header icon={IconTag} title="分类与标签" count={data.tags.length} />
+		<MasterDetail.List>
 			<div class="border-b px-4 py-2">
 				<h3 class="text-xs font-medium uppercase text-muted-foreground">标签</h3>
 			</div>
@@ -40,13 +35,7 @@
 				</Empty>
 			{:else}
 				{#each data.tags as tag (tag.id)}
-					<button
-						type="button"
-						class="flex w-full items-center gap-3 border-b px-4 py-3 text-left transition-colors {selectedId === tag.id
-							? 'bg-muted'
-							: 'hover:bg-muted/50'}"
-						onclick={() => (selectedId = tag.id)}
-					>
+					<MasterDetail.Item selected={selectedId === tag.id} onclick={() => (selectedId = tag.id)}>
 						<IconTag class="size-4 shrink-0 text-muted-foreground" />
 						<div class="min-w-0 flex-1">
 							<h4 class="truncate text-sm font-medium">{tag.name}</h4>
@@ -56,18 +45,16 @@
 							</p>
 						</div>
 						<Badge variant="outline" class="text-xs">标签</Badge>
-					</button>
+					</MasterDetail.Item>
 				{/each}
 			{/if}
-		</div>
-	</aside>
+		</MasterDetail.List>
+	</MasterDetail.Pane>
 
 	<!-- 主面板：标签详情（只读） -->
-	<main class="flex min-w-0 flex-1 flex-col">
+	<MasterDetail.Pane side="detail">
 		{#if selectedTag}
-			<div class="flex h-12 shrink-0 items-center border-b px-4">
-				<h2 class="truncate text-sm font-semibold">标签详情</h2>
-			</div>
+			<MasterDetail.Header title="标签详情" />
 			<div class="flex-1 overflow-y-auto p-5">
 				<section class="mb-6 flex items-start gap-4 rounded-lg border p-4">
 					<div class="flex size-12 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
@@ -97,5 +84,5 @@
 				</Empty>
 			</div>
 		{/if}
-	</main>
-</div>
+	</MasterDetail.Pane>
+</MasterDetail.Root>
