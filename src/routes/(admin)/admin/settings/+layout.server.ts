@@ -1,6 +1,6 @@
-import type { PageServerLoad, Actions } from './$types';
+import type { LayoutServerLoad } from './$types';
 
-export const load: PageServerLoad = async () => {
+export const load: LayoutServerLoad = async () => {
 	return {
 		settings: {
 			user: {
@@ -140,5 +140,3 @@ export const load: PageServerLoad = async () => {
 		}
 	};
 };
-
-export const actions = {} satisfies Actions;

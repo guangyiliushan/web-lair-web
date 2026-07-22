@@ -37,7 +37,7 @@
 		{ title: '页面', href: '/admin/pages', icon: IconFileText },
 		{ title: '读者', href: '/admin/readers', icon: IconEye },
 		{ title: '说说', href: '/admin/says', icon: IconQuote },
-		{ title: '速记', href: '/admin/shorthand', icon: IconWriting },
+		{ title: '备忘录', href: '/admin/memos', icon: IconWriting },
 		{ title: '项目', href: '/admin/projects', icon: IconFolders },
 		{ title: '朋友们', href: '/admin/friends', icon: IconUsers },
 		{ title: 'AI', href: '/admin/ai', icon: IconSparkles },
