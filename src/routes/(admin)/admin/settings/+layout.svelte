@@ -13,6 +13,7 @@
 	import IconShield from '@tabler/icons-svelte-runes/icons/shield';
 	import IconList from '@tabler/icons-svelte-runes/icons/list';
 	import IconArrowLeft from '@tabler/icons-svelte-runes/icons/arrow-left';
+	import { cn } from '$lib/utils';
 	import type { Component, Snippet } from 'svelte';
 
 	let { children }: { children: Snippet } = $props();
@@ -52,23 +53,61 @@
 	<title>设定 - Lair Admin</title>
 </svelte:head>
 
+<!-- Mobile: flat layout -->
+<div class="flex min-h-0 flex-1 flex-col sm:hidden">
+	{#if isRoot}
+		<div class="flex h-12 shrink-0 items-center gap-2 border-b px-4">
+			<IconSettings class="size-4 shrink-0 text-muted-foreground" />
+			<h2 class="truncate text-sm font-semibold">设定</h2>
+			<span class="ml-auto text-xs tabular-nums text-muted-foreground">{sections.length} 个</span>
+		</div>
+		<div class="min-h-0 flex-1 overflow-y-auto">
+			{#each sections as section (section.id)}
+				<button
+					type="button"
+					class={cn(
+						'flex w-full items-center gap-3 border-b px-4 py-3 text-left transition-colors hover:bg-muted/50',
+						isActive(section.id) && 'bg-muted/50'
+					)}
+					onclick={() => goto(sectionHref(section.id))}
+				>
+					<span class="flex size-9 shrink-0 items-center justify-center rounded {isActive(section.id) ? 'bg-muted-foreground/15' : 'bg-muted'}">
+						<section.icon class="size-4" />
+					</span>
+					<span class="min-w-0 flex-1">
+						<span class="block truncate text-sm font-medium">{section.label}</span>
+						<span class="mt-0.5 block truncate text-xs text-muted-foreground">{section.desc}</span>
+					</span>
+				</button>
+			{/each}
+		</div>
+	{:else}
+		<div class="flex h-12 shrink-0 items-center gap-2 border-b px-4">
+			<Button
+				variant="ghost"
+				size="icon"
+				class="size-8"
+				onclick={() => goto('/admin/settings')}
+				aria-label="返回设置列表"
+			>
+				<IconArrowLeft data-icon="inline-start" />
+			</Button>
+			<span class="text-sm font-medium">{activeSection()?.label ?? ''}</span>
+		</div>
+		<div class="min-h-0 flex-1 overflow-y-auto">
+			<div class="min-h-full p-4">
+				{@render children()}
+			</div>
+		</div>
+	{/if}
+</div>
+
+<!-- Desktop: MasterDetail -->
+<div class="hidden min-h-0 flex-1 sm:flex">
 <MasterDetail.Root>
 	<!-- 侧边栏导航 -->
-	<MasterDetail.Pane side="master" class={'w-80 shrink-0' + (isRoot ? '' : ' max-lg:hidden')}>
-		<MasterDetail.Header icon={IconSettings} title="设定" count={sections.length}>
-			{#if !isRoot}
-				<!-- 移动端返回按钮 -->
-				<Button
-					variant="ghost"
-					size="icon"
-					class="size-8 lg:hidden"
-					onclick={() => goto('/admin/settings')}
-					aria-label="返回设置列表"
-				>
-					<IconArrowLeft data-icon="inline-start" />
-				</Button>
-			{/if}
-		</MasterDetail.Header>
+	<MasterDetail.Pane side="master" class="w-80 shrink-0">
+		<MasterDetail.Header icon={IconSettings} title="设定" count={sections.length} />
 		<MasterDetail.List>
 			{#each sections as section (section.id)}
 				<MasterDetail.Item
@@ -88,23 +127,9 @@
 	</MasterDetail.Pane>
 
 	<!-- 内容区 -->
-	<MasterDetail.Pane side="detail" class={isRoot ? 'max-lg:hidden' : ''}>
+	<MasterDetail.Pane side="detail">
 		{#if !isRoot}
-			<!-- 移动端：返回侧边栏按钮 -->
-			<div class="flex h-12 shrink-0 items-center gap-2 border-b px-4 lg:hidden">
-				<Button
-					variant="ghost"
-					size="icon"
-					class="size-8"
-					onclick={() => goto('/admin/settings')}
-					aria-label="返回设置列表"
-				>
-					<IconArrowLeft data-icon="inline-start" />
-				</Button>
-				<span class="text-sm font-medium">{activeSection()?.label ?? ''}</span>
-			</div>
-			<!-- 桌面端：面包屑头部 -->
-			<div class="hidden h-12 shrink-0 items-center gap-2 border-b px-4 lg:flex">
+			<div class="flex h-12 shrink-0 items-center gap-2 border-b px-4">
 				<h1 class="truncate text-sm font-medium">{activeSection()?.label ?? ''}</h1>
 				<span class="text-xs text-muted-foreground">{activeSection()?.desc ?? ''}</span>
 			</div>
@@ -116,3 +141,4 @@
 		</div>
 	</MasterDetail.Pane>
 </MasterDetail.Root>
+</div>

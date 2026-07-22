@@ -2,6 +2,7 @@ import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async () => {
 	return {
+		headerTitle: '设定',
 		settings: {
 			user: {
 				nickname: 'test',

@@ -3,7 +3,7 @@
 	import IconSettings from '@tabler/icons-svelte-runes/icons/settings';
 </script>
 
-<div class="flex flex-1 items-center justify-center">
+<div class="hidden flex-1 items-center justify-center sm:flex">
 	<Empty>
 		<div class="flex flex-col items-center gap-1">
 			<IconSettings class="size-8 text-muted-foreground/40" />

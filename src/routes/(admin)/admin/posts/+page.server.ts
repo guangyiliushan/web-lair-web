@@ -8,6 +8,12 @@ export const load: PageServerLoad = async ({ url }) => {
 	const page = Number(url.searchParams.get('page') ?? '1');
 
 	return {
+		headerTitle: '博文',
+		headerActions: [
+			{ label: '分类', iconName: 'category', href: '/admin/posts/categories' },
+			{ label: '标签', iconName: 'tag', href: '/admin/posts/tags' },
+			{ label: '新建', iconName: 'plus', variant: 'default', href: '/admin/posts/edit' }
+		],
 		posts: [] as {
 			id: string;
 			title: string;

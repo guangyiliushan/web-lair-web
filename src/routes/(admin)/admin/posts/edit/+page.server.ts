@@ -12,6 +12,10 @@ export const load: PageServerLoad = async () => {
 		.orderBy(categories.name);
 
 	return {
+		headerTitle: '博文',
+		headerActions: [
+			{ label: '返回', iconName: 'arrow-left', variant: 'outline', href: '/admin/posts' }
+		],
 		categories: allCategories,
 		aiAvailable: false
 	};

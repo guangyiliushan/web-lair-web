@@ -21,5 +21,5 @@ export const load: PageServerLoad = async () => {
 		})
 	);
 
-	return { tags: allTags };
+	return { headerTitle: '标签', tags: allTags };
 };

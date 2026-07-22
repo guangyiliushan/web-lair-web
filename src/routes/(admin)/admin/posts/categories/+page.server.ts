@@ -30,7 +30,7 @@ export const load: PageServerLoad = async () => {
 		postCounts[r.categoryId] = r.count;
 	}
 
-	return { categories: allCategories, postCounts };
+	return { headerTitle: '分类', categories: allCategories, postCounts };
 };
 
 export const actions: Actions = {

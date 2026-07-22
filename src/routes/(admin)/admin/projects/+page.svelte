@@ -10,6 +10,9 @@
 	import IconTrash from '@tabler/icons-svelte-runes/icons/trash';
 	import IconArrowLeft from '@tabler/icons-svelte-runes/icons/arrow-left';
 	import IconX from '@tabler/icons-svelte-runes/icons/x';
+	import { page } from '$app/state';
+	import { goto } from '$app/navigation';
+	import { cn } from '$lib/utils';
 
 	interface Project {
 		id: string;
@@ -39,8 +42,20 @@
 		},
 	];
 
-	let selectedProjectId = $state<string | null>(null);
+	let selectedProjectId = $state<string | null>(page.url.searchParams.get('id'));
 	let creatingNew = $state(false);
+
+	function selectProject(id: string) {
+		selectedProjectId = id;
+		creatingNew = false;
+		goto(`?id=${id}`, { replaceState: true });
+	}
+
+	function backToProjectList() {
+		selectedProjectId = null;
+		creatingNew = false;
+		goto('.', { replaceState: true });
+	}
 
 	const selectedProject = $derived(projects.find((p) => p.id === selectedProjectId) ?? null);
 
@@ -86,6 +101,100 @@
 	<title>项目管理 - Lair Admin</title>
 </svelte:head>
 
+<!-- Mobile: flat layout -->
+<div class="flex min-h-0 flex-1 flex-col sm:hidden">
+	{#if selectedProject && !creatingNew}
+		{@const project = selectedProject}
+		<div class="flex h-12 shrink-0 items-center justify-between gap-2 border-b px-4">
+			<div class="flex min-w-0 items-center gap-2">
+				<Button variant="ghost" size="icon" class="size-8" onclick={backToProjectList} aria-label="返回列表">
+					<IconArrowLeft data-icon="inline-start" />
+				</Button>
+				<h2 class="inline-flex min-w-0 items-center gap-2 text-sm font-semibold">
+					<span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold uppercase ring-1 ring-border">
+						{avatarText(project.name)}
+					</span>
+					<span class="truncate">{project.name}</span>
+				</h2>
+			</div>
+			<div class="flex shrink-0 items-center gap-2">
+				<Button variant="outline" size="sm">
+					<IconPencil data-icon="inline-start" />编辑
+				</Button>
+				<Button variant="outline" size="sm" class="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive">
+					<IconTrash data-icon="inline-start" />删除
+				</Button>
+			</div>
+		</div>
+		<div class="min-h-0 flex-1 overflow-y-auto">
+			<div class="mx-auto grid max-w-3xl gap-6 p-6">
+				<div class="flex items-start gap-4">
+					<span class="flex size-14 shrink-0 items-center justify-center rounded-full bg-muted text-xl font-semibold uppercase ring-1 ring-border">
+						{avatarText(project.name)}
+					</span>
+					<div class="min-w-0 flex-1">
+						<h3 class="text-lg font-semibold">{project.name}</h3>
+						<p class="mt-1 text-sm leading-6 text-muted-foreground">{project.description}</p>
+						<div class="mt-2 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+							<time>创建于 {project.createdAt}</time>
+						</div>
+					</div>
+				</div>
+				{#if project.content}
+					<section class="border-t pt-5">
+						<h4 class="mb-3 text-sm font-medium">项目介绍</h4>
+						<div class="prose max-w-none text-sm">
+							<p>{project.content}</p>
+						</div>
+					</section>
+				{/if}
+			</div>
+		</div>
+	{:else}
+		<div class="flex h-12 shrink-0 items-center justify-between gap-2 border-b px-4">
+			<div class="flex min-w-0 items-center gap-2">
+				<IconFolder class="size-4 shrink-0 text-muted-foreground" />
+				<h2 class="truncate text-sm font-semibold">项目列表</h2>
+				<span class="text-xs tabular-nums text-muted-foreground">{projects.length} 个</span>
+			</div>
+			<Button size="sm" variant="outline" onclick={openNewProject}>
+				<IconPlus data-icon="inline-start" />新建项目
+			</Button>
+		</div>
+		<div class="min-h-0 flex-1 overflow-y-auto">
+			{#if projects.length === 0}
+				<div class="flex flex-col items-center gap-1 py-12">
+					<p class="text-sm text-muted-foreground">暂无项目</p>
+				</div>
+			{:else}
+				{#each projects as project (project.id)}
+					<button
+						type="button"
+						class={cn(
+							'flex w-full items-center gap-3 border-b px-4 py-3 text-left transition-colors hover:bg-muted/50',
+							selectedProjectId === project.id && !creatingNew && 'bg-muted/50'
+						)}
+						onclick={() => selectProject(project.id)}
+					>
+						<span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold uppercase ring-1 ring-border">
+							{avatarText(project.name)}
+						</span>
+						<span class="min-w-0 flex-1">
+							<span class="flex items-center gap-2">
+								<span class="truncate text-sm font-medium">{project.name}</span>
+							</span>
+							<span class="mt-0.5 block truncate text-xs text-muted-foreground">{project.description}</span>
+							<time class="mt-1 block text-xs text-muted-foreground/70">{project.createdAt}</time>
+						</span>
+					</button>
+				{/each}
+			{/if}
+		</div>
+	{/if}
+</div>
+
+<!-- Desktop: MasterDetail -->
+<div class="hidden min-h-0 flex-1 sm:flex">
 <MasterDetail.Root class="h-[calc(100vh-10rem)]">
 	<!-- ===== 左侧：项目列表 ===== -->
 	<MasterDetail.Pane side="master" class="w-80 shrink-0">
@@ -105,7 +214,7 @@
 				{#each projects as project (project.id)}
 					<MasterDetail.Item
 						selected={selectedProjectId === project.id && !creatingNew}
-						onclick={() => { selectedProjectId = project.id; creatingNew = false; }}
+						onclick={() => selectProject(project.id)}
 					>
 						<span class="size-10 shrink-0 flex items-center justify-center rounded-full bg-muted text-sm font-semibold uppercase ring-1 ring-border">
 							{avatarText(project.name)}
@@ -282,3 +391,4 @@
 		{/if}
 	</MasterDetail.Pane>
 </MasterDetail.Root>
+</div>

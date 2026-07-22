@@ -33,6 +33,16 @@ declare global {
 					avatarUrl: string | null;
 				} | null;
 			} | null;
+			/** admin-header 自动读取此字段作为页面标题 */
+			headerTitle?: string;
+			/** admin-header 自动读取此字段作为操作按钮 */
+			headerActions?: Array<{
+				label: string;
+				iconName: string;
+				variant?: 'default' | 'outline' | 'ghost';
+				size?: 'default' | 'sm' | 'lg' | 'icon';
+				href?: string;
+			}>;
 		}
 	}
 }

@@ -1,5 +1,26 @@
 import type { PageServerLoad } from './$types';
 
+export const load: PageServerLoad = async () => {
+	const comments: CommentItem[] = [
+		{
+			id: '1',
+			author: 'Alice',
+			avatar: '',
+			content: 'Great post!',
+			targetTitle: 'Hello World',
+			targetUrl: '/posts/hello-world',
+			ip: '127.0.0.1',
+			status: 'unread' as const,
+			createdAt: new Date().toISOString()
+		}
+	];
+
+	return {
+		headerTitle: '评论',
+		comments
+	};
+};
+
 export interface CommentItem {
 	id: string;
 	author: string;
