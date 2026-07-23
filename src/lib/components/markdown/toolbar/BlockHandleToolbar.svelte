@@ -4,16 +4,16 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import type { LexicalEditor } from 'lexical';
+	import { getLexicalNearestNodeFromDOM } from '$lib/components/markdown/editor/lexical-action';
 	import {
 		getBlockElement,
-		getLexicalNearestNodeFromDOM,
 		insertBlockAfter,
 		turnBlockInto,
 		duplicateBlocks,
 		moveBlockUp,
 		moveBlockDown,
 		deleteBlocks
-	} from './lexical-action';
+	} from '$lib/components/markdown/editor/lexical-block-helpers';
 
 	// ── Tabler Icons ──
 	import IconPlus from '@tabler/icons-svelte-runes/icons/plus';

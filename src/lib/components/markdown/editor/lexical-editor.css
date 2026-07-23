@@ -5,7 +5,7 @@
  * 才能访问 @apply 中的 utility（包括 shadcn-svelte 自定义类）。
  * @see https://tailwindcss.com/docs/functions-and-directives#reference-directive
  */
-@reference "../../../routes/layout.css";
+@reference "../../../../routes/layout.css";
 
 /* ── 标题 ── */
 .rich-editor-h1 {
@@ -100,7 +100,11 @@
 	@apply rounded bg-muted/50 px-1 py-0.5 font-mono text-sm;
 }
 .rich-editor-highlight {
-	@apply rounded-sm bg-yellow-200/40 dark:bg-yellow-600/30;
+	@apply rounded-sm;
+	background-color: rgb(254 240 138 / 0.4);
+}
+.dark .rich-editor-highlight {
+	background-color: rgb(217 119 6 / 0.3);
 }
 
 /* ── 内联 Tag ── */

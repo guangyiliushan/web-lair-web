@@ -10,9 +10,9 @@ import rehypeKatex from 'rehype-katex';
 import rehypeRaw from 'rehype-raw';
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 import rehypeStringify from 'rehype-stringify';
-import { remarkContainerDirective } from './plugins/remark-directive ';
-import { remarkSpoilerInline } from './plugins/remark-spoiler-inline';
-import { remarkMention } from './plugins/remark-mention';
+import { remarkContainerDirective } from '$lib/components/markdown/plugins/remark-directive';
+import { remarkSpoilerInline } from '$lib/components/markdown/plugins/remark-spoiler-inline';
+import { remarkMention } from '$lib/components/markdown/plugins/remark-mention';
 
 import type { Schema } from 'hast-util-sanitize';
 

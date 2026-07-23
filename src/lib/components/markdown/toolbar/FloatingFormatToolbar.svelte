@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 	import type { LexicalEditor, TextFormatType } from 'lexical';
+	import { FORMAT_TEXT_COMMAND } from '$lib/components/markdown/editor/lexical-action';
 	import {
-		FORMAT_TEXT_COMMAND,
 		insertLink,
 		readToolbarState,
 		getSelectionRect,
 		type ToolbarState
-	} from './lexical-action';
+	} from '$lib/components/markdown/editor/lexical-helpers';
 
 	// ── 图标 ──
 	import IconBold from '@tabler/icons-svelte-runes/icons/bold';

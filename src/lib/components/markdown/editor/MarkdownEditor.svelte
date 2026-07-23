@@ -3,20 +3,19 @@
 	import { Textarea } from '$lib/components/ui/textarea';
 	import { mount, unmount } from 'svelte';
 	import type { LexicalEditor } from 'lexical';
-	import { lexicalEditor, EDITOR_THEME } from './lexical-action';
+	import { lexicalEditor } from '$lib/components/markdown/editor/lexical-action';
 	import {
 		renderMarkdownToHtmlSync,
 		type MarkdownEditorProps,
 		type MarkdownEditorChangeDetail
-	} from './markdown-config';
-	import EditorToolbar from './EditorToolbar.svelte';
-	import FloatingFormatToolbar from './FloatingFormatToolbar.svelte';
-	import BlockHandleToolbar from './BlockHandleToolbar.svelte';
-	import CodeModeToggle from './CodeModeToggle.svelte';
-	import { setEditorContext } from './editor-context';
+	} from '$lib/components/markdown/editor/markdown-config';
+	import EditorToolbar from '$lib/components/markdown/toolbar/EditorToolbar.svelte';
+	import FloatingFormatToolbar from '$lib/components/markdown/toolbar/FloatingFormatToolbar.svelte';
+	import BlockHandleToolbar from '$lib/components/markdown/toolbar/BlockHandleToolbar.svelte';
+	import CodeModeToggle from '$lib/components/markdown/toolbar/CodeModeToggle.svelte';
 
 	// Lexical 编辑器全局样式（由 PostCSS 处理 @apply / Tailwind 指令）
-	import './lexical-editor.css';
+	import '$lib/components/markdown/editor/lexical-editor.css';
 
 	import {
 		$getRoot as getLexicalRoot,
@@ -52,36 +51,18 @@
 		borderless?: boolean;
 	} = $props();
 
-	// ── Editor Context ──
-	const editorRuntime = {
-		editor: null as LexicalEditor | null,
-		theme: EDITOR_THEME,
-		onError: (error: Error) => console.error('Lexical editor error:', error)
-	};
-	setEditorContext(editorRuntime);
-
 	let editor: LexicalEditor | null = $state(null);
 	let previewHtml = $state('');
-	let previewVisible = $state(false);
+	let previewVisible = $state(showPreview);
 	let codeMode = $state(false);
 	let codeModeText = $state('');
 
-	// 同步 codeModeText 与 Lexical 内容
-	let _pvInit = false;
-	$effect(() => {
-		if (!_pvInit) {
-			previewVisible = showPreview;
-			_pvInit = true;
-		}
-	});
-
 	function handleEditorReady(e: LexicalEditor) {
 		editor = e;
-		editorRuntime.editor = e;
 	}
 
 	// ── Block Handle Toolbar: portal to document.body ──
-	let blockHandleApp: Record<string, any> | null = null;
+	let blockHandleApp: ReturnType<typeof mount> | null = null;
 
 	$effect(() => {
 		// 当 editor 就绪且 editable 时挂载 block handle

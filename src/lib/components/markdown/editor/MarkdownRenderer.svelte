@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { cn } from '$lib/utils';
-	import { renderMarkdownToHtmlSync, type MarkdownRendererProps } from './markdown-config';
+	import { renderMarkdownToHtmlSync, type MarkdownRendererProps } from '$lib/components/markdown/editor/markdown-config';
 
 	let {
 		source,

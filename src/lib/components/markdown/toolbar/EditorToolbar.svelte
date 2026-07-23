@@ -1,4 +1,4 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import { cn } from '$lib/utils';
 	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
@@ -8,7 +8,9 @@
 		FORMAT_TEXT_COMMAND,
 		FORMAT_ELEMENT_COMMAND,
 		UNDO_COMMAND,
-		REDO_COMMAND,
+		REDO_COMMAND
+	} from '$lib/components/markdown/editor/lexical-action';
+	import {
 		toggleHeading,
 		toggleBulletList,
 		toggleOrderedList,
@@ -24,7 +26,7 @@
 		applyParagraph,
 		readToolbarState,
 		type ToolbarState
-	} from './lexical-action';
+	} from '$lib/components/markdown/editor/lexical-helpers';
 	import EditorDebugDialog from './EditorDebugDialog.svelte';
 
 	// ── 图标 ──

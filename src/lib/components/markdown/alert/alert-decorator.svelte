@@ -3,7 +3,8 @@
 	import { createEditor, type LexicalEditor } from 'lexical';
 	import { registerRichText } from '@lexical/rich-text';
 	import { registerHistory, createEmptyHistoryState } from '@lexical/history';
-	import { EDITOR_THEME, NESTED_EDITOR_NODES, getLexicalNodeByKey, isAlertNode } from './lexical-action';
+	import { EDITOR_THEME, NESTED_EDITOR_NODES, getLexicalNodeByKey } from '$lib/components/markdown/editor/lexical-action';
+	import { isAlertNode } from '$lib/components/markdown/editor/lexical-helpers';
 	import { AlertNode } from './alert-node';
 	import type { AlertType } from './alert-types';
 	import { ALERT_LABELS } from './alert-types';
@@ -35,6 +36,11 @@
 	let dropdownHover = $state(false);
 	let headerEl: HTMLElement | undefined = $state();
 	let dropdownTimeout: ReturnType<typeof setTimeout> | null = null;
+
+	// 同步 prop 变化到内部 state
+	$effect(() => {
+		currentAlertType = alertType;
+	});
 
 	// ── 下拉 hover 打开 / mouseleave 关闭 ──
 	function onHeaderEnter() {

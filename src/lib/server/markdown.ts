@@ -11,11 +11,11 @@ import rehypePrettyCode from 'rehype-pretty-code';
 import rehypeRaw from 'rehype-raw';
 import rehypeSanitize from 'rehype-sanitize';
 import rehypeStringify from 'rehype-stringify';
-import { remarkContainerDirective } from '$lib/components/markdown/plugins/remark-directive ';
+import { remarkContainerDirective } from '$lib/components/markdown/plugins/remark-directive';
 import { remarkSpoilerInline } from '$lib/components/markdown/plugins/remark-spoiler-inline';
 import { remarkMention } from '$lib/components/markdown/plugins/remark-mention';
 import { rehypeMermaid } from '$lib/components/markdown/plugins/rehype-mermaid';
-import { buildSanitizeSchema } from '$lib/components/markdown/markdown-config';
+import { buildSanitizeSchema } from '$lib/components/markdown';
 
 /**
  * 管线 Processor 的精确类型。
