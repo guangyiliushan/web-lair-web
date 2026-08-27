@@ -32,6 +32,7 @@ project.inlang/cache/
 # Only .vscode/ is shared for team-wide editor consistency.
 .agents/
 .claude/
+.codegraph/
 .codex/
 .cursor/
 .gemini/
