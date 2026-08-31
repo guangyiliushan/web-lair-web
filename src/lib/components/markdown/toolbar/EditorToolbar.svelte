@@ -62,8 +62,6 @@
 	import IconBug from '@tabler/icons-svelte-runes/icons/bug';
 	import IconDots from '@tabler/icons-svelte-runes/icons/dots';
 	import IconChevronDown from '@tabler/icons-svelte-runes/icons/chevron-down';
-	import IconEye from '@tabler/icons-svelte-runes/icons/eye';
-	import IconEyeOff from '@tabler/icons-svelte-runes/icons/eye-off';
 	import IconArticle from '@tabler/icons-svelte-runes/icons/article';
 
 	// ── 类型 ──
@@ -88,15 +86,11 @@
 	// ── Props ──
 	type Props = {
 		editor: LexicalEditor | null;
-		previewVisible: boolean;
-		onTogglePreview: () => void;
 		class?: string;
 	};
 
 	let {
 		editor,
-		previewVisible,
-		onTogglePreview,
 		class: className
 	}: Props = $props();
 
@@ -785,22 +779,6 @@
 			</DropdownMenu.Content>
 		</DropdownMenu.Root>
 	{/if}
-
-	<!-- ═══════════ 预览切换 (Tier 0) ═══════════ -->
-	<Button
-		variant="ghost"
-		size="icon-sm"
-		onclick={onTogglePreview}
-		onmousedown={preventSelectionLoss}
-		aria-label={previewVisible ? '关闭预览' : '开启预览'}
-		title={previewVisible ? '关闭预览' : '开启预览'}
-	>
-		{#if previewVisible}
-			<IconEyeOff data-icon="inline-start" />
-		{:else}
-			<IconEye data-icon="inline-start" />
-		{/if}
-	</Button>
 
 	<!-- ═══════════ 调试（始终最右）═══════════ -->
 	<Button

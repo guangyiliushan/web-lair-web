@@ -1,13 +1,11 @@
 <script lang="ts">
 	import { cn } from '$lib/utils';
-	import { Textarea } from '$lib/components/ui/textarea';
 	import { mount, unmount } from 'svelte';
 	import type { LexicalEditor } from 'lexical';
 	import { lexicalEditor } from '$lib/components/markdown/editor/lexical-action';
-	import {
-		renderMarkdownToHtmlSync,
-		type MarkdownEditorProps,
-		type MarkdownEditorChangeDetail
+	import type {
+		MarkdownEditorProps,
+		MarkdownEditorChangeDetail
 	} from '$lib/components/markdown/editor/markdown-config';
 	import EditorToolbar from '$lib/components/markdown/toolbar/EditorToolbar.svelte';
 	import FloatingFormatToolbar from '$lib/components/markdown/toolbar/FloatingFormatToolbar.svelte';
@@ -24,9 +22,9 @@
 	} from 'lexical';
 	import {
 		$convertToMarkdownString as convertToMarkdown,
-		$convertFromMarkdownString as convertFromMarkdown,
-		TRANSFORMERS
+		$convertFromMarkdownString as convertFromMarkdown
 	} from '@lexical/markdown';
+	import { EDITOR_TRANSFORMERS } from '$lib/components/markdown/editor/markdown-transformers';
 
 	let {
 		value,
@@ -36,7 +34,6 @@
 		theme = 'default',
 		autofocus = false,
 		showToolbar = true,
-		showPreview = false,
 		stickyToolbar = false,
 		borderless = false,
 		class: className,
@@ -52,10 +49,18 @@
 	} = $props();
 
 	let editor: LexicalEditor | null = $state(null);
-	let previewHtml = $state('');
-	let previewVisible = $state(showPreview);
 	let codeMode = $state(false);
 	let codeModeText = $state('');
+
+	// ── 代码模式行号 gutter ──
+	let gutterEl: HTMLElement | null = $state(null);
+	let codeTextarea: HTMLTextAreaElement | null = $state(null);
+	const lineNumbers = $derived(
+		Array.from({ length: codeModeText.split('\n').length }, (_, i) => i + 1)
+	);
+	function syncGutter() {
+		if (gutterEl && codeTextarea) gutterEl.scrollTop = codeTextarea.scrollTop;
+	}
 
 	function handleEditorReady(e: LexicalEditor) {
 		editor = e;
@@ -88,17 +93,15 @@
 		isEmpty: boolean;
 	}) {
 		codeModeText = detail.markdown;
-		const html = renderMarkdownToHtmlSync(detail.markdown);
-		previewHtml = html;
-		onChange?.({ ...detail, htmlPreview: html });
+		onChange?.(detail);
 	}
 
 	// 代码模式 → 切换回富文本时，将编辑后的 markdown 同步回 Lexical
 	function toggleCodeMode() {
 		if (!codeMode) {
-			// 进入代码模式：从 Lexical 导出 markdown（保留标题/列表等格式）
+			// 进入代码模式：从 Lexical 导出 markdown（保留标题/列表/Tag/Alert 等格式）
 			editor?.getEditorState().read(() => {
-				codeModeText = convertToMarkdown(TRANSFORMERS);
+				codeModeText = convertToMarkdown(EDITOR_TRANSFORMERS);
 			});
 		} else {
 			// 退出代码模式：将编辑后的 markdown 解析回 Lexical 节点树
@@ -107,9 +110,10 @@
 					const root = getLexicalRoot();
 					root.clear();
 					try {
-						convertFromMarkdown(codeModeText, TRANSFORMERS);
+						convertFromMarkdown(codeModeText, EDITOR_TRANSFORMERS);
 					} catch {
 						// 解析失败时作为纯文本回退
+						root.clear();
 						const p = createLexicalParagraph();
 						p.append(createLexicalText(codeModeText));
 						root.append(p);
@@ -125,13 +129,10 @@
 	function onCodeModeInput(e: Event) {
 		const target = e.currentTarget as HTMLTextAreaElement;
 		codeModeText = target.value;
-		const html = renderMarkdownToHtmlSync(target.value);
-		previewHtml = html;
 		onChange?.({
 			editorStateJson: '',
 			markdown: target.value,
 			plainText: target.value,
-			htmlPreview: html,
 			isEmpty: !target.value.trim()
 		});
 	}
@@ -140,11 +141,15 @@
 <div class={cn('flex flex-col', className)}>
 	<!-- Toolbar -->
 	{#if showToolbar && editable}
-		<div class={cn('flex min-w-0 items-center gap-0.5', stickyToolbar && 'sticky top-14 z-10 border-b border-border bg-background/80 backdrop-blur-sm')}>
+		<div
+			class={cn(
+				'flex min-w-0 items-center gap-0.5',
+				stickyToolbar &&
+					'sticky top-14 z-10 border-b border-border bg-background/80 backdrop-blur-sm'
+			)}
+		>
 			<EditorToolbar
 				{editor}
-				{previewVisible}
-				onTogglePreview={() => (previewVisible = !previewVisible)}
 				class="min-w-0 flex-1"
 			/>
 			<CodeModeToggle {codeMode} onToggle={toggleCodeMode} />
@@ -157,16 +162,33 @@
 	<!-- Editor area -->
 	<div class="min-h-0 flex-1">
 		{#if codeMode}
-			<!-- 代码模式：纯文本编辑 -->
-			<Textarea
-				bind:value={codeModeText}
-				oninput={onCodeModeInput}
-				{placeholder}
+			<!-- 代码模式：纯文本编辑（无框视觉 + 行号 gutter，字体/行高/内边距与富文本一致） -->
+			<div
 				class={cn(
-					'h-full min-h-48 w-full resize-none font-mono text-sm leading-6',
+					'flex h-full min-h-48 w-full overflow-hidden',
 					!borderless && 'rounded-lg border border-border bg-background'
 				)}
-			/>
+			>
+				<div
+					bind:this={gutterEl}
+					aria-hidden="true"
+					class="w-10 shrink-0 overflow-hidden py-3 pr-2 text-right font-mono text-sm leading-6 text-muted-foreground/50 select-none"
+				>
+					{#each lineNumbers as n (n)}
+						<div>{n}</div>
+					{/each}
+				</div>
+				<textarea
+					bind:this={codeTextarea}
+					bind:value={codeModeText}
+					oninput={onCodeModeInput}
+					onscroll={syncGutter}
+					{placeholder}
+					spellcheck="false"
+					wrap="off"
+					class="h-full min-h-48 w-full flex-1 resize-none bg-transparent px-3 py-3 font-mono text-sm leading-6 text-foreground outline-none placeholder:text-muted-foreground/50"
+				></textarea>
+			</div>
 		{:else}
 			<!-- 富文本模式：Lexical 编辑器 -->
 			<div
@@ -195,13 +217,4 @@
 		{/if}
 	</div>
 
-	<!-- Preview area -->
-	{#if previewVisible && previewHtml}
-		<div
-			class="prose max-w-none overflow-y-auto rounded-lg border border-border bg-background p-4 prose-neutral dark:prose-invert"
-		>
-			<!-- eslint-disable-next-line svelte/no-at-html-tags -- Safe: HTML is sanitized by rehype-sanitize -->
-			{@html previewHtml}
-		</div>
-	{/if}
 </div>

@@ -1,36 +1,5 @@
 import {
 	createEditor,
-	type LexicalEditor,
-	type LexicalCommand,
-	type EditorThemeClasses
-} from 'lexical';
-import { registerRichText } from '@lexical/rich-text';
-import { registerHistory, createEmptyHistoryState } from '@lexical/history';
-import {
-	registerMarkdownShortcuts,
-	TRANSFORMERS,
-	$convertToMarkdownString,
-	$convertFromMarkdownString,
-	type Transformer
-} from '@lexical/markdown';
-import {
-	HeadingNode,
-	QuoteNode,
-	type HeadingTagType
-} from '@lexical/rich-text';
-import {
-	ListNode,
-	ListItemNode,
-	INSERT_UNORDERED_LIST_COMMAND,
-	INSERT_ORDERED_LIST_COMMAND,
-	REMOVE_LIST_COMMAND
-} from '@lexical/list';
-import { LinkNode } from '@lexical/link';
-import { CodeNode, CodeHighlightNode } from '@lexical/code';
-import { HorizontalRuleNode, INSERT_HORIZONTAL_RULE_COMMAND } from '@lexical/extension';
-import { TagNode } from '$lib/components/markdown/tag/tag-node';
-import { AlertNode, $isAlertNode } from '$lib/components/markdown/alert/alert-node';
-import {
 	$getRoot,
 	$createParagraphNode,
 	$createTextNode,
@@ -40,8 +9,29 @@ import {
 	CLEAR_EDITOR_COMMAND,
 	UNDO_COMMAND,
 	REDO_COMMAND,
+	type LexicalEditor,
+	type LexicalCommand,
 	type TextFormatType
 } from 'lexical';
+import { registerRichText } from '@lexical/rich-text';
+import { registerHistory, createEmptyHistoryState } from '@lexical/history';
+import {
+	registerMarkdownShortcuts,
+	$convertFromMarkdownString,
+	$convertToMarkdownString,
+	type Transformer
+} from '@lexical/markdown';
+import { type HeadingTagType } from '@lexical/rich-text';
+import {
+	INSERT_UNORDERED_LIST_COMMAND,
+	INSERT_ORDERED_LIST_COMMAND,
+	REMOVE_LIST_COMMAND
+} from '@lexical/list';
+import { INSERT_HORIZONTAL_RULE_COMMAND } from '@lexical/extension';
+import { $isAlertNode } from '$lib/components/markdown/alert/alert-node';
+import { EDITOR_NODES } from '$lib/components/markdown/editor/editor-nodes';
+import { EDITOR_THEME } from '$lib/components/markdown/editor/editor-shared';
+import { EDITOR_TRANSFORMERS } from '$lib/components/markdown/editor/markdown-transformers';
 
 export interface LexicalActionOptions {
 	/** 初始 markdown（当无 editorState 时使用） */
@@ -52,7 +42,7 @@ export interface LexicalActionOptions {
 	placeholder: string;
 	/** 自动聚焦 */
 	autofocus: boolean;
-	/** 自定义 transformer（覆盖默认 TRANSFORMERS） */
+	/** 自定义 transformer（覆盖默认 EDITOR_TRANSFORMERS） */
 	transformers?: Transformer[];
 	/** 内容变化回调 */
 	onChange?: (detail: {
@@ -64,70 +54,6 @@ export interface LexicalActionOptions {
 	/** 将 editor 实例抛出给 Svelte $state */
 	onEditorReady?: (editor: LexicalEditor) => void;
 }
-
-/** 编辑器节点注册列表 */
-const EDITOR_NODES = [
-	HeadingNode,
-	ListNode,
-	ListItemNode,
-	QuoteNode,
-	CodeNode,
-	CodeHighlightNode,
-	LinkNode,
-	HorizontalRuleNode,
-	TagNode,
-	AlertNode
-];
-
-/** 嵌套编辑器节点子集（不含 AlertNode 和 TagNode，防止无限嵌套） */
-export const NESTED_EDITOR_NODES = [
-	HeadingNode,
-	ListNode,
-	ListItemNode,
-	QuoteNode,
-	CodeNode,
-	CodeHighlightNode,
-	LinkNode,
-	HorizontalRuleNode
-];
-
-/**
- * Lexical 编辑器 Theme 配置。
- *
- * 将各节点类型映射到语义化 CSS 类名，由组件层 CSS 提供实际样式。
- * 参考 Mx Space Admin 的 rich-heading-h1/h2/h3 命名惯例。
- *
- * 注意：类名通过 `:global()` 定义在 MarkdownEditor.svelte 的 scoped style 中，
- * 支持 Tailwind `@apply` 以确保与设计系统一致。
- */
-export const EDITOR_THEME: EditorThemeClasses = {
-	heading: {
-		h1: 'rich-editor-h1',
-		h2: 'rich-editor-h2',
-		h3: 'rich-editor-h3',
-		h4: 'rich-editor-h4',
-		h5: 'rich-editor-h5',
-		h6: 'rich-editor-h6'
-	},
-	list: {
-		ul: 'rich-editor-ul',
-		ol: 'rich-editor-ol',
-		listitem: 'rich-editor-li',
-		nested: {
-			listitem: 'rich-editor-nested-li'
-		}
-	},
-	quote: 'rich-editor-quote',
-	code: 'rich-editor-code-block',
-	text: {
-		bold: 'rich-editor-bold',
-		italic: 'rich-editor-italic',
-		underline: 'rich-editor-underline',
-		strikethrough: 'rich-editor-strikethrough',
-		code: 'rich-editor-inline-code',
-		highlight: 'rich-editor-highlight'
-	}
-};
 
 /**
  * Svelte 5 Action：将 HTMLElement 绑定为 Lexical 编辑器。
@@ -167,8 +93,8 @@ export function lexicalEditor(node: HTMLElement, initialOptions: LexicalActionOp
 		node.setAttribute('contenteditable', 'true');
 	}
 
-	// 注册 Markdown 快捷输入（# / > / - / ``` / 1. 等自动转换）
-	const transformers = optionsRef.current.transformers ?? TRANSFORMERS;
+	// 注册 Markdown 快捷输入（# / > / - / ``` / 1. / #tag# / :::info 等自动转换）
+	const transformers = optionsRef.current.transformers ?? EDITOR_TRANSFORMERS;
 	const unregisterMarkdownShortcuts = registerMarkdownShortcuts(editor, transformers);
 
 	// 注册历史
@@ -289,3 +215,6 @@ export {
 
 // 来自 alert-node.ts 的 $ 前缀函数也需要别名
 export { $isAlertNode as isAlertNode };
+
+// 编辑器完整 transformer 列表（含 Tag/Alert），供 MarkdownEditor 等使用
+export { EDITOR_TRANSFORMERS };

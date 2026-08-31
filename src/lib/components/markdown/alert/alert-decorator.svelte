@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import { createEditor, type LexicalEditor } from 'lexical';
+	import { createEditor, $getNodeByKey as getLexicalNodeByKey, type LexicalEditor } from 'lexical';
 	import { registerRichText } from '@lexical/rich-text';
 	import { registerHistory, createEmptyHistoryState } from '@lexical/history';
-	import { EDITOR_THEME, NESTED_EDITOR_NODES, getLexicalNodeByKey } from '$lib/components/markdown/editor/lexical-action';
+	import { EDITOR_THEME, NESTED_EDITOR_NODES } from '$lib/components/markdown/editor/editor-shared';
 	import { isAlertNode } from '$lib/components/markdown/editor/lexical-helpers';
 	import { AlertNode } from './alert-node';
 	import type { AlertType } from './alert-types';
@@ -44,7 +44,10 @@
 
 	// ── 下拉 hover 打开 / mouseleave 关闭 ──
 	function onHeaderEnter() {
-		if (dropdownTimeout) { clearTimeout(dropdownTimeout); dropdownTimeout = null; }
+		if (dropdownTimeout) {
+			clearTimeout(dropdownTimeout);
+			dropdownTimeout = null;
+		}
 		dropdownHover = true;
 		dropdownOpen = true;
 	}
@@ -56,7 +59,10 @@
 		}, 150);
 	}
 	function onDropdownEnter() {
-		if (dropdownTimeout) { clearTimeout(dropdownTimeout); dropdownTimeout = null; }
+		if (dropdownTimeout) {
+			clearTimeout(dropdownTimeout);
+			dropdownTimeout = null;
+		}
 		dropdownHover = true;
 	}
 	function onDropdownLeave() {
@@ -223,7 +229,7 @@
 				class="rich-editor-alert-type-btn"
 				aria-haspopup="menu"
 				aria-expanded={dropdownOpen}
-				onclick={() => dropdownOpen = true}
+				onclick={() => (dropdownOpen = true)}
 			>
 				<CurrentOptionIcon class="rich-editor-alert-icon" aria-hidden="true" />
 				<span class="rich-editor-alert-label">{currentOption.label}</span>
@@ -245,9 +251,15 @@
 							role="menuitem"
 							class="rich-editor-alert-dropdown-item"
 							class:active={option.type === currentAlertType}
-							onclick={() => { changeAlertType(option.type); dropdownOpen = false; }}
+							onclick={() => {
+								changeAlertType(option.type);
+								dropdownOpen = false;
+							}}
 						>
-							<OptionIcon class="rich-editor-alert-option-icon rich-editor-alert-option-icon-{option.type}" aria-hidden="true" />
+							<OptionIcon
+								class="rich-editor-alert-option-icon rich-editor-alert-option-icon-{option.type}"
+								aria-hidden="true"
+							/>
 							<span>{option.label}</span>
 						</button>
 					{/each}

@@ -13,6 +13,7 @@ import rehypeStringify from 'rehype-stringify';
 import { remarkContainerDirective } from '$lib/components/markdown/plugins/remark-directive';
 import { remarkSpoilerInline } from '$lib/components/markdown/plugins/remark-spoiler-inline';
 import { remarkMention } from '$lib/components/markdown/plugins/remark-mention';
+import { remarkTag } from '$lib/components/markdown/plugins/remark-tag';
 
 import type { Schema } from 'hast-util-sanitize';
 
@@ -52,7 +53,6 @@ export interface MarkdownEditorProps {
 	theme?: 'default' | 'compact';
 	autofocus?: boolean;
 	showToolbar?: boolean; // 默认 true
-	showPreview?: boolean; // 默认 false
 	class?: string;
 }
 
@@ -64,8 +64,6 @@ export interface MarkdownEditorChangeDetail {
 	markdown: string;
 	/** 纯文本（用于摘要/搜索） */
 	plainText: string;
-	/** 预览 HTML（仅供编辑器内预览面板，不持久化） */
-	htmlPreview: string;
 	/** 编辑器是否为空 */
 	isEmpty: boolean;
 }
@@ -93,8 +91,11 @@ export interface MarkdownRendererProps {
  * 在 defaultSchema 基础上扩展：
  * - KaTeX 输出的 MathML 标签和属性
  * - Shiki 高亮输出的 data-* 属性
- * - 自定义组件（spoiler/mermaid/mention）的 class
+ * - 自定义组件（spoiler/mermaid/mention/tag/callout）的 class
  * - 图片 loading 属性
+ *
+ * 注意：hast-util-sanitize v5 使用 hast **属性名**（如 className），
+ * 而非 HTML 属性名（class）；'data*' 为特殊值，放行全部 data-* 属性。
  *
  * 该 schema 同时用于服务端管线和客户端轻量管线。
  */
@@ -103,23 +104,16 @@ export function buildSanitizeSchema(): Schema {
 		...defaultSchema,
 		attributes: {
 			...defaultSchema.attributes,
-			// 允许所有元素携带 class/style/id（KaTeX/Shiki/自定义组件依赖）
-			'*': [
-				...(defaultSchema.attributes?.['*'] ?? []),
-				'class',
-				'style',
-				'id',
-				'data-theme', // Shiki 双主题
-				'data-language' // Shiki 代码语言标记
-			],
-			a: [...(defaultSchema.attributes?.a ?? []), 'target', 'rel', 'class'],
-			img: [...(defaultSchema.attributes?.img ?? []), 'loading', 'class', 'width', 'height'],
-			code: [...(defaultSchema.attributes?.code ?? []), 'class', 'data-language'],
-			pre: [...(defaultSchema.attributes?.pre ?? []), 'class', 'data-language'],
-			span: [...(defaultSchema.attributes?.span ?? []), 'class', 'style', 'aria-hidden'],
-			div: [...(defaultSchema.attributes?.div ?? []), 'class', 'style'],
-			figure: [...(defaultSchema.attributes?.figure ?? []), 'class'],
-			figcaption: [...(defaultSchema.attributes?.figcaption ?? []), 'class'],
+			// 允许所有元素携带 class/style/id 与 data-*（KaTeX/Shiki/自定义组件依赖）
+			'*': [...(defaultSchema.attributes?.['*'] ?? []), 'className', 'style', 'id', 'data*'],
+			a: [...(defaultSchema.attributes?.a ?? []), 'target', 'rel', 'className'],
+			img: [...(defaultSchema.attributes?.img ?? []), 'loading', 'className', 'width', 'height'],
+			code: [...(defaultSchema.attributes?.code ?? []), 'className'],
+			pre: [...(defaultSchema.attributes?.pre ?? []), 'className'],
+			span: [...(defaultSchema.attributes?.span ?? []), 'className', 'style', 'ariaHidden'],
+			div: [...(defaultSchema.attributes?.div ?? []), 'className', 'style'],
+			figure: [...(defaultSchema.attributes?.figure ?? []), 'className'],
+			figcaption: [...(defaultSchema.attributes?.figcaption ?? []), 'className'],
 			// KaTeX 输出的 MathML 标签属性
 			math: ['xmlns', 'display'],
 			annotation: ['encoding'],
@@ -193,6 +187,7 @@ function getLightProcessor(): MarkdownProcessor {
 		.use(remarkContainerDirective)
 		.use(remarkSpoilerInline)
 		.use(remarkMention)
+		.use(remarkTag)
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TS overload 限制
 		.use(remarkRehype as any, { allowDangerousHtml: true })
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- rehype-katex Options vs boolean overload
@@ -208,7 +203,6 @@ function getLightProcessor(): MarkdownProcessor {
  * 客户端同步渲染（无 Shiki 代码高亮、无 Mermaid 渲染）。
  *
  * 用于：
- * - MarkdownEditor 的实时预览面板
  * - MarkdownRenderer 的客户端渲染模式（当未传入 html prop 时）
  *
  * @param markdown 原始 Markdown 字符串

@@ -324,23 +324,5 @@ test.describe('EditorToolbar', () => {
 			await expect(blockDropdown).toBeVisible();
 		});
 
-		test('preview toggle button toggles preview', async ({ page }) => {
-			await page.setViewportSize(VIEWPORTS.desktop);
-			await page.goto('/admin/posts/edit');
-
-			const toolbar = page.locator('[role="toolbar"][aria-label="编辑器工具栏"]');
-
-			// Find the preview toggle (eye icon)
-			const previewBtn = toolbar.locator('button[aria-label="开启预览"], button[aria-label="关闭预览"]');
-			await expect(previewBtn).toBeVisible();
-
-			// Click to toggle
-			await previewBtn.click();
-			await page.waitForTimeout(300);
-
-			// Should now show "关闭预览" (close preview) label
-			const closePreviewBtn = toolbar.locator('button[aria-label="关闭预览"]');
-			await expect(closePreviewBtn).toBeVisible();
-		});
 	});
 });

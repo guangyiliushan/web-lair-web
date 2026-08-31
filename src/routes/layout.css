@@ -270,6 +270,61 @@
 		filter: none;
 	}
 
+	/* ── 行内标签（#text# → span.tag）── 与编辑器 .rich-editor-tag 视觉一致 */
+	.tag {
+		display: inline-block;
+		vertical-align: baseline;
+		padding-inline: 0.75em;
+		border-radius: 9999px;
+		font-size: 0.875em;
+		line-height: 1.6;
+		background-color: color-mix(in oklab, var(--primary) 18%, transparent);
+		color: var(--foreground);
+	}
+
+	/* ── Callout 容器（:::info/tip/warning → div.callout）──
+	   与编辑器 .rich-editor-alert 对齐：左侧强调条 + 仅右侧圆角 */
+	.callout {
+		position: relative;
+		margin-block: 1rem;
+		padding: 1rem 1rem 1rem 1.25rem;
+		border-radius: 0 var(--radius-md) var(--radius-md) 0;
+		background-color: color-mix(in oklab, var(--muted) 40%, transparent);
+	}
+	.callout::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		width: 0.25rem;
+		border-radius: inherit;
+	}
+	.callout > *:first-child {
+		margin-top: 0;
+	}
+	.callout > *:last-child {
+		margin-bottom: 0;
+	}
+	.callout-info::before {
+		background-color: hsl(207 65% 65%);
+	}
+	.callout-tip::before {
+		background-color: hsl(120 50% 55%);
+	}
+	.callout-warning::before {
+		background-color: hsl(25 65% 55%);
+	}
+	.dark .callout-info {
+		background-color: hsl(210 50% 12% / 0.85);
+	}
+	.dark .callout-tip {
+		background-color: hsl(120 30% 10% / 0.85);
+	}
+	.dark .callout-warning {
+		background-color: hsl(30 40% 12% / 0.85);
+	}
+
 	.mermaid {
 		background: var(--muted);
 		border-radius: var(--radius-lg);
