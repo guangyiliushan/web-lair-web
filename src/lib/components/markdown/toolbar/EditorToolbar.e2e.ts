@@ -124,7 +124,7 @@ test.describe('EditorToolbar', () => {
 			await expect(menu).toBeVisible({ timeout: 2000 });
 
 			// Menu should have max-height constraint and be scrollable if needed
-			const maxHeight = await menu.evaluate(el => window.getComputedStyle(el).maxHeight);
+			const maxHeight = await menu.evaluate((el) => window.getComputedStyle(el).maxHeight);
 			expect(maxHeight).not.toBe('none');
 		});
 	});
@@ -323,6 +323,5 @@ test.describe('EditorToolbar', () => {
 			const blockDropdown = toolbar.locator('[data-slot="dropdown-menu-trigger"]').first();
 			await expect(blockDropdown).toBeVisible();
 		});
-
 	});
 });

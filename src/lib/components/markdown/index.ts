@@ -28,7 +28,11 @@ export type {
 	MarkdownRendererProps
 } from '$lib/components/markdown/editor/markdown-config';
 
-export { $createAlertNode, $isAlertNode, insertAlert } from '$lib/components/markdown/editor/lexical-helpers';
+export {
+	$createAlertNode,
+	$isAlertNode,
+	insertAlert
+} from '$lib/components/markdown/editor/lexical-helpers';
 export type { AlertType } from '$lib/components/markdown/alert/alert-types';
 export type { SerializedAlertNode } from '$lib/components/markdown/alert/alert-node';
 

@@ -37,6 +37,14 @@ export const remarkContainerDirective: Plugin<[], Root> = () => {
 				return; // 不替换节点，子节点走正常渲染管线
 			}
 
+			// ── 对齐指令（编辑器 :::center 等 语法）：保留嵌套子节点 ──
+			if (['left', 'center', 'right', 'justify'].includes(name)) {
+				const data = directive.data ?? (directive.data = {});
+				data.hName = 'div';
+				data.hProperties = { style: `text-align: ${name};` };
+				return;
+			}
+
 			// ── 旧路径指令：仅处理已知的容器类型 ──
 			if (!['spoiler', 'gallery', 'banner'].includes(name)) return;
 

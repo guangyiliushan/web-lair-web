@@ -1,46 +1,81 @@
 import {
 	type LexicalEditor,
 	type ElementFormatType,
+	type LexicalNode,
 	$getSelection,
 	$isRangeSelection,
 	$isElementNode,
-	$getRoot,
+	$isRootOrShadowRoot,
 	$createParagraphNode,
 	$createTextNode
 } from 'lexical';
 import { $createHeadingNode, $createQuoteNode, type HeadingTagType } from '@lexical/rich-text';
 import {
+	$isListNode,
+	type ListNode,
 	INSERT_UNORDERED_LIST_COMMAND,
 	INSERT_ORDERED_LIST_COMMAND,
+	INSERT_CHECK_LIST_COMMAND,
 	REMOVE_LIST_COMMAND
 } from '@lexical/list';
+import { INSERT_TABLE_COMMAND } from '@lexical/table';
 import { $createLinkNode } from '@lexical/link';
 import { $createCodeNode } from '@lexical/code';
 import { INSERT_HORIZONTAL_RULE_COMMAND } from '@lexical/extension';
 import { $setBlocksType } from '@lexical/selection';
 import { $createTagNode } from '$lib/components/markdown/tag/tag-node';
 import { $createAlertNode, $isAlertNode } from '$lib/components/markdown/alert/alert-node';
-import { DEFAULT_ALERT_TYPE, createDefaultAlertContent } from '$lib/components/markdown/alert/alert-types';
+import { $createImageNode } from '$lib/components/markdown/image/image-node';
+import {
+	DEFAULT_ALERT_TYPE,
+	createDefaultAlertContent
+} from '$lib/components/markdown/alert/alert-types';
 import type { AlertType } from '$lib/components/markdown/alert/alert-types';
+
+// ── 选区块定位（工具栏状态与 toggle 的统一依据）──
+
+/**
+ * 获取选区所在的顶层块节点（root 的直接子级）。
+ * 光标在段落/标题/引用内返回该块；在列表内返回外层 ListNode；在表格内返回 TableNode。
+ */
+function $getTopLevelBlockFromSelection(): LexicalNode | null {
+	const selection = $getSelection();
+	if (!$isRangeSelection(selection)) return null;
+	let node: LexicalNode = selection.anchor.getNode();
+	let parent = node.getParent();
+	while (parent && !$isRootOrShadowRoot(parent)) {
+		node = parent;
+		parent = node.getParent();
+	}
+	return node;
+}
+
+/**
+ * 获取选区所在的最近 ListNode 祖先（不在列表中时返回 null）。
+ * 嵌套列表时返回光标直接所在的那层列表。
+ */
+function $getNearestListNodeFromSelection(): ListNode | null {
+	const selection = $getSelection();
+	if (!$isRangeSelection(selection)) return null;
+	let node: LexicalNode | null = selection.anchor.getNode();
+	while (node !== null) {
+		if ($isListNode(node)) return node;
+		node = node.getParent();
+	}
+	return null;
+}
 
 /** 切换标题级别：已是该级别则降为段落 */
 export function toggleHeading(editor: LexicalEditor, level: HeadingTagType) {
 	editor.update(() => {
 		const selection = $getSelection();
-		if (!selection) return;
-		const nodes = selection.getNodes();
-		if (nodes.length === 0) return;
-		// 从选中节点的第一个节点向上查找块级父节点
-		let block = nodes[0];
-		let parent = block.getParent();
-		while (parent && parent.getType() !== 'root') {
-			block = parent;
-			parent = parent.getParent();
-		}
-		const currentType = block.getType?.() ?? '';
-		const currentTag = (block as { getTag?: () => string })?.getTag?.() ?? '';
+		if (!$isRangeSelection(selection)) return;
+		const block = $getTopLevelBlockFromSelection();
+		if (!block) return;
+		const isTargetHeading =
+			block.getType() === 'heading' && (block as { getTag?: () => string }).getTag?.() === level;
 
-		if (currentType === 'heading' && currentTag === level) {
+		if (isTargetHeading) {
 			$setBlocksType(selection, () => $createParagraphNode());
 		} else {
 			$setBlocksType(selection, () => $createHeadingNode(level));
@@ -52,16 +87,11 @@ export function toggleHeading(editor: LexicalEditor, level: HeadingTagType) {
 export function toggleBlockquote(editor: LexicalEditor) {
 	editor.update(() => {
 		const selection = $getSelection();
-		if (!selection) return;
-		const nodes = selection.getNodes();
-		if (nodes.length === 0) return;
-		let block = nodes[0];
-		let parent = block.getParent();
-		while (parent && parent.getType() !== 'root') {
-			block = parent;
-			parent = parent.getParent();
-		}
-		if (block.getType?.() === 'quote') {
+		if (!$isRangeSelection(selection)) return;
+		const block = $getTopLevelBlockFromSelection();
+		if (!block) return;
+
+		if (block.getType() === 'quote') {
 			$setBlocksType(selection, () => $createParagraphNode());
 		} else {
 			$setBlocksType(selection, () => $createQuoteNode());
@@ -69,15 +99,11 @@ export function toggleBlockquote(editor: LexicalEditor) {
 	});
 }
 
-/** 切换无序列表 */
+/** 切换无序列表（按选区所在列表判断开关，而非全文首个块） */
 export function toggleBulletList(editor: LexicalEditor) {
 	editor.update(() => {
-		const children = $getRoot().getChildren();
-		const firstChild = children[0];
-		if (
-			firstChild?.getType?.() === 'list' &&
-			(firstChild as { getListType?: () => string })?.getListType?.() === 'bullet'
-		) {
+		const list = $getNearestListNodeFromSelection();
+		if (list && list.getListType() === 'bullet') {
 			editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
 		} else {
 			editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined);
@@ -85,15 +111,11 @@ export function toggleBulletList(editor: LexicalEditor) {
 	});
 }
 
-/** 切换有序列表 */
+/** 切换有序列表（按选区所在列表判断开关） */
 export function toggleOrderedList(editor: LexicalEditor) {
 	editor.update(() => {
-		const children = $getRoot().getChildren();
-		const firstChild = children[0];
-		if (
-			firstChild?.getType?.() === 'list' &&
-			(firstChild as { getListType?: () => string })?.getListType?.() === 'number'
-		) {
+		const list = $getNearestListNodeFromSelection();
+		if (list && list.getListType() === 'number') {
 			editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
 		} else {
 			editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined);
@@ -124,28 +146,38 @@ export function insertLink(editor: LexicalEditor, url: string) {
 }
 
 /**
- * 插入图片（markdown 语法 !\[alt](url)）。
- * 编辑器内显示为文本，渲染管线会转为 <img>。
+ * 插入图片（ImageNode，WYSIWYG）。
+ * 编辑器内直接渲染 <img>，保存时由 imageTransformer 导出 ![alt](src)。
  */
 export function insertImage(editor: LexicalEditor, url: string, alt: string = '') {
 	editor.update(() => {
 		const selection = $getSelection();
 		if (!$isRangeSelection(selection)) return;
-		selection.insertNodes([$createTextNode(`![${alt}](${url})`)]);
+		const image = $createImageNode(url, alt);
+		selection.insertNodes([image]);
+		// 插入后补一个空段落承接光标（ImageNode 不可编辑）
+		if (!image.getNextSibling()) {
+			image.insertAfter($createParagraphNode());
+		}
 	});
 }
 
 /**
- * 插入 3×2 Markdown 表格模板。
- * 编辑器内显示为文本，渲染管线会转为 <table>。
+ * 插入 3×3 表格（TableNode，WYSIWYG）。
+ * 由 registerTablePlugin 处理 INSERT_TABLE_COMMAND 创建节点；
+ * Markdown 往返由 tableTransformer 负责。
  */
-export function insertTable(editor: LexicalEditor) {
-	const tableMd =
-		'\n| 列 1 | 列 2 | 列 3 |\n| --- | --- | --- |\n|     |     |     |\n|     |     |     |\n';
-	editor.update(() => {
-		const selection = $getSelection();
-		if (!$isRangeSelection(selection)) return;
-		selection.insertNodes([$createTextNode(tableMd)]);
+export function insertTable(
+	editor: LexicalEditor,
+	rows = 3,
+	columns = 3,
+	includeHeaders: { rows: boolean; columns: boolean } = { rows: true, columns: false }
+) {
+	// 0.46 的 payload 中 rows/columns 为字符串类型
+	editor.dispatchCommand(INSERT_TABLE_COMMAND, {
+		rows: String(rows),
+		columns: String(columns),
+		includeHeaders
 	});
 }
 
@@ -164,15 +196,41 @@ export function insertCodeBlock(editor: LexicalEditor, language: string = '') {
 }
 
 /**
- * 插入待办列表项。
- * 利用 Lexical ListNode + ListItemNode 的 checklist 变体。
+ * 插入/关闭待办列表项（toggle）。
+ * 利用 Lexical ListNode + ListItemNode 的 checklist 变体；
+ * 光标已在待办列表内时移除列表（转为普通段落）。
  */
 export function insertCheckList(editor: LexicalEditor) {
 	editor.update(() => {
+		const list = $getNearestListNodeFromSelection();
+		if (list && list.getListType() === 'check') {
+			editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
+		} else {
+			editor.dispatchCommand(INSERT_CHECK_LIST_COMMAND, undefined);
+		}
+	});
+}
+
+/**
+ * 插入数学公式（`$$ ... $$` 源码文本，独占段落）。
+ *
+ * 编辑器内保持源码文本（与渲染管线的 remark-math/rehype-katex 约定一致）。
+ * 公式作为独立段落插入当前块之后——micromark-extension-math 中 `$$...$$`
+ * 只有独占一行才是块级公式，插在段落中间会被解析为行内公式。
+ */
+export function insertMath(editor: LexicalEditor, latex: string) {
+	editor.update(() => {
 		const selection = $getSelection();
 		if (!$isRangeSelection(selection)) return;
-		// 通过 markdown 语法 `- [ ] ` 插入，由 TRANSFORMERS 转为 checklist
-		selection.insertNodes([$createTextNode('- [ ] ')]);
+		const paragraph = $createParagraphNode();
+		paragraph.append($createTextNode(`$$ ${latex} $$`));
+		const block = $getTopLevelBlockFromSelection();
+		if (block) {
+			block.insertAfter(paragraph);
+		} else {
+			selection.insertNodes([paragraph]);
+		}
+		paragraph.select();
 	});
 }
 
@@ -264,17 +322,20 @@ export function readToolbarState(): ToolbarState {
 		}
 	}
 
-	const root = $getRoot();
-	const firstChild = root.getChildren()[0];
-	const type = firstChild?.getType?.() ?? 'paragraph';
-	if (type === 'heading') {
-		const tag = (firstChild as { getTag?: () => string }).getTag?.() ?? 'h1';
-		state.blockType = tag as ToolbarState['blockType'];
-	} else if (type === 'list') {
-		const listType = (firstChild as { getListType?: () => string }).getListType?.() ?? 'bullet';
-		state.blockType = listType === 'number' ? 'number' : 'bullet';
-	} else if (type === 'quote') {
-		state.blockType = 'quote';
+	// 当前块：优先按选区所在列表（含嵌套），否则按选区顶层块判定
+	const list = $getNearestListNodeFromSelection();
+	if (list) {
+		const listType = list.getListType();
+		state.blockType = listType === 'number' ? 'number' : listType === 'check' ? 'check' : 'bullet';
+	} else {
+		const block = $getTopLevelBlockFromSelection();
+		const type = block?.getType?.() ?? 'paragraph';
+		if (type === 'heading') {
+			const tag = (block as { getTag?: () => string }).getTag?.() ?? 'h1';
+			state.blockType = tag as ToolbarState['blockType'];
+		} else if (type === 'quote') {
+			state.blockType = 'quote';
+		}
 	}
 
 	return state;
@@ -283,12 +344,9 @@ export function readToolbarState(): ToolbarState {
 /** 将当前块转换为段落（用于 BlockMenu 的"正文"选项） */
 export function applyParagraph(editor: LexicalEditor) {
 	editor.update(() => {
-		const root = $getRoot();
-		const children = root.getChildren();
-		if (children[0]?.getType?.() !== 'paragraph') {
-			root.clear();
-			root.append($createParagraphNode());
-		}
+		const selection = $getSelection();
+		if (!$isRangeSelection(selection)) return;
+		$setBlocksType(selection, () => $createParagraphNode());
 	});
 }
 

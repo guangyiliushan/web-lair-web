@@ -12,7 +12,11 @@ import {
 } from 'lexical';
 import { $createHeadingNode, $createQuoteNode } from '@lexical/rich-text';
 import { $createCodeNode } from '@lexical/code';
-import { INSERT_UNORDERED_LIST_COMMAND, INSERT_ORDERED_LIST_COMMAND } from '@lexical/list';
+import {
+	INSERT_UNORDERED_LIST_COMMAND,
+	INSERT_ORDERED_LIST_COMMAND,
+	INSERT_CHECK_LIST_COMMAND
+} from '@lexical/list';
 import { INSERT_HORIZONTAL_RULE_COMMAND } from '@lexical/extension';
 import { $setBlocksType } from '@lexical/selection';
 
@@ -38,7 +42,11 @@ export function insertBlockAfter(editor: LexicalEditor, blockKey: string) {
  * 复制指定 key 的块节点，插入到其后。
  * 支持通过 selectedKeys 批量复制（selectedKeys 为空时仅复制 blockKey）。
  */
-export function duplicateBlocks(editor: LexicalEditor, blockKey: string, selectedKeys: string[] = []) {
+export function duplicateBlocks(
+	editor: LexicalEditor,
+	blockKey: string,
+	selectedKeys: string[] = []
+) {
 	const keys = selectedKeys.length > 0 ? selectedKeys : [blockKey];
 	if (!keys.length) return;
 
@@ -106,7 +114,11 @@ export function moveBlockUp(editor: LexicalEditor, blockKey: string, selectedKey
 /**
  * 下移块：将其与后一个兄弟节点交换位置。
  */
-export function moveBlockDown(editor: LexicalEditor, blockKey: string, selectedKeys: string[] = []) {
+export function moveBlockDown(
+	editor: LexicalEditor,
+	blockKey: string,
+	selectedKeys: string[] = []
+) {
 	const keys = selectedKeys.length > 0 ? selectedKeys : [blockKey];
 	if (!keys.length) return;
 
@@ -181,7 +193,7 @@ export function turnBlockInto(editor: LexicalEditor, blockKey: string, type: str
 		const commands: BlockCommandMap = {
 			bullet: INSERT_UNORDERED_LIST_COMMAND,
 			numbered: INSERT_ORDERED_LIST_COMMAND,
-			todo: INSERT_UNORDERED_LIST_COMMAND, // checklist fallback
+			todo: INSERT_CHECK_LIST_COMMAND,
 			divider: INSERT_HORIZONTAL_RULE_COMMAND
 		};
 		const cmd = commands[type];

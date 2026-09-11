@@ -1,12 +1,16 @@
 import {
 	createEditor,
 	$getRoot,
+	$getSelection,
+	$isRangeSelection,
+	$isNodeSelection,
 	$createParagraphNode,
 	$createTextNode,
 	FORMAT_TEXT_COMMAND,
 	FORMAT_ELEMENT_COMMAND,
 	SELECTION_CHANGE_COMMAND,
 	CLEAR_EDITOR_COMMAND,
+	COMMAND_PRIORITY_EDITOR,
 	UNDO_COMMAND,
 	REDO_COMMAND,
 	type LexicalEditor,
@@ -25,9 +29,12 @@ import { type HeadingTagType } from '@lexical/rich-text';
 import {
 	INSERT_UNORDERED_LIST_COMMAND,
 	INSERT_ORDERED_LIST_COMMAND,
-	REMOVE_LIST_COMMAND
+	REMOVE_LIST_COMMAND,
+	registerList,
+	registerCheckList
 } from '@lexical/list';
-import { INSERT_HORIZONTAL_RULE_COMMAND } from '@lexical/extension';
+import { registerTablePlugin, registerTableSelectionObserver } from '@lexical/table';
+import { INSERT_HORIZONTAL_RULE_COMMAND, $createHorizontalRuleNode } from '@lexical/extension';
 import { $isAlertNode } from '$lib/components/markdown/alert/alert-node';
 import { EDITOR_NODES } from '$lib/components/markdown/editor/editor-nodes';
 import { EDITOR_THEME } from '$lib/components/markdown/editor/editor-shared';
@@ -99,6 +106,54 @@ export function lexicalEditor(node: HTMLElement, initialOptions: LexicalActionOp
 
 	// 注册历史
 	const unregisterHistory = registerHistory(editor, createEmptyHistoryState(), 300);
+
+	// 注册列表命令（无序/有序/待办）。缺失时工具栏列表按钮是 no-op，
+	// 列表无法创建。registerCheckList 额外注册待办勾选/点击切换。
+	const unregisterList = registerList(editor);
+	const unregisterCheckList = registerCheckList(editor);
+
+	// 注册表格命令监听（INSERT_TABLE_COMMAND 等）与完整性 transform，
+	// 再单独注册表格选区观察器（单元格选区/Tab 导航/方向键移动）。
+	// 顺序要求：selection observer 必须在 registerTablePlugin 之后（见其文档注释）。
+	const unregisterTablePlugin = registerTablePlugin(editor);
+	const unregisterTableSelection = registerTableSelectionObserver(editor);
+
+	// 注册水平分割线命令。Lexical 0.46 将该命令监听器移入 HorizontalRuleExtension，
+	// 经典 nodes 模式（createEditor({nodes})）不会自动执行 extension.register，
+	// 需手动注册，否则分割线按钮是 no-op。
+	const unregisterHorizontalRule = editor.registerCommand(
+		INSERT_HORIZONTAL_RULE_COMMAND,
+		() => {
+			const selection = $getSelection();
+			if (!$isRangeSelection(selection)) return false;
+			selection.insertNodes([$createHorizontalRuleNode()]);
+			return true;
+		},
+		COMMAND_PRIORITY_EDITOR
+	);
+
+	// 键盘可选中节点（ImageNode 等 DecoratorNode）的选中态视觉反馈：
+	// 核心不为 NodeSelection 加 CSS 类，这里标记 data-selected 供样式呈现。
+	let markedSelectionEls: HTMLElement[] = [];
+	const unregisterSelectionVisual = editor.registerUpdateListener(({ editorState }) => {
+		const selectedKeys = new Set<string>();
+		editorState.read(() => {
+			const selection = $getSelection();
+			if ($isNodeSelection(selection)) {
+				for (const node of selection.getNodes()) selectedKeys.add(node.getKey());
+			}
+		});
+		if (markedSelectionEls.length === 0 && selectedKeys.size === 0) return;
+		for (const el of markedSelectionEls) el.removeAttribute('data-selected');
+		markedSelectionEls = [];
+		for (const key of selectedKeys) {
+			const el = editor.getElementByKey(key);
+			if (el) {
+				el.setAttribute('data-selected', 'true');
+				markedSelectionEls.push(el);
+			}
+		}
+	});
 
 	// 加载初始内容
 	editor.update(
@@ -179,6 +234,13 @@ export function lexicalEditor(node: HTMLElement, initialOptions: LexicalActionOp
 			unregisterRichText();
 			unregisterMarkdownShortcuts();
 			unregisterHistory();
+			unregisterList();
+			unregisterCheckList();
+			unregisterTableSelection();
+			unregisterTablePlugin();
+			unregisterHorizontalRule();
+			unregisterSelectionVisual();
+			markedSelectionEls = [];
 			node.removeEventListener('focus', focusListener, true);
 			node.removeEventListener('blur', blurListener, true);
 			editor.setRootElement(null);

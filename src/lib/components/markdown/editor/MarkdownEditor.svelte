@@ -11,6 +11,7 @@
 	import FloatingFormatToolbar from '$lib/components/markdown/toolbar/FloatingFormatToolbar.svelte';
 	import BlockHandleToolbar from '$lib/components/markdown/toolbar/BlockHandleToolbar.svelte';
 	import CodeModeToggle from '$lib/components/markdown/toolbar/CodeModeToggle.svelte';
+	import TableCellMenu from '$lib/components/markdown/toolbar/TableCellMenu.svelte';
 
 	// Lexical 编辑器全局样式（由 PostCSS 处理 @apply / Tailwind 指令）
 	import '$lib/components/markdown/editor/lexical-editor.css';
@@ -148,15 +149,15 @@
 					'sticky top-14 z-10 border-b border-border bg-background/80 backdrop-blur-sm'
 			)}
 		>
-			<EditorToolbar
-				{editor}
-				class="min-w-0 flex-1"
-			/>
+			<EditorToolbar {editor} class="min-w-0 flex-1" />
 			<CodeModeToggle {codeMode} onToggle={toggleCodeMode} />
 		</div>
 
 		<!-- 浮动格式工具栏：选中文本时出现 -->
 		<FloatingFormatToolbar {editor} />
+
+		<!-- 浮动表格菜单：光标进入表格单元格时出现 -->
+		<TableCellMenu {editor} />
 	{/if}
 
 	<!-- Editor area -->
@@ -216,5 +217,4 @@
 			></div>
 		{/if}
 	</div>
-
 </div>

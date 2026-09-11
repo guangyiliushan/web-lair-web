@@ -48,12 +48,22 @@ export const EDITOR_THEME: EditorThemeClasses = {
 		ul: 'rich-editor-ul',
 		ol: 'rich-editor-ol',
 		listitem: 'rich-editor-li',
+		listitemChecked: 'rich-editor-listitem-checked',
+		listitemUnchecked: 'rich-editor-listitem-unchecked',
+		checklist: 'rich-editor-checklist',
 		nested: {
 			listitem: 'rich-editor-nested-li'
 		}
 	},
 	quote: 'rich-editor-quote',
 	code: 'rich-editor-code-block',
+	// ── 表格（@lexical/table 0.46 主题键，tableCellSelected/tableSelection 由包自动增删）──
+	table: 'rich-editor-table',
+	tableRow: 'rich-editor-table-row',
+	tableCell: 'rich-editor-table-cell',
+	tableCellHeader: 'rich-editor-table-cell-header',
+	tableCellSelected: 'rich-editor-table-cell-selected',
+	tableSelection: 'rich-editor-table-selection',
 	text: {
 		bold: 'rich-editor-bold',
 		italic: 'rich-editor-italic',

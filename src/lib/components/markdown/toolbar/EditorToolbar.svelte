@@ -23,11 +23,13 @@
 		insertTag,
 		insertAlert,
 		insertCheckList,
+		insertMath,
 		applyParagraph,
 		readToolbarState,
 		type ToolbarState
 	} from '$lib/components/markdown/editor/lexical-helpers';
 	import EditorDebugDialog from './EditorDebugDialog.svelte';
+	import ImageInsertDialog from './ImageInsertDialog.svelte';
 
 	// ── 图标 ──
 	import IconH1 from '@tabler/icons-svelte-runes/icons/h-1';
@@ -89,10 +91,7 @@
 		class?: string;
 	};
 
-	let {
-		editor,
-		class: className
-	}: Props = $props();
+	let { editor, class: className }: Props = $props();
 
 	// ── 基于 toolbar wrapper 实际宽度的断点阈值（确保零内部溢出）──
 	const BP_THRESHOLDS = { xl: 950, lg: 900, md: 650, sm: 420 } as const;
@@ -141,6 +140,8 @@
 
 	let debugOpen = $state(false);
 	let debugJson = $state('');
+
+	let imageDialogOpen = $state(false);
 
 	$effect(() => {
 		if (!editor) return;
@@ -210,16 +211,24 @@
 
 	function handleInsertImage() {
 		if (!editor) return;
-		const url = window.prompt('输入图片地址:', 'https://');
-		if (url) {
-			const alt = window.prompt('图片描述 (可选):', '') ?? '';
-			insertImage(editor, url.trim(), alt.trim());
-		}
+		imageDialogOpen = true;
+	}
+
+	function handleImageInsert(url: string, alt: string) {
+		if (!editor) return;
+		insertImage(editor, url, alt);
 	}
 
 	function handleInsertTable() {
 		if (!editor) return;
 		insertTable(editor);
+	}
+
+	function handleInsertMath() {
+		if (!editor) return;
+		const latex = window.prompt('输入 LaTeX 公式（如 \\frac{a}{b}）:', 'E=mc^2');
+		if (latex === null) return;
+		insertMath(editor, latex.trim() || 'E=mc^2');
 	}
 
 	// 当前激活的块选项
@@ -374,7 +383,7 @@
 					minBp: 3
 				},
 				{ id: 'tag', label: '标签', icon: IconTag, action: () => insertTag(editor!), minBp: 3 },
-				{ id: 'formula', label: '公式', icon: IconMath, action: () => {}, minBp: 4 }
+				{ id: 'formula', label: '公式', icon: IconMath, action: handleInsertMath, minBp: 4 }
 			]
 		}
 	];
@@ -794,3 +803,4 @@
 </div>
 
 <EditorDebugDialog bind:open={debugOpen} editorStateJson={debugJson} />
+<ImageInsertDialog bind:open={imageDialogOpen} onInsert={handleImageInsert} />

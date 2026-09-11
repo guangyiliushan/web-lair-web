@@ -100,6 +100,121 @@ describe('markdown transformers roundtrip', () => {
 	});
 });
 
+describe('phase 1-6 新增能力 roundtrip', () => {
+	it('roundtrips horizontal rule (---)', () => {
+		const out = roundtrip('前文\n\n---\n\n后文');
+		expect(out).toContain('---');
+		expect(out).toContain('前文');
+		expect(out).toContain('后文');
+	});
+
+	it('roundtrips standalone image as ImageNode', () => {
+		const out = roundtrip('![替代文本](https://example.com/a.png)');
+		expect(out).toContain('![替代文本](https://example.com/a.png)');
+	});
+
+	it('keeps inline image markdown as text (block-only policy)', () => {
+		const out = roundtrip('行内 ![图](https://example.com/a.png) 文本');
+		// 段落内的 ![...](...) 保持原样（渲染管线转为 <img>）
+		expect(out).toContain('![图](https://example.com/a.png)');
+	});
+
+	it('roundtrips GFM pipe table', () => {
+		const md = '| 名称 | 数量 |\n| --- | --- |\n| 苹果 | 3 |\n| 香蕉 | 5 |';
+		const out = roundtrip(md);
+		expect(out).toContain('| 名称 | 数量 |');
+		expect(out).toContain('| --- | --- |');
+		expect(out).toContain('| 苹果 | 3 |');
+		expect(out).toContain('| 香蕉 | 5 |');
+	});
+
+	it('roundtrips table with inline formatting in cells', () => {
+		const md = '| A | B |\n| --- | --- |\n| **加粗** | `代码` |';
+		const out = roundtrip(md);
+		expect(out).toContain('| **加粗** | `代码` |');
+	});
+
+	it('escapes and restores pipes inside table cells', () => {
+		const md = '| A | B |\n| --- | --- |\n| a\\|b | c |';
+		const out = roundtrip(md);
+		expect(out).toContain('a\\|b');
+	});
+
+	it('roundtrips alignment directive', () => {
+		const md = ':::center\n居中的内容\n:::';
+		const out = roundtrip(md);
+		expect(out).toContain(':::center');
+		expect(out).toContain('居中的内容');
+	});
+
+	it('roundtrips alignment directive wrapping a heading', () => {
+		const md = ':::center\n# 居中标题\n:::';
+		const out = roundtrip(md);
+		expect(out).toContain(':::center');
+		expect(out).toContain('# 居中标题');
+	});
+
+	it('keeps aligned block content intact when followed by an alert (temp editor reuse)', () => {
+		const out = roundtrip(':::center\n居中的内容\n:::\n\n:::info\n提示内容\n:::');
+		const centerBlock = out.match(/:::center\n([\s\S]*?)\n:::/)?.[1] ?? '';
+		// 对齐块内容不能被后续 alert 的 temp editor 解析结果污染
+		expect(centerBlock).toBe('居中的内容');
+		expect(out).toContain(':::info');
+		expect(out).toContain('提示内容');
+	});
+
+	it('keeps aligned block content intact when followed by a table (temp editor reuse)', () => {
+		const out = roundtrip(':::center\n居中的内容\n:::\n\n| A | B |\n| --- | --- |\n| 1 | 2 |');
+		const centerBlock = out.match(/:::center\n([\s\S]*?)\n:::/)?.[1] ?? '';
+		expect(centerBlock).toBe('居中的内容');
+		expect(out).toContain('| A | B |');
+		expect(out).toContain('| 1 | 2 |');
+	});
+
+	it('roundtrips superscript and subscript', () => {
+		const md = '质能方程 <sup>x^2</sup> 与化学式 <sub>n+1</sub>';
+		const out = roundtrip(md);
+		expect(out).toContain('<sup>x^2</sup>');
+		expect(out).toContain('<sub>n+1</sub>');
+	});
+
+	it('roundtrips checklist items', () => {
+		const md = '- [ ] 待办事项\n- [x] 已完成';
+		const out = roundtrip(md);
+		expect(out).toContain('- [ ] 待办事项');
+		expect(out).toContain('- [x] 已完成');
+	});
+
+	it('is stable on a second roundtrip for the full feature matrix', () => {
+		const md = [
+			'# 大标题',
+			'',
+			'正文 #tag# 与 <sup>上标</sup>',
+			'',
+			'- [ ] 待办',
+			'',
+			':::center',
+			'居中段落',
+			':::',
+			'',
+			':::info',
+			'提示内容',
+			':::',
+			'',
+			'| A | B |',
+			'| --- | --- |',
+			'| 1 | 2 |',
+			'',
+			'---',
+			'',
+			'![图片](https://example.com/i.png)'
+		].join('\n');
+		const once = roundtrip(md);
+		const twice = roundtrip(once);
+		expect(twice).toBe(once);
+	});
+});
+
 describe('alert json <-> markdown helpers', () => {
 	it('converts markdown to alert json and back', () => {
 		const json = markdownToAlertJson('- 项一\n- 项二\n\n段落');

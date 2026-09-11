@@ -239,12 +239,7 @@
 	onmouseleave={onHandleLeave}
 >
 	<!-- Add Block Button -->
-	<Button
-		variant="ghost"
-		size="icon-sm"
-		aria-label="Add block"
-		onclick={handleAddBlock}
-	>
+	<Button variant="ghost" size="icon-sm" aria-label="Add block" onclick={handleAddBlock}>
 		<IconPlus data-icon="inline-start" />
 	</Button>
 
